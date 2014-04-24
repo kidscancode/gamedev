@@ -1,4 +1,4 @@
 gamedev
 =======
 
-Example code and docs for "Game Development and Design" class
+Example code and docs for "Game Development and Design" class.
