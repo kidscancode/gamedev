@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="32" height="32" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="groundCompiled" tilewidth="32" tileheight="32">
+  <image source="../../../../../Downloads/pylletTown/tiles/groundCompiled.png" width="192" height="32"/>
+ </tileset>
+ <tileset firstgid="7" name="objects" tilewidth="32" tileheight="32">
+  <image source="../../../../../Downloads/pylletTown/tiles/objects.png" width="288" height="64"/>
+ </tileset>
+ <tileset firstgid="25" name="house" tilewidth="32" tileheight="32">
+  <image source="../../../../../Downloads/pylletTown/tiles/house.png" width="256" height="192"/>
+ </tileset>
+ <tileset firstgid="73" name="triggers" tilewidth="32" tileheight="32">
+  <image source="../../../../../Downloads/pylletTown/tiles/triggers.png" width="192" height="64"/>
+  <tile id="0">
+   <properties>
+    <property name="playerStart" value="down"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="solid" value=""/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="85" name="sprites" tilewidth="32" tileheight="32">
+  <image source="../../../../../Downloads/pylletTown/tiles/sprites.png" width="128" height="64"/>
+  <tile id="0">
+   <properties>
+    <property name="frames" value="8"/>
+    <property name="height" value="32"/>
+    <property name="mspf" value="350"/>
+    <property name="src" value="img/water.png"/>
+    <property name="width" value="32"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="background" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztljsSwCAIRJHU3v+6aU0Gla+YjAWNg3nsBtQCACU5roDgMCP5khqxWcMEPie3EmvWWlf7/653BZ/yTctHB88p/sqem+kf+aX5x1K+5Xse+r24leFlj4/w7LVZ32lrbfkZPbjL+T/Ls94PvT2e+jV1fcX/KE/+rl/CP/PvG5SfGe8fiX7r3b+T/x780UxUZp6EnzWDWf6fALgBFLcLaw==
+  </data>
+ </layer>
+ <layer name="foreground" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJzt11lrwkAYhWHvVFzQUpWq1VqtS92texfXqv//F/leGBgGNPnqVBHnwMMQDJmcDIaMz2cmfgSU0ev5phJDXBm9nm86+nNwG01Hfw5u47XyX/29xva3/W+lf/AghLByfE4k/R8OHpFQjs+JXX/b3/aX5QlpZJDFM3LI40V4rWP9o4goUspvBbyiiBLeUEYFVeH8p/ontXtwUsM76migiRba6Ajn/8v6d9HDB/oYYIgRxsJrSdbfee9PMMUnvvCNH8wwF84v6e+89xdYYoU1frHBFjvh/Pfy/7/097+ea33/X7qnHq89pfs10/s76X7N9P5uDw/BEa4=
+  </data>
+ </layer>
+ <layer name="sprites" width="32" height="32" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztzbEJAAAIBDGXdP9VnOA7C5EErr4qAAAA2NOh7//0vfIf9sIJTQ==
+  </data>
+ </layer>
+ <layer name="triggers" width="32" height="32" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJzt1tEKgCAMBVB/r8AK6v+/pb0IEYobbrtJuzB8SY4aDnNKKRtUL5JvOUH7rXVonNVMPjfhhx++vFdtgnna/kl1AfyShWoddEf8neoA+poJfz7/ef9ro7Vf7n9rtPb/uv9a//fc/7v/o/6/Zrx89Psb5XONL/iWJV2nt38D8GFRBA==
+  </data>
+ </layer>
+</map>
