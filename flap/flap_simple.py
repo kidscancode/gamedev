@@ -1,6 +1,6 @@
 # Flap
 # KidsCanCode 2014
-# Flappy bird in pygame
+# Flappy bird in pygame - Simple version (no graphics)
 import pygame
 import sys
 import random
@@ -34,6 +34,8 @@ class Bird(pygame.sprite.Sprite):
     width = 36
     height = 24
     def __init__(self):
+        # when you make a Pygame Sprite object, you have to call the
+        # Sprite init function
         pygame.sprite.Sprite.__init__(self)
         self.speed_y = 0
         self.image = pygame.Surface([self.width, self.height])
@@ -56,12 +58,14 @@ class Bird(pygame.sprite.Sprite):
             self.rect.bottom = HEIGHT
             self.speed_y = 0
 
-    def move(self):
+    def flap(self):
         # player hit SPACEBAR
         self.speed_y -= FLAP_SPEED
 
 class Pipe(pygame.sprite.Sprite):
-    # pipe segment class
+    # pipe segment objects
+    # all pipes move at the same speed and are the same width
+    # only the height will vary
     speed_x = -PIPE_SPEED
     width = 36
     def __init__(self, height, y):
@@ -90,9 +94,9 @@ class Pipe(pygame.sprite.Sprite):
 
 def new_pipe():
     # create a new pair of pipes (upper and lower)
-    loc = random.randrange(20, HEIGHT-20-GAP)
-    pipe_u = Pipe(loc, 0)
-    pipe_l = Pipe(HEIGHT - GAP - loc, loc + GAP)
+    size = random.randrange(20, HEIGHT-20-GAP)
+    pipe_u = Pipe(size, 0)
+    pipe_l = Pipe(HEIGHT - GAP - size, size + GAP)
     return pipe_u, pipe_l
 
 def draw_text(text, size, x, y):
@@ -149,10 +153,9 @@ while True:
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_SPACE:
-                    player.move()
+                    player.flap()
 
-        ##### Game logic goes here  #########
-        # filter out old pipes
+        # delete old pipes
         for pipe in pipe_sprite_list:
             if pipe.offscreen():
                 active_sprite_list.remove(pipe)

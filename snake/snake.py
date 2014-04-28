@@ -22,21 +22,26 @@ CELLWIDTH = WIDTH / CELLSIZE
 CELLHEIGHT = HEIGHT / CELLSIZE
 
 class Coord:
+    # an object to hold X & Y coordinates
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
+# initialize pygame and create the screen
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption("Snake")
+# load some sound effects
 snake_eat_snd = pygame.mixer.Sound("snd/eat.wav")
 snake_eat_snd.set_volume(0.2)
 snake_hit_snd = pygame.mixer.Sound("snd/hit.wav")
 snake_hit_snd.set_volume(0.2)
 
 def run_game():
+    # this function runs the game
+    # pick a starting spot for the snake's head (not too close to the wall)
     startx = random.randrange(5, CELLWIDTH-5)
     starty = random.randrange(5, CELLHEIGHT-5)
     snake_coords = [Coord(startx, starty),
@@ -114,6 +119,7 @@ def draw_grid():
         pygame.draw.line(screen, DARKGRAY, (0, y), (WIDTH, y))
 
 def get_random_location():
+    # pick a random Coord on the grid
     return Coord(random.randrange(0, CELLWIDTH-1),
                  random.randrange(0, CELLHEIGHT-1))
 
@@ -188,6 +194,7 @@ def show_go_screen():
             pygame.event.get()
             return
 
+# Main game loop
 show_start_screen()
 while True:
     run_game()

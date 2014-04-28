@@ -50,6 +50,8 @@ class Bird(pygame.sprite.Sprite):
     width = 36
     height = 24
     def __init__(self):
+        # when you make a Pygame Sprite object, you have to call the
+        # Sprite init function
         pygame.sprite.Sprite.__init__(self)
         self.alive = True
         self.speed_x = 0

@@ -1,3 +1,5 @@
+# A variant of "Dodge!" with a spaceship dodging meteors
+# by KidsCanCode 2014
 import pygame
 import sys
 import random
@@ -19,6 +21,7 @@ class Player(pygame.sprite.Sprite):
         self.speed_x = 0
         self.speed_y = 0
         self.explode_snd = pygame.mixer.Sound("snd/Explosion6.wav")
+        self.explode_snd.set_volume(0.2)
         # self.image = pygame.Surface([self.width, self.height])
         # self.image.fill(RED)
         self.image = pygame.image.load("img/red_rocket.gif")

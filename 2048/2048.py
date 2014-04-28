@@ -83,12 +83,13 @@ class Board:
     def add_tile(self):
         # add a random new tile to the board
         # new tiles always have a value of 2
-        while True:
-            row = random.randrange(4)
-            col = random.randrange(4)
-            if self.board[row][col].value == 0:
-                self.board[row][col].value = 2
-                break
+        if not self.full():
+            while True:
+                row = random.randrange(4)
+                col = random.randrange(4)
+                if self.board[row][col].value == 0:
+                    self.board[row][col].value = 2
+                    break
 
     def full(self):
         # test to see if board is full

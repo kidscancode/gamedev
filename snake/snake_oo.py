@@ -45,7 +45,9 @@ class Snake:
         x = random.randrange(5, CELLWIDTH-5)
         y = random.randrange(5, CELLHEIGHT-5)
         self.eat_snd = pygame.mixer.Sound("snd/eat.wav")
+        self.eat_snd.set_volume(0.2)
         self.hit_snd = pygame.mixer.Sound("snd/hit.wav")
+        self.hit_snd.set_volume(0.2)
         self.coords = []
         for i in range(3):
             self.coords.append(Coord(x-i, y))

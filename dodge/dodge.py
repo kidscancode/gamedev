@@ -22,15 +22,19 @@ class SpriteSheet:
 
     def get_image(self, x, y, width, height):
         # grab an image out of a larger spritesheet
-        image = pygame.Surface([width, height]).convert()
+        image = pygame.Surface([width, height])
         image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
         image.set_colorkey([0, 0, 0])
         return image
 
 class Player(pygame.sprite.Sprite):
-    speed = 12  # constant speed for player movement
+    # player object
+    # how fast the player moves
+    speed = 12
 
     def __init__(self):
+        # when you make a Pygame Sprite object, you have to call the
+        # Sprite init function
         pygame.sprite.Sprite.__init__(self)
         self.speed_x = 0
         self.speed_y = 0
@@ -43,9 +47,10 @@ class Player(pygame.sprite.Sprite):
         self.frames_r = []
         self.frames_u = []
         self.frames_d = []
+        # starting direction
         self.dir = 'r'
-        sprite_sheet = SpriteSheet('dodgemobs.png')
-        # use SpriteCutie - http://spritecutie.com/
+        sprite_sheet = SpriteSheet('img/dodgemobs.png')
+        # use SpriteCutie - http://spritecutie.com/ - to cut the spritesheet
         image = sprite_sheet.get_image(232, 33, 40, 48)
         self.frames_d.append(image)
         image = sprite_sheet.get_image(288, 33, 40, 48)
@@ -72,7 +77,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = HEIGHT / 2
 
     def update(self):
-        # move sprite
+        # move player on the screen
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
         # animate - pick another frame every 50 pixels of movement
@@ -88,7 +93,7 @@ class Player(pygame.sprite.Sprite):
         else:
             frame = (self.rect.y // 50) % len(self.frames_d)
             self.image = self.frames_d[frame]
-        # check for walls
+        # don't move past the edge of the screen
         if self.rect.left < 0:
             self.rect.left = 0
             self.speed_x = 0
@@ -103,7 +108,7 @@ class Player(pygame.sprite.Sprite):
             self.speed_y = 0
 
     def go(self, dir):
-        # process keypresses (arrow keys)
+        # This method handles the keypresses (arrow keys)
         if dir == 'L':
             self.dir = 'l'
             self.speed_x = -self.speed
@@ -118,7 +123,7 @@ class Player(pygame.sprite.Sprite):
             self.speed_y = self.speed
 
     def stop(self, dir):
-        # process keyup events
+        # this method is called when a key is released (KEYUP)
         # this lets us keep moving when more than one arrow key is held down
         if dir in ('L', 'R'):
             self.speed_x = 0
@@ -126,13 +131,16 @@ class Player(pygame.sprite.Sprite):
             self.speed_y = 0
 
 class Mob(pygame.sprite.Sprite):
+    # class for the bad guys
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.speed = random.randrange(6, 10)
         self.frames = []
-
-        # start off the screen - pick an edge
+        # We want mobs to start at a spot off the screen
+        # first, pick an edge
         edge = random.choice(['t', 'b', 'l', 'r'])
+        # depending on which edge, choose the starting point and direction
+        # and load the appropriate image
         if edge == 'l':
             self.dir = random.randrange(-80, 80)
             self.load_images()
@@ -156,7 +164,8 @@ class Mob(pygame.sprite.Sprite):
 
     def load_images(self):
         # load the sprites - pick one of the two mob sprites
-        sprite_sheet = SpriteSheet("dodgemobs.png")
+        # use "transform" to rotate the image in the right direction
+        sprite_sheet = SpriteSheet("img/dodgemobs.png")
         i = random.randrange(2)
         if i == 0:
             image = sprite_sheet.get_image(24, 33, 56, 80)
@@ -177,7 +186,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def update(self):
-        # move sprite
+        # move the mob sprite on the screen
         self.rect.x += self.speed * math.cos(math.radians(self.dir))
         self.rect.y += self.speed * math.sin(math.radians(self.dir))
         # change to the next frame after every 30 pixels of movement
@@ -186,7 +195,7 @@ class Mob(pygame.sprite.Sprite):
         self.image = self.frames[frame]
 
     def offscreen(self):
-        # kill mob when it runs offscreen
+        # detect when the mob runs offscreen
         # added some space so new mobs that appear offscreen aren't instakilled
         if self.rect.x < -self.rect.width * 2 or self.rect.x > WIDTH + self.rect.width * 2:
             return True
@@ -242,7 +251,7 @@ def show_go_screen(score):
     draw_text(text, 24, WIDTH/2, HEIGHT/2)
     draw_text("Press a key to begin", 24, WIDTH/2, HEIGHT*3/4)
     pygame.display.update()
-    # pause for a moment and then wait for key
+    # pause for a moment and then wait for keypress
     pygame.time.wait(500)
     wait_for_key()
     while True:
@@ -271,17 +280,15 @@ running = True
 show_start_screen()
 while True:
     score = 0
-    # create sprite lists - one for all sprites, and one for mobs
+    # create sprite lists - one for all sprites, and one for all mobs
     active_sprite_list = pygame.sprite.Group()
     mob_sprite_list = pygame.sprite.Group()
     # create the player object
     player = Player()
     active_sprite_list.add(player)
     # create some mobs
-    mobs = []
     for i in range(12):
         mob = Mob()
-        mobs.append(mob)
         active_sprite_list.add(mob)
         mob_sprite_list.add(mob)
     # play the game!
@@ -319,20 +326,19 @@ while True:
                     player.stop('U')
                 if event.key == pygame.K_DOWN:
                     player.stop('D')
-        # filter mobs and create new ones
-        for mob in mobs:
+        # kill mobs that go offscreen and create new ones to replace them
+        for mob in mob_sprite_list:
             if mob.offscreen():
-                mobs.remove(mob)
                 active_sprite_list.remove(mob)
+                mob_sprite_list.remove(mob)
                 newmob = Mob()
-                mobs.append(newmob)
                 active_sprite_list.add(newmob)
                 mob_sprite_list.add(newmob)
         # check for hits - using collide_mask instead of default collide_rect
-        hits_list = pygame.sprite.spritecollide(player, mob_sprite_list, False,
-                                                pygame.sprite.collide_mask)
-        if len(hits_list) > 0:
-            # sorry, game over
+        hit_list = pygame.sprite.spritecollide(player, mob_sprite_list, False,
+                                               pygame.sprite.collide_mask)
+        if len(hit_list) > 0:
+            # player hit a mob - sorry, game over
             player.explode_snd.play()
             running = False
         # update screen
@@ -343,4 +349,5 @@ while True:
         pygame.display.flip()
 
     show_go_screen(score)
+    # after the GO screen, reset running to True and play again
     running = True
