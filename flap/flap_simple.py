@@ -10,7 +10,6 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
 LIGHTBLUE = (0, 155, 155)
 BGCOLOR = LIGHTBLUE
 
@@ -116,7 +115,7 @@ pygame.display.set_caption("Flap")
 while True:
     clock = pygame.time.Clock()
     # timer to generate new pipes
-    pygame.time.set_timer(pygame.USEREVENT+1, int(FREQ*1000))
+    pygame.time.set_timer(pygame.USEREVENT, int(FREQ*1000))
     # groups to hold sprites (all sprites & a group of just the pipes)
     active_sprite_list = pygame.sprite.Group()
     pipe_sprite_list = pygame.sprite.Group()
@@ -140,7 +139,7 @@ while True:
                 pygame.quit()
                 sys.exit()
             # # every FREQ seconds, make a new pipe
-            elif event.type == pygame.USEREVENT+1:
+            elif event.type == pygame.USEREVENT:
                 upper, lower = new_pipe()
                 active_sprite_list.add(upper)
                 pipe_sprite_list.add(upper)

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="32" height="32" tilewidth="32" tileheight="32">
  <tileset firstgid="1" name="groundCompiled" tilewidth="32" tileheight="32">
-  <image source="../../../../../Downloads/pylletTown/tiles/groundCompiled.png" width="192" height="32"/>
+  <image source="img/groundCompiled.png" width="192" height="32"/>
  </tileset>
  <tileset firstgid="7" name="objects" tilewidth="32" tileheight="32">
-  <image source="../../../../../Downloads/pylletTown/tiles/objects.png" width="288" height="64"/>
+  <image source="img/objects.png" width="288" height="64"/>
  </tileset>
  <tileset firstgid="25" name="house" tilewidth="32" tileheight="32">
-  <image source="../../../../../Downloads/pylletTown/tiles/house.png" width="256" height="192"/>
+  <image source="img/house.png" width="256" height="192"/>
  </tileset>
  <tileset firstgid="73" name="triggers" tilewidth="32" tileheight="32">
-  <image source="../../../../../Downloads/pylletTown/tiles/triggers.png" width="192" height="64"/>
+  <image source="img/triggers.png" width="192" height="64"/>
   <tile id="0">
    <properties>
     <property name="playerStart" value="down"/>
@@ -23,7 +23,7 @@
   </tile>
  </tileset>
  <tileset firstgid="85" name="sprites" tilewidth="32" tileheight="32">
-  <image source="../../../../../Downloads/pylletTown/tiles/sprites.png" width="128" height="64"/>
+  <image source="img/sprites.png" width="128" height="64"/>
   <tile id="0">
    <properties>
     <property name="frames" value="8"/>

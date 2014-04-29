@@ -15,7 +15,7 @@ DARKGRAY = (40, 40, 40)
 BGCOLOR = BLACK
 
 FPS = 15
-# WIDTH & HEIGHT need to be multiples of 20
+# WIDTH & HEIGHT need to be multiples of CELLSIZE
 WIDTH = 640
 HEIGHT = 480
 CELLSIZE = 20
@@ -23,40 +23,48 @@ CELLWIDTH = WIDTH / CELLSIZE
 CELLHEIGHT = HEIGHT / CELLSIZE
 
 class Coord:
+    # a utility object to hold X/Y coordinates
     def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
 
 class Apple:
+    # apple object for the snake to eat
     def __init__(self):
         self.loc = Coord(random.randrange(0, CELLWIDTH-1),
-                           random.randrange(0, CELLHEIGHT-1))
+                         random.randrange(0, CELLHEIGHT-1))
 
     def draw(self):
         x = self.loc.x * CELLSIZE
         y = self.loc.y * CELLSIZE
         apple_rect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
         pygame.draw.rect(screen, RED, apple_rect)
-        inside_rect = pygame.Rect(x+4, y+4, CELLSIZE-8, CELLSIZE-8)
-        pygame.draw.rect(screen, DARKRED, inside_rect)
 
 class Snake:
+    # snake object - made up of a list of coordinates
     def __init__(self):
-        x = random.randrange(5, CELLWIDTH-5)
-        y = random.randrange(5, CELLHEIGHT-5)
+        # load the sound effects
         self.eat_snd = pygame.mixer.Sound("snd/eat.wav")
         self.eat_snd.set_volume(0.2)
         self.hit_snd = pygame.mixer.Sound("snd/hit.wav")
         self.hit_snd.set_volume(0.2)
+        # pick a random spot for the snake to start (not too close to the wall)
+        x = random.randrange(5, CELLWIDTH-5)
+        y = random.randrange(5, CELLHEIGHT-5)
+        # this list will hold the coordinates of the snake's body
         self.coords = []
+        # the snake starts with 3 segments to the left of the head
         for i in range(3):
             self.coords.append(Coord(x-i, y))
+        # start moving right
         self.dir = 'r'
 
     def draw(self):
+        # draw the snake on the screen
         for coord in self.coords:
             x = coord.x * CELLSIZE
             y = coord.y * CELLSIZE
+            # each segment is two squares (dark/light)
             segment_rect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
             pygame.draw.rect(screen, DARKGREEN, segment_rect)
             inside_rect = pygame.Rect(x+4, y+4, CELLSIZE-8, CELLSIZE-8)
@@ -83,7 +91,7 @@ class Snake:
         return False
 
     def hit(self):
-        # check if snake hit an edge = death
+        # check if snake hit an edge
         if self.coords[0].x == -1:
             return True
         if self.coords[0].x == CELLWIDTH:
@@ -93,12 +101,18 @@ class Snake:
         if self.coords[0].y == CELLHEIGHT:
             return True
 
-        # check if snake hit itself = death
+        # check if snake hit itself
         for snake_body in self.coords[1:]:
             if snake_body.x == self.coords[0].x and snake_body.y == self.coords[0].y:
                 return True
         return False
 
+class Game:
+    # object for the game state
+    def __init__(self):
+        pass
+
+# initialize pygame
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -106,6 +120,7 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("Snake")
 
 def run_game():
+    # this function runs the game
     snake = Snake()
     apple = Apple()
     while True:
@@ -117,6 +132,7 @@ def run_game():
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+                # don't move in the opposite direction
                 elif event.key == pygame.K_LEFT and snake.dir != 'r':
                     snake.dir = 'l'
                 elif event.key == pygame.K_RIGHT and snake.dir != 'l':
@@ -127,12 +143,15 @@ def run_game():
                     snake.dir = 'd'
 
         if snake.eat(apple):
+            # make a new apple
             apple = Apple()
         else:
+            # remove the last segment from the snake (it stayed the same size)
             del snake.coords[-1]
 
         snake.move()
         if snake.hit():
+            # dead - play the hit sound and return the score
             snake.hit_snd.play()
             return len(snake.coords) - 3
 
@@ -150,10 +169,6 @@ def draw_grid():
         pygame.draw.line(screen, DARKGRAY, (x, 0), (x, HEIGHT))
     for y in range(0, HEIGHT, CELLSIZE):
         pygame.draw.line(screen, DARKGRAY, (0, y), (WIDTH, y))
-
-def get_random_location():
-    return Coord(random.randrange(0, CELLWIDTH-1),
-                 random.randrange(0, CELLHEIGHT-1))
 
 def draw_text(text, size, x, y):
     # utility function to draw text on screen

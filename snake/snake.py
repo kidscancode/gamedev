@@ -1,6 +1,7 @@
 # Snake
 # by KidsCanCode 2014
 # A Pygame snake clone
+# Modified from http://inventwithpython.com/
 import pygame
 import sys
 import random
@@ -14,7 +15,7 @@ DARKGRAY = (40, 40, 40)
 BGCOLOR = BLACK
 
 FPS = 15
-# WIDTH & HEIGHT need to be multiples of 20
+# WIDTH & HEIGHT need to be multiples of CELLSIZE
 WIDTH = 640
 HEIGHT = 480
 CELLSIZE = 20
@@ -22,7 +23,7 @@ CELLWIDTH = WIDTH / CELLSIZE
 CELLHEIGHT = HEIGHT / CELLSIZE
 
 class Coord:
-    # an object to hold X & Y coordinates
+    # a utility object to hold X/Y coordinates
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -44,6 +45,7 @@ def run_game():
     # pick a starting spot for the snake's head (not too close to the wall)
     startx = random.randrange(5, CELLWIDTH-5)
     starty = random.randrange(5, CELLHEIGHT-5)
+    # this list will hold the coordinates of the snake's body
     snake_coords = [Coord(startx, starty),
                     Coord(startx-1, starty),
                     Coord(startx-2, starty)]

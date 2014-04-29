@@ -1,4 +1,4 @@
-# Template for new Pygame project
+# 2048 - Yet another 2048 clone
 # KidsCanCode 2014
 import pygame
 import sys
@@ -6,11 +6,6 @@ import random
 
 # define some colors (R, G, B)
 BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-GREY = (155, 155, 155)
 BGCOLOR = BLACK
 
 # basic constants for your game options
