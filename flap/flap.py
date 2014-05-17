@@ -298,6 +298,9 @@ while True:
                     sys.exit()
                 if event.key == pygame.K_SPACE:
                     player.move()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                clicked = True
+                player.move()
 
         ##### Game logic goes here  #########
         # filter out old pipes

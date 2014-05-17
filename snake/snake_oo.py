@@ -107,11 +107,6 @@ class Snake:
                 return True
         return False
 
-class Game:
-    # object for the game state
-    def __init__(self):
-        pass
-
 # initialize pygame
 pygame.init()
 pygame.mixer.init()
@@ -165,6 +160,7 @@ def run_game():
         clock.tick(FPS)
 
 def draw_grid():
+    # draw the grid of lines on the screen
     for x in range(0, WIDTH, CELLSIZE):
         pygame.draw.line(screen, DARKGRAY, (x, 0), (x, HEIGHT))
     for y in range(0, HEIGHT, CELLSIZE):
