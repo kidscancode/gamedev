@@ -2,6 +2,9 @@
 # by KidsCanCode 2014
 # A generic space shooter
 # Art & sounds from http://opengameart.org
+# Meteors - http://opengameart.org/content/asteroids
+# Rocket - http://opengameart.org/content/rocket
+# Lasers = Modified from http://opengameart.org/content/lasers-and-beams
 import pygame
 import sys
 import random
