@@ -2,13 +2,28 @@
 # KidsCanCode 2014
 import pygame
 import sys
+import time
+import random
 
 # define some colors (R, G, B)
-BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
+FUCHSIA = (255, 0, 255)
+GRAY = (128, 128, 128)
+LIME = (0, 128, 0)
+MAROON = (128, 0, 0)
+NAVYBLUE = (0, 0, 128)
+OLIVE = (128, 128, 0)
+PURPLE = (128, 0, 128)
+RED = (255, 0, 0)
+SILVER = (192, 192, 192)
+TEAL = (0, 128, 128)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+ORANGE = (255, 128, 0)
+CYAN = (0, 255, 255)
 BGCOLOR = BLACK
 
 # basic constants for your game options
@@ -18,7 +33,7 @@ FPS = 30
 
 # initialize pygame
 pygame.init()
-# initialize sound - remove if you're not using sound
+# initialize sound - remove if you're not using sound (always use sound!)
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("My Game")

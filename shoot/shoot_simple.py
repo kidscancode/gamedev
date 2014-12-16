@@ -17,37 +17,14 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BGCOLOR = BLACK
 
-class SpriteSheet:
-    """Utility class to load and parse spritesheets"""
-    def __init__(self, filename):
-        self.sprite_sheet = pygame.image.load(filename).convert()
-
-    def get_image(self, x, y, width, height):
-        # grab an image out of a larger spritesheet
-        image = pygame.Surface([width, height]).convert()
-        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
-        image.set_colorkey([0, 0, 0])
-        return image
-
 class Meteor(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         # start with a random speed
         self.speed = random.randrange(3, 12)
-        # load the images for the animation frames
-        # 10 % will be big meteors
-        chance = random.randrange(10)
-        self.frames = []
-        for i in range(16):
-            if chance == 9:
-                image = pygame.image.load("img/b400{:02}.png".format(i))
-            else:
-                image = pygame.image.load("img/b100{:02}.gif".format(i))
-            image = image.convert()
-            image.set_colorkey([0, 0, 0])
-            self.frames.append(image)
         # set starting image to a random one
-        self.image = random.choice(self.frames)
+        self.image = pygame.Surface([36, 54])
+        self.image.fill(RED)
         self.rect = self.image.get_rect()
         # start off the top of the screen
         self.rect.y = random.randrange(-50, -30)
@@ -56,8 +33,6 @@ class Meteor(pygame.sprite.Sprite):
     def update(self):
         # move the sprite
         self.rect.y += self.speed
-        frame = (self.rect.y // 20) % len(self.frames)
-        self.image = self.frames[frame]
 
     def offscreen(self):
         # kill the meteor when it's offscreen
@@ -73,22 +48,11 @@ class Player(pygame.sprite.Sprite):
         self.speed_x = 0
         self.level = 0
         self.score = 0
-        self.shot_sounds = []
-        snd = pygame.mixer.Sound("snd/laser4.wav")
-        self.shot_sounds.append(snd)
-        snd = pygame.mixer.Sound("snd/laser5.wav")
-        snd.set_volume(0.5)
-        self.shot_sounds.append(snd)
-        snd = pygame.mixer.Sound("snd/laser8.wav")
-        snd.set_volume(0.2)
-        self.shot_sounds.append(snd)
+        self.shoot_sound = pygame.mixer.Sound("snd/laser4.wav")
         self.hit_snd = pygame.mixer.Sound("snd/explode.wav")
         self.explode_snd = pygame.mixer.Sound("snd/die.wav")
-        self.powerup_snd = pygame.mixer.Sound("snd/powerup.wav")
-        self.powerup_snd.set_volume(1.0)
-        self.image = pygame.image.load("img/red_rocket.gif").convert()
-        self.image.set_colorkey([0, 0, 0])
-        self.mask = pygame.mask.from_surface(self.image)
+        self.image = pygame.Surface([36, 54])
+        self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.rect.x = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
@@ -117,24 +81,14 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.midtop, self.rect.y, self.level)
         active_sprite_list.add(bullet)
         bullet_sprite_list.add(bullet)
-        self.shot_sounds[self.level].play()
+        self.shoot_sound.play()
 
 class Bullet(pygame.sprite.Sprite):
     speed = -15
     def __init__(self, x, y, level):
         pygame.sprite.Sprite.__init__(self)
-        self.frames = []
-        image = pygame.image.load("img/shot1.png").convert()
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = pygame.image.load("img/shot2.png").convert()
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = pygame.image.load("img/shot3.png").convert()
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        self.image = self.frames[level]
-        self.mask = pygame.mask.from_surface(self.image)
+        self.image = pygame.Surface([10, 20])
+        self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.midtop = x
         self.rect.y = y
@@ -143,52 +97,6 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y += self.speed
         if self.rect.bottom < 0:
             self.kill()
-
-class Powerup(pygame.sprite.Sprite):
-    speed = random.randrange(5, 9)
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.frames = []
-        sprite_sheet = SpriteSheet("img/powerup-sheet.png")
-        image = sprite_sheet.get_image(5, 0, 22, 32)
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = sprite_sheet.get_image(37, 0, 21, 32)
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = sprite_sheet.get_image(69, 0, 21, 32)
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = sprite_sheet.get_image(102, 0, 21, 32)
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = sprite_sheet.get_image(134, 0, 20, 32)
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = sprite_sheet.get_image(165, 0, 21, 32)
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = sprite_sheet.get_image(198, 0, 21, 32)
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        image = sprite_sheet.get_image(230, 0, 21, 32)
-        image.set_colorkey([0, 0, 0])
-        self.frames.append(image)
-        self.image = self.frames[0]
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect()
-        self.rect.y = random.randrange(-50, -30)
-        self.rect.x = random.randrange(WIDTH)
-
-    def update(self):
-        self.rect.y += self.speed
-        frame = (self.rect.y // 30) % len(self.frames)
-        self.image = self.frames[frame]
-
-    def offscreen(self):
-        if self.rect.top > HEIGHT:
-            return True
-        return False
 
 def draw_text(text, size, x, y):
     # utility function to draw text on screen
@@ -201,7 +109,7 @@ def draw_text(text, size, x, y):
 
 def show_start_screen():
     # Display the starting screen
-    screen.blit(background, background_rect)
+    screen.fill(BGCOLOR)
     draw_text("Shoot!", 72, WIDTH/2, HEIGHT/4)
     draw_text("Move with the arrow keys", 24, WIDTH/2, HEIGHT/2)
     draw_text("Shoot the meteors", 24, WIDTH/2, HEIGHT*5/8)
@@ -216,7 +124,7 @@ def show_start_screen():
 
 def show_go_screen(score):
     # display the Game Over screen
-    screen.blit(background, background_rect)
+    screen.fill(BGCOLOR)
     draw_text("GAME OVER", 58, WIDTH/2, HEIGHT/4)
     text = "Score: %s" % score
     draw_text(text, 24, WIDTH/2, HEIGHT/2)
@@ -256,13 +164,9 @@ pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Shoot!")
-# background
-background = pygame.image.load("img/starfield.png").convert()
-background_rect = background.get_rect()
 clock = pygame.time.Clock()
 
 running = True
-
 show_start_screen()
 while True:
     active_sprite_list = pygame.sprite.Group()
@@ -270,7 +174,6 @@ while True:
     bullet_sprite_list = pygame.sprite.Group()
     player = Player()
     active_sprite_list.add(player)
-    powerup = None
     for i in range(10):
         meteor = Meteor()
         active_sprite_list.add(meteor)
@@ -302,10 +205,6 @@ while True:
                 # add any other key events here
 
         ##### Game logic goes here  #########
-        # rare chance of a powerup appearing
-        if random.random() > 0.98 and powerup is None and player.level < 2:
-            powerup = Powerup()
-            active_sprite_list.add(powerup)
         # filter meteors
         for meteor in meteor_sprite_list:
             if meteor.offscreen():
@@ -314,15 +213,9 @@ while True:
                 newmeteor = Meteor()
                 active_sprite_list.add(newmeteor)
                 meteor_sprite_list.add(newmeteor)
-        # remove powerup that got past
-        if powerup is not None:
-            if powerup.offscreen():
-                active_sprite_list.remove(powerup)
-                powerup = None
         # check for collisions
         # first, ship with meteors
-        hit = pygame.sprite.spritecollideany(player, meteor_sprite_list,
-                                             pygame.sprite.collide_mask)
+        hit = pygame.sprite.spritecollideany(player, meteor_sprite_list)
         if hit:
             # you die
             player.explode_snd.play()
@@ -330,7 +223,7 @@ while True:
             running = False
         # next, check bullets with meteors
         hits = pygame.sprite.groupcollide(meteor_sprite_list, bullet_sprite_list,
-                                          True, True, pygame.sprite.collide_mask)
+                                          True, True)
         # for each meteor destroyed, spawn a new one
         for hit in hits:
             player.hit_snd.play()
@@ -338,20 +231,9 @@ while True:
             newmeteor = Meteor()
             active_sprite_list.add(newmeteor)
             meteor_sprite_list.add(newmeteor)
-        # check for powerup
-        if powerup is not None:
-            hit = pygame.sprite.collide_mask(player, powerup)
-            if hit:
-                active_sprite_list.remove(powerup)
-                powerup = None
-                player.powerup_snd.play()
-                player.level += 1
-                if player.level == 3:
-                    player.level = 2
 
         ##### Draw/update screen ########
-        # screen.fill(BGCOLOR)
-        screen.blit(background, background_rect)
+        screen.fill(BGCOLOR)
         active_sprite_list.update()
         active_sprite_list.draw(screen)
         text = 'Score: %s' % player.score

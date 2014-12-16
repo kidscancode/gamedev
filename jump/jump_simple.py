@@ -61,7 +61,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += 1
         hit_list = pygame.sprite.spritecollide(self, platform_sprite_list, False)
         self.rect.y -= 1
-        if len(hit_list) > 0:
+        if hit_list:
             self.speed_y -= self.jump_speed
 
     def stop(self, dir):
