@@ -11,7 +11,8 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 FUCHSIA = (255, 0, 255)
-GRAY = (128, 128, 128)
+GRDY = (128, 128, 128)
+DARKGREY = (64, 64, 64)
 LIME = (0, 128, 0)
 MAROON = (128, 0, 0)
 NAVYBLUE = (0, 0, 128)
@@ -24,7 +25,7 @@ WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255)
-BGCOLOR = GRAY
+BGCOLOR = DARKGREY
 
 # basic constants for your game options
 WIDTH = 800
@@ -96,30 +97,34 @@ class Game:
         self.enemies = pygame.sprite.Group()
         self.player = Player()
         for i in range(10):
-            skel = Skeleton(self.skel_frames_r, self.skel_frames_l,
-                            WIDTH/2+i*27, HEIGHT/3)
-            self.all_sprites.add(skel)
-            self.enemies.add(skel)
+            mob = Mob(self.mob_frames_r, self.mob_frames_l,
+                      WIDTH/2+i*27, HEIGHT/3)
+            self.all_sprites.add(mob)
+            self.enemies.add(mob)
         self.all_sprites.add(self.player)
         self.create_platforms()
 
     def load_images(self):
-        # skeletons
-        sprite_sheet = SpriteSheet('img/zombie_n_skeleton2.png')
-        self.skel_frames_l = []
-        self.skel_frames_r = []
-        image = sprite_sheet.get_image(98, 144, 22, 47)
-        self.skel_frames_r.append(image)
+        # mobs
+        sprite_sheet = SpriteSheet('img/guardBlue64.png')
+        self.mob_frames_l = []
+        self.mob_frames_r = []
+        image = sprite_sheet.get_image(5, 9, 48, 55)
+        self.mob_frames_l.append(image)
         image = pygame.transform.flip(image, True, False)
-        self.skel_frames_l.append(image)
-        image = sprite_sheet.get_image(130, 144, 22, 47)
-        self.skel_frames_r.append(image)
+        self.mob_frames_r.append(image)
+        image = sprite_sheet.get_image(67, 9, 48, 55)
+        self.mob_frames_l.append(image)
         image = pygame.transform.flip(image, True, False)
-        self.skel_frames_l.append(image)
-        image = sprite_sheet.get_image(163, 144, 22, 47)
-        self.skel_frames_r.append(image)
+        self.mob_frames_r.append(image)
+        image = sprite_sheet.get_image(134, 9, 48, 55)
+        self.mob_frames_l.append(image)
         image = pygame.transform.flip(image, True, False)
-        self.skel_frames_l.append(image)
+        self.mob_frames_r.append(image)
+        image = sprite_sheet.get_image(198, 9, 48, 55)
+        self.mob_frames_l.append(image)
+        image = pygame.transform.flip(image, True, False)
+        self.mob_frames_r.append(image)
 
     def create_platforms(self):
         plat_image = pygame.image.load("img/platform_square.png").convert()
@@ -150,7 +155,7 @@ class Game:
         pygame.sprite.groupcollide(g.platforms, g.bullets, False, True)
         hits = pygame.sprite.groupcollide(self.enemies, self.bullets, True, True)
         for hit in hits:
-            pass #explode
+            pass  #explode
 
     def quit(self):
         pygame.quit()
@@ -158,8 +163,8 @@ class Game:
 
     def draw(self):
         self.screen.fill(BGCOLOR)
-        text = 'FPS: %s' % (int(self.clock.get_fps()))
-        draw_text(text, 16, 35, 35)
+        # text = 'FPS: %s' % (int(self.clock.get_fps()))
+        # draw_text(text, 16, 35, 35)
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
         pygame.display.flip()
@@ -213,6 +218,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.shoot_snd = pygame.mixer.Sound("snd/8bit_gunloop.wav")
+        self.shoot_snd.set_volume(0.5)
         self.speed_x = 0
         self.speed_y = 0
         # load animation frames
@@ -347,7 +353,7 @@ class Player(pygame.sprite.Sprite):
             self.speed_y -= self.jump_speed
 
     def shoot(self):
-        num_bullets = 5
+        num_bullets = 1
         if self.dir == 'l':
             for i in range(num_bullets):
                 b = Bullet(self.bullet_frames, self.rect.left+18,
@@ -417,7 +423,7 @@ class Platform(pygame.sprite.Sprite):
     def update(self):
         pass
 
-class Skeleton(pygame.sprite.Sprite):
+class Mob(pygame.sprite.Sprite):
     def __init__(self, frames_r, frames_l, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.frames_l = frames_l

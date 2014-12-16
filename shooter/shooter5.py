@@ -10,7 +10,8 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 FUCHSIA = (255, 0, 255)
-GRAY = (128, 128, 128)
+GREY = (128, 128, 128)
+DARKGREY = (64, 64, 64)
 LIME = (0, 128, 0)
 MAROON = (128, 0, 0)
 NAVYBLUE = (0, 0, 128)
@@ -23,7 +24,7 @@ WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255)
-BGCOLOR = GRAY
+BGCOLOR = DARKGREY
 
 # basic constants for your game options
 WIDTH = 800
@@ -126,8 +127,6 @@ class Game:
 
     def draw(self):
         self.screen.fill(BGCOLOR)
-        text = 'x: %s, y: %s' % (g.player.rect.x, g.player.rect.y)
-        draw_text(text, 16, 35, 35)
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
         pygame.display.flip()
@@ -181,6 +180,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.shoot_snd = pygame.mixer.Sound("snd/8bit_gunloop.wav")
+        self.shoot_snd.set_volume(0.5)
         self.speed_x = 0
         self.speed_y = 0
         # load animation frames
@@ -193,9 +193,6 @@ class Player(pygame.sprite.Sprite):
         self.now = 0
         self.last_update = 0
         self.load_images()
-        # self.image = pygame.Surface((24, 36))
-        # self.image.fill(RED)
-        # self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 50
 

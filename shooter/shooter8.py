@@ -90,6 +90,7 @@ class Game:
         self.load_images()
         self.running = True
         self.shake = False
+        self.explode_snd = pygame.mixer.Sound('snd/boom8.wav')
         self.all_sprites = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
@@ -97,30 +98,40 @@ class Game:
         self.enemies = pygame.sprite.Group()
         self.player = Player()
         for i in range(10):
-            skel = Skeleton(self.skel_frames_r, self.skel_frames_l,
-                            WIDTH/2+i*27, HEIGHT/3)
-            self.all_sprites.add(skel)
-            self.enemies.add(skel)
+            mob = Mob(self.mob_frames_r, self.mob_frames_l,
+                      WIDTH/2+i*27, HEIGHT/3)
+            self.all_sprites.add(mob)
+            self.enemies.add(mob)
         self.all_sprites.add(self.player)
         self.create_platforms()
 
+    def spawn(self):
+        mob = Mob(self.mob_frames_r, self.mob_frames_l,
+                  WIDTH/2, HEIGHT/3)
+        self.all_sprites.add(mob)
+        self.enemies.add(mob)
+
     def load_images(self):
-        # skeletons
-        sprite_sheet = SpriteSheet('img/zombie_n_skeleton2.png')
-        self.skel_frames_l = []
-        self.skel_frames_r = []
-        image = sprite_sheet.get_image(98, 144, 22, 47)
-        self.skel_frames_r.append(image)
+        # mobs
+        sprite_sheet = SpriteSheet('img/guardBlue64.png')
+        self.mob_frames_l = []
+        self.mob_frames_r = []
+        image = sprite_sheet.get_image(5, 9, 48, 55)
+        self.mob_frames_l.append(image)
         image = pygame.transform.flip(image, True, False)
-        self.skel_frames_l.append(image)
-        image = sprite_sheet.get_image(130, 144, 22, 47)
-        self.skel_frames_r.append(image)
+        self.mob_frames_r.append(image)
+        image = sprite_sheet.get_image(67, 9, 48, 55)
+        self.mob_frames_l.append(image)
         image = pygame.transform.flip(image, True, False)
-        self.skel_frames_l.append(image)
-        image = sprite_sheet.get_image(163, 144, 22, 47)
-        self.skel_frames_r.append(image)
+        self.mob_frames_r.append(image)
+        image = sprite_sheet.get_image(134, 9, 48, 55)
+        self.mob_frames_l.append(image)
         image = pygame.transform.flip(image, True, False)
-        self.skel_frames_l.append(image)
+        self.mob_frames_r.append(image)
+        image = sprite_sheet.get_image(198, 9, 48, 55)
+        self.mob_frames_l.append(image)
+        image = pygame.transform.flip(image, True, False)
+        self.mob_frames_r.append(image)
         # explosions
         sprite_sheet = SpriteSheet('img/puff_smoke.png')
         self.explode_frames = []
@@ -160,8 +171,10 @@ class Game:
         # kill baddies
         hits = pygame.sprite.groupcollide(self.enemies, self.bullets, True, True)
         for hit in hits:
-            expl = Explode(self.explode_frames, hit.rect.x, hit.rect.y)
+            expl = Explode(self.explode_frames, hit.rect.x, hit.rect.y-10)
             self.all_sprites.add(expl)
+            self.explode_snd.play()
+            self.screen_shake(12)
 
     def quit(self):
         pygame.quit()
@@ -169,8 +182,8 @@ class Game:
 
     def draw(self):
         self.screen.fill(BGCOLOR)
-        text = 'FPS: %s' % (int(self.clock.get_fps()))
-        draw_text(text, 16, 35, 35)
+        # text = 'FPS: %s' % (int(self.clock.get_fps()))
+        # draw_text(text, 16, 35, 35)
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
         pygame.display.flip()
@@ -194,6 +207,8 @@ class Game:
                     self.player.go('r')
                 if event.key == pygame.K_SPACE:
                     self.player.shoot()
+                if event.key == pygame.K_z:
+                    self.spawn()
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
                     self.player.stop('l')
@@ -206,14 +221,13 @@ class Game:
     def start_screen(self):
         pass
 
-    def screen_shake(self):
+    def screen_shake(self, amount):
         if not self.shake:
-            self.shake_x = random.randrange(-3, 4)
-            self.shake_y = random.randrange(-3, 4)
+            self.shake_x = random.randrange(-amount, amount+1)
+            self.shake_y = random.randrange(-amount, amount+1)
             for sprite in self.all_sprites:
                 sprite.rect.x += self.shake_x
                 sprite.rect.y += self.shake_y
-            # self.draw()
             self.shake = True
             self.shake_time = pygame.time.get_ticks()
 
@@ -224,6 +238,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.shoot_snd = pygame.mixer.Sound("snd/8bit_gunloop.wav")
+        self.shoot_snd.set_volume(0.5)
         self.speed_x = 0
         self.speed_y = 0
         # load animation frames
@@ -384,7 +399,7 @@ class Player(pygame.sprite.Sprite):
         g.all_sprites.add(flash)
         g.flashes.add(flash)
         self.shoot_snd.play()
-        g.screen_shake()
+        g.screen_shake(3)
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, frames, x, y, dir):
@@ -449,7 +464,7 @@ class Explode(pygame.sprite.Sprite):
             else:
                 self.image = self.frames[self.current_frame]
 
-class Skeleton(pygame.sprite.Sprite):
+class Mob(pygame.sprite.Sprite):
     def __init__(self, frames_r, frames_l, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.frames_l = frames_l
@@ -458,12 +473,12 @@ class Skeleton(pygame.sprite.Sprite):
         self.current_frame = 0
         if random.randrange(2) == 0:
             self.dir = 'r'
-            self.image = self.frames_r[0]
-            self.speed_x = 3
+            self.image = self.frames_l[0]
+            self.speed_x = random.randrange(2, 4)
         else:
             self.dir = 'l'
-            self.image = self.frames_l[0]
-            self.speed_x = -3
+            self.image = self.frames_r[0]
+            self.speed_x = random.randrange(-3, -1)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y

@@ -16,9 +16,6 @@ shooter4.py:
 shooter5.py:
     screen shake
 
-shooter5.5.py:
-    bullets explode when they hit the wall
-
 shooter6.py:
     baddies
 

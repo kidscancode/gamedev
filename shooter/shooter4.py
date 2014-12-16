@@ -10,7 +10,8 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 FUCHSIA = (255, 0, 255)
-GRAY = (128, 128, 128)
+GREY = (128, 128, 128)
+DARKGREY = (64, 64, 64)
 LIME = (0, 128, 0)
 MAROON = (128, 0, 0)
 NAVYBLUE = (0, 0, 128)
@@ -23,7 +24,7 @@ WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255)
-BGCOLOR = GRAY
+BGCOLOR = DARKGREY
 
 # basic constants for your game options
 WIDTH = 800
@@ -164,6 +165,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.shoot_snd = pygame.mixer.Sound("snd/8bit_gunloop.wav")
+        self.shoot_snd.set_volume(0.5)
         self.speed_x = 0
         self.speed_y = 0
         # load animation frames
