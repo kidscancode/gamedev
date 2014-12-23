@@ -2,6 +2,7 @@
 # KidsCanCode 2014
 import pygame
 import sys
+import random
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -310,11 +311,13 @@ class Bullet(pygame.sprite.Sprite):
             self.speed_x = -18
         else:
             self.speed_x = 18
+        self.speed_y = random.randrange(-1, 2)
         self.rect.x = x
         self.rect.y = y
 
     def update(self):
         self.rect.x += self.speed_x
+        self.rect.y += self.speed_y
         frame = (self.rect.x // 50) % len(self.frames)
         self.image = self.frames[frame]
         # hit a wall?

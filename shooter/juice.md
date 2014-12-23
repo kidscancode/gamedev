@@ -8,7 +8,7 @@ shooter3.py:
     muzzle flash
 
 shooter3.5.py:
-    bigger/more bullets
+    bullet spray
 
 shooter4.py:
     pushback

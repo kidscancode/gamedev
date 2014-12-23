@@ -34,6 +34,22 @@ FPS = 30
 TITLE = "Shooter!"
 GRAVITY = 1
 
+# Flags for demo
+MOB_EXPLOSIONS = True
+MOB_EXPL_SHAKE = 12  # 12
+MOB_HIT = True
+MOBS = True
+NUM_BULLETS = 5  # 5
+BULLET_SPEED = 17  # 17
+SHOOT_SHAKE = 3  # 3
+SCREEN_SHAKE = True
+PUSHBACK = 3  # 3
+BULLET_SPRAY = 2  # 2
+MUZZLE_FLASH = True
+SOUND = True
+SHOOT_SOUND = 'snd/8bit_gunloop.wav'  # 'snd/gun_fire.wav'
+
+
 level = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
          [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
          [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -97,11 +113,12 @@ class Game:
         self.flashes = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.player = Player()
-        for i in range(10):
-            mob = Mob(self.mob_frames_r, self.mob_frames_l,
-                      WIDTH/2+i*27, HEIGHT/3)
-            self.all_sprites.add(mob)
-            self.enemies.add(mob)
+        if MOBS:
+            for i in range(10):
+                mob = Mob(self.mob_frames_r, self.mob_frames_l,
+                          WIDTH/2+i*27, HEIGHT/3)
+                self.all_sprites.add(mob)
+                self.enemies.add(mob)
         self.all_sprites.add(self.player)
         self.create_platforms()
 
@@ -170,11 +187,13 @@ class Game:
         pygame.sprite.groupcollide(g.platforms, g.bullets, False, True)
         # kill baddies
         hits = pygame.sprite.groupcollide(self.enemies, self.bullets, True, True)
-        for hit in hits:
-            expl = Explode(self.explode_frames, hit.rect.x, hit.rect.y-10)
-            self.all_sprites.add(expl)
-            self.explode_snd.play()
-            self.screen_shake(12)
+        if MOB_EXPLOSIONS:
+            for hit in hits:
+                expl = Explode(self.explode_frames, hit.rect.x, hit.rect.y-10)
+                self.all_sprites.add(expl)
+                if SOUND:
+                    self.explode_snd.play()
+                self.screen_shake(12)
 
     def quit(self):
         pygame.quit()
@@ -237,7 +256,7 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.shoot_snd = pygame.mixer.Sound("snd/gun_fire.wav")
+        self.shoot_snd = pygame.mixer.Sound(SHOOT_SOUND)
         self.shoot_snd.set_volume(0.5)
         self.speed_x = 0
         self.speed_y = 0
@@ -373,33 +392,37 @@ class Player(pygame.sprite.Sprite):
             self.speed_y -= self.jump_speed
 
     def shoot(self):
-        num_bullets = 5
         if self.dir == 'l':
-            for i in range(num_bullets):
+            for i in range(NUM_BULLETS):
                 b = Bullet(self.bullet_frames, self.rect.left+18,
                            self.rect.centery-5, self.dir)
                 g.all_sprites.add(b)
                 g.bullets.add(b)
-            flash = Muzzle_Flash(self.rect.x-10, self.rect.y+8)
-            self.rect.x += 3
+            if MUZZLE_FLASH:
+                flash = Muzzle_Flash(self.rect.x-10, self.rect.y+8)
+                g.flashes.add(flash)
+                g.all_sprites.add(flash)
+            self.rect.x += PUSHBACK
             hit_list = pygame.sprite.spritecollide(self, g.platforms, False)
             if hit_list:
-                self.rect.x -= 3
+                self.rect.x -= PUSHBACK
         else:
-            for i in range(num_bullets):
+            for i in range(NUM_BULLETS):
                 b = Bullet(self.bullet_frames, self.rect.right-18,
                            self.rect.centery-5, self.dir)
                 g.all_sprites.add(b)
                 g.bullets.add(b)
-            flash = Muzzle_Flash(self.rect.x+20, self.rect.y+8)
-            self.rect.x -= 3
+            if MUZZLE_FLASH:
+                flash = Muzzle_Flash(self.rect.x+20, self.rect.y+8)
+                g.all_sprites.add(flash)
+                g.flashes.add(flash)
+            self.rect.x -= PUSHBACK
             hit_list = pygame.sprite.spritecollide(self, g.platforms, False)
             if hit_list:
-                self.rect.x += 3
-        g.all_sprites.add(flash)
-        g.flashes.add(flash)
-        self.shoot_snd.play()
-        g.screen_shake(3)
+                self.rect.x += PUSHBACK
+        if SOUND:
+            self.shoot_snd.play()
+        g.screen_shake(SHOOT_SHAKE)
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, frames, x, y, dir):
@@ -408,18 +431,16 @@ class Bullet(pygame.sprite.Sprite):
         self.image = self.frames[0]
         self.rect = self.image.get_rect()
         if dir == 'l':
-            self.speed_x = random.randrange(-20, -17)
+            self.speed_x = random.randrange(-BULLET_SPEED-3, -BULLET_SPEED)
         else:
-            self.speed_x = random.randrange(17, 20)
-        self.speed_y = random.randrange(-2, 3)
+            self.speed_x = random.randrange(BULLET_SPEED, BULLET_SPEED+3)
+        self.speed_y = random.randrange(-BULLET_SPRAY, BULLET_SPRAY+1)
         self.rect.x = x
         self.rect.y = y
 
     def update(self):
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
-        # frame = (self.rect.x // 50) % len(self.frames)
-        # self.image = self.frames[frame]
 
 class Muzzle_Flash(pygame.sprite.Sprite):
     def __init__(self, x, y):

@@ -121,8 +121,6 @@ class Game:
 
     def draw(self):
         self.screen.fill(BGCOLOR)
-        text = 'x: %s, y: %s' % (g.player.rect.x, g.player.rect.y)
-        draw_text(text, 16, 35, 35)
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
         pygame.display.flip()
