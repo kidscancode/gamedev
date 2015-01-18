@@ -47,7 +47,7 @@ PUSHBACK = 3  # 3
 BULLET_SPRAY = 2  # 2
 MUZZLE_FLASH = True
 SOUND = True
-SHOOT_SOUND = 'snd/8bit_gunloop.wav'  # 'snd/gun_fire.wav'
+SHOOT_SOUND = 'snd/gun_fire.wav'  # 'snd/gun_fire.wav' or 'snd/8bit_gunloop.wav'
 
 
 level = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],

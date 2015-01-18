@@ -301,7 +301,7 @@ class Bullet(pygame.sprite.Sprite):
         else:
             self.speed_x = 18
         self.rect.x = x
-        self.rect.y =y
+        self.rect.y = y
 
     def update(self):
         self.rect.x += self.speed_x
@@ -318,9 +318,6 @@ class Platform(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-
-    def update(self):
-        pass
 
 g = Game()
 g.start_screen()
