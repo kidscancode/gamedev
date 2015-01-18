@@ -23,6 +23,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Collect the Blocks")
 clock = pygame.time.Clock()
 
+
 def draw_text(text, size, x, y):
     # utility function to draw text on screen
     font_name = pygame.font.match_font('arial')
@@ -31,6 +32,7 @@ def draw_text(text, size, x, y):
     text_rect = text_surface.get_rect()
     text_rect.topleft = (x, y)
     screen.blit(text_surface, text_rect)
+
 
 class vec2:
     def __init__(self, x, y):
