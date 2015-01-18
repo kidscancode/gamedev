@@ -1,10 +1,13 @@
 # Flap
 # KidsCanCode 2014
 # Flappy bird in pygame
+# For educational purposes only
 # Art from http://lanica.co/flappy-clone/
 # Music from opengameart.org (http://opengameart.org/content/cheerful-1-choro-bavario-happy-loop)
 #   Copyright 2009 MSTR "Choro Bavario" <http://www.jamendo.com/en/artist/349242/mstr>
 #   Copyright 2012 Iwan Gabovitch "Choro Bavario (happy loop)" (simple editing to make it loop)
+# TODO:
+# combine sprites into one spritesheet
 import pygame
 import sys
 import random

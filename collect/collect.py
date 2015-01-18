@@ -1,6 +1,12 @@
 # Collect the Blocks
 # by KidsCanCode 2015
-# Run around and collect the blocks before the time runs out!
+# Run around and collect the blocks
+# For educational purposes only
+
+# TODO
+# time bonus
+# powerups
+# more mob features (different types, etc)
 
 import pygame
 import sys
@@ -35,28 +41,37 @@ def draw_text(text, size, x, y):
 
 
 class vec2:
+    # a class to do vector math
+    # includes operator overloading
+    # TODO: more operations
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
     def __mul__(self, other):
+        # multiplying a vector by a scalar
         x = self.x * other
         y = self.y * other
         return vec2(x, y)
 
     def __add__(self, other):
+        # adding two vectors
         x = self.x + other.x
         y = self.y + other.y
         return vec2(x, y)
 
     def __str__(self):
+        # the __str__ function defines how an object appears with print()
         return "({:.2f},{:.2f})".format(self.x, self.y)
 
     def mag(self):
+        # return the magnitude (length) of the vector
         return math.sqrt(self.x*self.x + self.y*self.y)
 
 
 class Player(pygame.sprite.Sprite):
+    # player sprite
+    # realistic movement using equations of motion (pos, vel, accel)
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.pos = vec2(WIDTH/2, HEIGHT/2)
@@ -70,6 +85,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         self.accel = vec2(0, 0)
+        # keep accelerating as long as that dir key is down
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT]:
             self.accel.x = -1.5
@@ -79,15 +95,17 @@ class Player(pygame.sprite.Sprite):
             self.accel.y = -1.5
         if keystate[pygame.K_DOWN]:
             self.accel.y = 1.5
+        # fix diagonals so they are same speed as orthoganal directions
         if self.accel.x != 0 and self.accel.y != 0:
             self.accel *= 0.7071
 
         # friction (based on vel)
         self.accel += self.vel * -0.12
-        # grav
-        # self.accel.y += .3
+        # grav example (not going to use in this game, but fun to see)
+        # self.accel.y += .7
 
         # equations of motion
+        # for simplicity, using t=1 (change per timestep)
         # p' = 0.5 at**2 + vt + p
         # v' = at + v
         self.pos += self.accel * 0.5 + self.vel
@@ -112,6 +130,8 @@ class Player(pygame.sprite.Sprite):
 
 
 class Box(pygame.sprite.Sprite):
+    # simple static box
+    # TODO: moving boxes?
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((24, 24))
@@ -122,6 +142,8 @@ class Box(pygame.sprite.Sprite):
 
 
 class Mob(pygame.sprite.Sprite):
+    # bad guy!
+    # will chase the player
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((24, 24))
@@ -129,15 +151,18 @@ class Mob(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.pos = vec2(x, y)
         self.vel = vec2(0, 0)
-        self.speed = random.randrange(1, 4)
         self.accel = vec2(0, 0)
+        # varied speeds (actually acceleration, but determines max speed)
+        # TODO: different types of enemy based on speed?
+        self.speed = random.choice([0.1, 0.2, 0.3, 0.4])
         self.rect.x = int(self.pos.x)
         self.rect.y = int(self.pos.y)
 
     def update(self):
-        # equations of motion
-        # p' = 0.5 at**2 + vt + p
-        # v' = at + v
+        # friction (based on vel)
+        self.accel += self.vel * -0.08
+
+        # equations of motion - see Player class
         self.pos += self.accel * 0.5 + self.vel
         self.vel += self.accel
 
@@ -165,9 +190,6 @@ mobs = pygame.sprite.Group()
 
 player = Player()
 all_sprites.add(player)
-mob = Mob(0, 0)
-all_sprites.add(mob)
-mobs.add(mob)
 
 for i in range(10):
     box = Box(random.randrange(5, WIDTH-29),
@@ -190,11 +212,11 @@ while running:
                 pygame.quit()
                 sys.exit()
 
-    # collide w/boxes and remove
+    # collide w/boxes and remove them
     hit_list = pygame.sprite.spritecollide(player, boxes, True)
     score += len(hit_list)
 
-    # level up, create new boxes
+    # level up, create new boxes and mobs
     if len(boxes) == 0:
         level += 1
         for i in range((level+1)*5):
@@ -202,28 +224,35 @@ while running:
                       random.randrange(5, HEIGHT-29))
             boxes.add(box)
             all_sprites.add(box)
-        if level % 3 == 0:
-            mob = Mob(random.randrange(5, WIDTH-29),
-                      random.randrange(5, WIDTH-29))
-            all_sprites.add(mob)
+        mobs.empty()
+        # put the player back in the middle
+        player.vel = vec2(0, 0)
+        player.pos = vec2(WIDTH/2, HEIGHT/2)
+        # create some mobs - start in the corners
+        for i in range(level // 2):
+            mob = Mob(random.choice([5, WIDTH-29]),
+                      random.choice([5, WIDTH-29]))
             mobs.add(mob)
 
     # accelerate mobs towards player
     for mob in mobs:
-        mob.vel = vec2(player.pos.x - mob.pos.x,
-                       player.pos.y - mob.pos.y)
-        mob.vel = mob.vel * (mob.speed / mob.vel.mag())
+        mob.accel = vec2(player.pos.x - mob.pos.x,
+                         player.pos.y - mob.pos.y)
+        mob.accel = mob.accel * (mob.speed / mob.accel.mag())
+        # touch a mob and die!
         if pygame.sprite.collide_rect(mob, player):
             running = False
 
     screen.fill(BLACK)
-    fps_txt = "{:.2f}".format(clock.get_fps())
-    draw_text(str(fps_txt), 18, WIDTH-50, 10)
-    # draw_text(str(player.pos), 18, 10, 10)
-    # draw_text(str(player.vel), 18, 10, 50)
-    # draw_text(str(player.accel), 18, 10, 90)
+    # uncommment to show FPS (useful for troubleshooting)
+    # fps_txt = "{:.2f}".format(clock.get_fps())
+    # draw_text(str(fps_txt), 18, WIDTH-50, 10)
     all_sprites.update()
+    mobs.update()
     all_sprites.draw(screen)
+    mobs.draw(screen)
     score_txt = "Score: {:0}".format(score)
     draw_text(score_txt, 18, 10, 10)
+    lvl_txt = "Level: {:0}".format(level)
+    draw_text(lvl_txt, 18, 10, 30)
     pygame.display.flip()

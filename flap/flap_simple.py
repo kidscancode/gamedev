@@ -1,6 +1,7 @@
-# Flap
+# Flap - prototype (no graphics)
 # KidsCanCode 2014
 # Flappy bird in pygame - Simple version (no graphics)
+# For educational purposes only
 import pygame
 import sys
 import random
@@ -17,7 +18,7 @@ BGCOLOR = LIGHTBLUE
 WIDTH = 480
 HEIGHT = 320
 FPS = 30
-# tweak this to change how quickly the bird falls
+# change this to change how quickly the bird falls
 GRAVITY = 1
 # how big the gaps between the pipes are
 GAP = 100
@@ -92,7 +93,7 @@ class Pipe(pygame.sprite.Sprite):
             return False
 
 def new_pipe():
-    # create a new pair of pipes (upper and lower)
+    # create a new pair of pipes segments(upper and lower)
     size = random.randrange(20, HEIGHT-20-GAP)
     pipe_u = Pipe(size, 0)
     pipe_l = Pipe(HEIGHT - GAP - size, size + GAP)

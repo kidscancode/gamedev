@@ -1,6 +1,7 @@
 # Jump!
 # by KidsCanCode 2014
 # A Doodle Jump style game in Pygame
+# For educational purposes only
 import pygame
 import sys
 import random

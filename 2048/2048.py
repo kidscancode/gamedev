@@ -1,5 +1,10 @@
 # 2048 - Yet another 2048 clone
-# KidsCanCode 2014
+# by KidsCanCode 2014
+# For educational purposes only
+
+# TODO:
+# Animate moving tiles
+
 import pygame
 import sys
 import random
@@ -8,13 +13,14 @@ import random
 BLACK = (0, 0, 0)
 BGCOLOR = BLACK
 
-# basic constants for your game options
+# constants for game options
 FPS = 15
 TILESIZE = 100
 MARGIN = 5
 BORDER = 8
 WIDTH = TILESIZE * 4 + MARGIN * 3 + BORDER * 2
 HEIGHT = WIDTH
+# increasingly deeper shades of red, based on tile value
 COLORS = {0: "0x000000",
           2: "0xFFFFFF",
           4: "0xFFEEEE",
@@ -35,7 +41,7 @@ COLORS = {0: "0x000000",
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, value=0):
-        # player init - create the tile
+        # create the tile sprite, default value is 0
         pygame.sprite.Sprite.__init__(self)
         self.value = value
         self.image = pygame.Surface((TILESIZE, TILESIZE))
@@ -43,29 +49,34 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def update(self):
-        # make sure we have the right color
+        # make sure we have the right color in case the value has increased
         self.image.fill(pygame.Color(COLORS[self.value]))
+        # draw the value of the tile centered on it
         text_surface = FONT.render(str(self.value), True, BLACK)
         text_rect = text_surface.get_rect()
         text_rect.midtop = (50, 40)
         self.image.blit(text_surface, text_rect)
+
 
 class Board:
     # board object - holds all the tiles
     # new board has 2 random spots filled
     def __init__(self):
         self.sprite_list = pygame.sprite.Group()
+        # list comprehension, creates a 4x4 grid as a list of lists
+        # each of the items in the list is a tile object
         self.board = [[0 for _ in range(4)] for _ in range(4)]
         for row in range(4):
             for col in range(4):
                 self.board[row][col] = Tile()
                 self.sprite_list.add(self.board[row][col])
-        self.can_move = True
+        # self.can_move = True
         self.add_tile()
         self.add_tile()
 
     def draw(self):
-        # draw the board
+        # draw the board, pause one tick between each tile movement
+        # TODO: replace this with better animation
         clock.tick(FPS)
         for i, row in enumerate(self.board):
             for j, tile in enumerate(row):
@@ -76,7 +87,7 @@ class Board:
         pygame.display.flip()
 
     def add_tile(self):
-        # add a random new tile to the board
+        # add a random new tile to am empty spot on the board
         # new tiles always have a value of 2
         if not self.full():
             while True:
@@ -106,7 +117,7 @@ class Board:
             for i, row in enumerate(self.board):
                 for j, tile in enumerate(row):
                     # we ignore the tiles in the leftmost column, they can't move
-                    # and we ignore 0 tiles
+                    # and we ignore 0 value tiles
                     if j > 0 and tile.value > 0:
                         if self.board[i][j-1].value == 0:
                             # it can move to the left, so shift it
@@ -154,7 +165,7 @@ class Board:
             for i, row in enumerate(self.board):
                 for j, tile in enumerate(row):
                     # we ignore the tiles in the top row, they can't move
-                    # and we ignore 0 tiles
+                    # and we ignore 0 value tiles
                     if i > 0 and tile.value > 0:
                         if self.board[i-1][j].value == 0:
                             # it can move up, so shift it

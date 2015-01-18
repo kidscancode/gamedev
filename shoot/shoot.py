@@ -1,6 +1,7 @@
 # Shoot!
 # by KidsCanCode 2014
 # A generic space shooter
+# For educational purposes only
 # Art & sounds from http://opengameart.org
 # Meteors - http://opengameart.org/content/asteroids
 # Rocket - http://opengameart.org/content/rocket
@@ -123,6 +124,7 @@ class Bullet(pygame.sprite.Sprite):
     speed = -15
     def __init__(self, x, y, level):
         pygame.sprite.Sprite.__init__(self)
+        self.speed *= (level + 1)
         self.frames = []
         image = pygame.image.load("img/shot1.png").convert()
         image.set_colorkey([0, 0, 0])
@@ -357,6 +359,8 @@ while True:
         text = 'Score: %s' % player.score
         draw_text(text, 18, 45, 10)
         # after drawing, flip the display
+        fps_txt = "{:.2f}".format(clock.get_fps())
+        draw_text(str(fps_txt), 18, WIDTH-50, 10)
         pygame.display.flip()
 
     show_go_screen(player.score)

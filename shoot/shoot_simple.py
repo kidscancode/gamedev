@@ -1,10 +1,11 @@
 # Shoot!
 # by KidsCanCode 2014
-# A generic space shooter
+# A generic space shooter - prototype (no art)
+# For educational purposes only
 # Art & sounds from http://opengameart.org
 # Meteors - http://opengameart.org/content/asteroids
 # Rocket - http://opengameart.org/content/rocket
-# Lasers = Modified from http://opengameart.org/content/lasers-and-beams
+# Lasers - Modified from http://opengameart.org/content/lasers-and-beams
 import pygame
 import sys
 import random
@@ -22,7 +23,6 @@ class Meteor(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         # start with a random speed
         self.speed = random.randrange(3, 12)
-        # set starting image to a random one
         self.image = pygame.Surface([36, 54])
         self.image.fill(RED)
         self.rect = self.image.get_rect()
@@ -35,7 +35,7 @@ class Meteor(pygame.sprite.Sprite):
         self.rect.y += self.speed
 
     def offscreen(self):
-        # kill the meteor when it's offscreen
+        # returns True if the meteor is offscreen
         if self.rect.y > HEIGHT + 10:
             return True
         else:

@@ -22,6 +22,8 @@ class SpriteSheet:
 
     def get_image(self, x, y, width, height):
         # grab an image out of a larger spritesheet
+        # you need to know the x,y of the upper left corner and the
+        # width,height of the sprite
         image = pygame.Surface([width, height])
         image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
         image.set_colorkey([0, 0, 0])
@@ -136,27 +138,28 @@ class Mob(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.speed = random.randrange(6, 10)
         self.frames = []
+        self.sprite_sheet = MOB_SPRITESHEET
         # We want mobs to start at a spot off the screen
         # first, pick an edge
-        edge = random.choice(['t', 'b', 'l', 'r'])
+        edge = random.choice(['top', 'bottom', 'left', 'right'])
         # depending on which edge, choose the starting point and direction
         # and load the appropriate image
-        if edge == 'l':
+        if edge == 'left':
             self.dir = random.randrange(-80, 80)
             self.load_images()
             self.rect.right = 0
             self.rect.y = random.randrange(HEIGHT)
-        elif edge == 'r':
+        elif edge == 'right':
             self.dir = random.randrange(100, 260)
             self.load_images()
             self.rect.left = WIDTH
             self.rect.y = random.randrange(HEIGHT)
-        elif edge == 't':
+        elif edge == 'top':
             self.dir = random.randrange(190, 350)
             self.load_images()
             self.rect.bottom = 0
             self.rect.x = random.randrange(WIDTH)
-        elif edge == 'b':
+        elif edge == 'bottom':
             self.dir = random.randrange(10, 170)
             self.load_images()
             self.rect.top = HEIGHT
@@ -165,20 +168,19 @@ class Mob(pygame.sprite.Sprite):
     def load_images(self):
         # load the sprites - pick one of the two mob sprites
         # use "transform" to rotate the image in the right direction
-        sprite_sheet = SpriteSheet("img/dodgemobs.png")
         i = random.randrange(2)
         if i == 0:
-            image = sprite_sheet.get_image(24, 33, 56, 80)
+            image = self.sprite_sheet.get_image(24, 33, 56, 80)
             image = pygame.transform.rotate(image, -(self.dir+90) % 360)
             self.frames.append(image)
-            image = sprite_sheet.get_image(112, 33, 56, 80)
+            image = self.sprite_sheet.get_image(112, 33, 56, 80)
             image = pygame.transform.rotate(image, -(self.dir+90) % 360)
             self.frames.append(image)
         else:
-            image = sprite_sheet.get_image(16, 137, 72, 80)
+            image = self.sprite_sheet.get_image(16, 137, 72, 80)
             image = pygame.transform.rotate(image, -(self.dir+90) % 360)
             self.frames.append(image)
-            image = sprite_sheet.get_image(104, 137, 72, 80)
+            image = self.sprite_sheet.get_image(104, 137, 72, 80)
             image = pygame.transform.rotate(image, -(self.dir+90) % 360)
             self.frames.append(image)
         # set the starting frame
@@ -259,10 +261,6 @@ def show_go_screen(score):
             pygame.event.get()
             return
 
-def show_score(score):
-    # display the score on the screen
-    text = 'Score: %s' % score
-    draw_text(text, 18, 40, 10)
 
 # set screen dimensions
 WIDTH = 405
@@ -276,6 +274,9 @@ pygame.display.set_caption("Dodge!")
 clock = pygame.time.Clock()
 # create a timer to count seconds for score
 pygame.time.set_timer(pygame.USEREVENT, 1000)
+# load the mob spritesheet
+MOB_SPRITESHEET = SpriteSheet("img/dodgemobs.png")
+
 running = True
 show_start_screen()
 while True:
@@ -345,7 +346,9 @@ while True:
         screen.fill(GRAY)
         active_sprite_list.update()
         active_sprite_list.draw(screen)
-        show_score(score)
+        # show_score(score)
+        text = 'Score: %s' % score
+        draw_text(text, 18, 40, 10)
         pygame.display.flip()
 
     show_go_screen(score)

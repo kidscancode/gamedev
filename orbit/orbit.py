@@ -1,7 +1,6 @@
-# Collect the Blocks
+# Orbital simulation, using real physical values
 # by KidsCanCode 2015
-# Run around and collect the blocks before the time runs out!
-
+# For educational purposes only
 import pygame
 import sys
 import math
@@ -44,38 +43,48 @@ def draw_text(text, size, x, y):
 
 
 class vec2:
+    # a class to do vector math
+    # includes operator overloading
+    # TODO: more operations
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
     def __mul__(self, other):
+        # multiplying a vector by a scalar
         x = self.x * other
         y = self.y * other
         return vec2(x, y)
 
     def __add__(self, other):
+        # adding two vectors
         x = self.x + other.x
         y = self.y + other.y
         return vec2(x, y)
 
     def __sub__(self, other):
+        # subtract one vector from another
         x = self.x - other.x
         y = self.y - other.y
         return vec2(x, y)
 
     def __str__(self):
+        # the __str__ function defines how an object appears with print()
         return "({:.4f},{:.4f})".format(self.x, self.y)
 
     def mag(self):
+        # return the magnitude (length) of the vector
         return math.sqrt(self.x*self.x + self.y*self.y)
 
 
 class Body(pygame.sprite.Sprite):
+    # a generic astronomical body
+    # requires radius (in pixels) and color for drawing
     def __init__(self, rad, col):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((rad*2, rad*2))
         pygame.draw.circle(self.image, col, (rad, rad), rad)
-        self.mass = 1000
+        self.mass = 1
         self.rad = rad
         self.col = col
         self.rect = self.image.get_rect()
@@ -96,14 +105,14 @@ bodies = pygame.sprite.Group()
 # planetary data from http://ssd.jpl.nasa.gov/horizons.cgi
 sun = Body(25, YELLOW)
 sun.name = "Sun"
-sun.mass = 1.98892e30
+sun.mass = 1.98892e30  # kg
 bodies.add(sun)
 
 earth = Body(8, BLUE)
 earth.name = "Earth"
-earth.mass = 5.9742e24
+earth.mass = 5.9742e24  # kg
 earth.pos.x = -1 * AU
-earth.vel.y = 29.783e3  # 29.783 km/s
+earth.vel.y = 29.783e3  # km/s
 bodies.add(earth)
 
 venus = Body(7, YELLOW)
@@ -127,6 +136,8 @@ mercury.pos.x = -0.3075 * AU
 mercury.vel.y = 47.362e3
 bodies.add(mercury)
 
+# Jupiter is *really* far from the sun.  You'll need to make the window bigger
+# and/or change the SCALE value to even see it. Try WIDTH / (12 * AU)
 # jup = Body(12, ORANGE)
 # jup.name = "Jupiter"
 # jup.mass = 1898.13e24
@@ -137,12 +148,14 @@ bodies.add(mercury)
 step = 1
 running = True
 while running:
+    # uncomment to print out each body's data each step
     # print('Step #{}'.format(step))
     # for body in bodies:
     #     s = '{:<8}  Pos.={:>6.4f} {:>6.4f} Vel.={:>10.4f} {:>10.4f}'.format(
     #         body.name, body.pos.x/AU, body.pos.y/AU, body.vel.x, body.vel.y)
     #     print(s)
     # print()
+    # use this if you want to slow the animation down
     # pygame.time.wait(1000)
     step += 1
     clock.tick(FPS)
@@ -156,7 +169,7 @@ while running:
                 pygame.quit()
                 sys.exit()
 
-    # find total force on each body
+    # find sun's force on each body
     for body in bodies:
         if body is sun:
             continue
@@ -174,9 +187,11 @@ while running:
         body.vel += body.accel * TIMESTEP
         body.pos += body.vel * TIMESTEP
 
+    # comment this to make the planets leave trails!
     screen.fill(BLACK)
-    fps_txt = "{:.2f}".format(clock.get_fps())
-    draw_text(str(fps_txt), 18, WIDTH-50, 10)
+    # uncomment to show current FPS
+    # fps_txt = "{:.2f}".format(clock.get_fps())
+    # draw_text(str(fps_txt), 18, WIDTH-50, 10)
     bodies.update()
     bodies.draw(screen)
     pygame.display.flip()

@@ -1,5 +1,7 @@
-# Template for new Pygame project
-# KidsCanCode 2014
+# Pokemon example
+# by KidsCanCode 2014
+# An example of using Tiled editor to create tilemaps and load in Python
+# For educational purposes only
 import pygame
 import sys
 import tmx

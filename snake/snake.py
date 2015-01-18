@@ -1,6 +1,7 @@
 # Snake
 # by KidsCanCode 2014
 # A Pygame snake clone
+# For educational purposes only
 # Modified from http://inventwithpython.com/
 import pygame
 import sys
