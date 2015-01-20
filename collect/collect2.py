@@ -1,0 +1,343 @@
+# Collect the Blocks
+# by KidsCanCode 2015
+# Run around and collect the blocks
+# For educational purposes only
+
+# TODO
+# time bonus
+# powerups
+# more mob features (different types, etc)
+# Level designs (walls, gravity (black holes?))
+
+import pygame
+import sys
+import random
+import math
+
+# define some colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+BGCOLOR = BLACK
+
+WIDTH = 800
+HEIGHT = 640
+FPS = 60
+TITLE = "Collect the Stuff!"
+
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Collect the Blocks")
+clock = pygame.time.Clock()
+
+
+def draw_text(text, size, x, y):
+    # utility function to draw text on screen
+    font_name = pygame.font.match_font('arial')
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.topleft = (x, y)
+    screen.blit(text_surface, text_rect)
+
+
+class vec2:
+    # a class to do vector math
+    # includes operator overloading
+    # TODO: more operations
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __mul__(self, other):
+        # multiplying a vector by a scalar
+        x = self.x * other
+        y = self.y * other
+        return vec2(x, y)
+
+    def __add__(self, other):
+        # adding two vectors
+        x = self.x + other.x
+        y = self.y + other.y
+        return vec2(x, y)
+
+    def __str__(self):
+        # the __str__ function defines how an object appears with print()
+        return "({:.2f},{:.2f})".format(self.x, self.y)
+
+    def mag(self):
+        # return the magnitude (length) of the vector
+        return math.sqrt(self.x*self.x + self.y*self.y)
+
+
+class Player(pygame.sprite.Sprite):
+    # player sprite
+    # realistic movement using equations of motion (pos, vel, accel)
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.pos = vec2(WIDTH/2, HEIGHT/2)
+        self.vel = vec2(0, 0)
+        self.accel = vec2(0, 0)
+        self.image = pygame.Surface((24, 24))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.rect.x = int(self.pos.x)
+        self.rect.y = int(self.pos.y)
+
+    def update(self):
+        self.accel = vec2(0, 0)
+        # keep accelerating as long as that dir key is down
+        keystate = pygame.key.get_pressed()
+        a = 1.5
+        if FPS == 60:
+            a = 0.7
+        if keystate[pygame.K_LEFT]:
+            self.accel.x = -a
+        if keystate[pygame.K_RIGHT]:
+            self.accel.x = a
+        if keystate[pygame.K_UP]:
+            self.accel.y = -a
+        if keystate[pygame.K_DOWN]:
+            self.accel.y = a
+        # fix diagonals so they are same speed as orthoganal directions
+        if self.accel.x != 0 and self.accel.y != 0:
+            self.accel *= 0.7071
+
+        # friction (based on vel)
+        self.accel += self.vel * -0.12
+        # grav example (not going to use in this game, but fun to see)
+        # self.accel.y += .7
+
+        # equations of motion
+        # for simplicity, using t=1 (change per timestep)
+        # p' = 0.5 at**2 + vt + p
+        # v' = at + v
+        self.pos += self.accel * 0.5 + self.vel
+        self.vel += self.accel
+
+        # move the sprite
+        self.rect.x = int(self.pos.x)
+        self.check_collisions('x')
+        self.rect.y = int(self.pos.y)
+        self.check_collisions('y')
+
+    def check_collisions(self, dir):
+        if dir == 'x':
+            hit_list = pygame.sprite.spritecollide(self, g.walls, False)
+            if hit_list:
+                if self.vel.x > 0:
+                    self.vel.x = 0
+                    self.pos.x = hit_list[0].rect.left - self.rect.width
+                    self.rect.right = hit_list[0].rect.left
+                elif self.vel.x < 0:
+                    self.vel.x = 0
+                    self.pos.x = hit_list[0].rect.right
+                    self.rect.left = hit_list[0].rect.right
+        elif dir == 'y':
+            hit_list = pygame.sprite.spritecollide(self, g.walls, False)
+            if hit_list:
+                if self.vel.y > 0:
+                    self.vel.y = 0
+                    self.pos.y = hit_list[0].rect.top - self.rect.height
+                    self.rect.bottom = hit_list[0].rect.top
+                elif self.vel.y < 0:
+                    self.vel.y = 0
+                    self.pos.y = hit_list[0].rect.bottom
+                    self.rect.top = hit_list[0].rect.bottom
+                self.speed_y = 0
+
+
+class Box(pygame.sprite.Sprite):
+    # simple static box
+    # TODO: moving boxes?
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((24, 24))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Mob(pygame.sprite.Sprite):
+    # bad guy!
+    # will chase the player
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((24, 24))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.pos = vec2(x, y)
+        self.vel = vec2(0, 0)
+        self.accel = vec2(0, 0)
+        # varied speeds (actually acceleration, but determines max speed)
+        # TODO: different types of enemy based on speed?
+        self.speed = random.choice([0.1, 0.2, 0.3, 0.4])
+        self.rect.x = int(self.pos.x)
+        self.rect.y = int(self.pos.y)
+
+    def update(self):
+        # friction (based on vel)
+        self.accel += self.vel * -0.09
+
+        # equations of motion - see Player class
+        self.pos += self.accel * 0.5 + self.vel
+        self.vel += self.accel
+
+        # move the sprite
+        self.rect.x = int(self.pos.x)
+        self.rect.y = int(self.pos.y)
+        # don't move offscreen
+        if self.rect.left < 0:
+            self.pos.x = 0
+            self.vel.x = 0
+        if self.rect.right > WIDTH:
+            self.pos.x = WIDTH - self.rect.width
+            self.vel.x = 0
+        if self.rect.top < 0:
+            self.pos.y = 0
+            self.vel.y = 0
+        if self.rect.bottom > HEIGHT:
+            self.pos.y = HEIGHT - self.rect.height
+            self.vel.y = 0
+
+
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Game:
+    def __init__(self):
+        pygame.init()
+        pygame.mixer.init()
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        pygame.display.set_caption(TITLE)
+        self.clock = pygame.time.Clock()
+        self.load_data()
+        self.running = True
+        self.all_sprites = pygame.sprite.Group()
+        self.walls = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
+        self.boxes = pygame.sprite.Group()
+        self.player = Player()
+        self.all_sprites.add(self.player)
+        self.level = 2
+        self.score = 0
+        self.create_walls()
+        self.create_enemies()
+        self.create_boxes()
+
+    def load_data(self):
+        # load image and sound data
+        wall_images = ["img/brick_blue32.png",
+                       "img/brick_green32.png",
+                       "img/brick_red32.png"]
+        self.wall_images = []
+        for img in wall_images:
+            self.wall_images.append(pygame.image.load(img).convert())
+
+        # load level data from txt file
+        self.level_data = [[]]
+        with open("levels.txt", 'rt') as f:
+            lines = f.read().splitlines()
+        for line in lines:
+            if line[0] == ":":
+                level = int(line[1])
+                self.level_data.append([])
+            else:
+                self.level_data[level].append(line)
+
+    def create_walls(self):
+        # load level based on self.level
+        img = random.choice(self.wall_images)
+        for row, tiles in enumerate(self.level_data[self.level]):
+            for col, tile in enumerate(tiles):
+                if tile == '1':
+                    wall = Wall(img, col*16, row*32)
+                    self.all_sprites.add(wall)
+                    self.walls.add(wall)
+
+    def create_enemies(self):
+        # create number/type of enemies based on self.level
+        pass
+
+    def create_boxes(self):
+        # create number/type of boxes based on self.level
+        pass
+
+    def run(self):
+        while self.running:
+            self.clock.tick(FPS)
+            self.events()  # check for events
+            self.update()  # update the game state
+            self.draw()    # draw the next frame
+
+    def quit(self):
+        pygame.quit()
+        sys.exit()
+
+    def events(self):
+        # handle all events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.quit()
+
+    def update(self):
+        # collide w/boxes and remove them
+        hit_list = pygame.sprite.spritecollide(self.player, self.boxes, True)
+        self.score += len(hit_list)
+
+        # if we level up
+        # if len(self.boxes) == 0:
+        #     self.level += 1
+        #     self.create_walls()
+        #     self.create_boxes()
+        #     self.create_enemies()
+        #     self.player.vel = vec2(0, 0)
+        #     self.player.pos = vec2(WIDTH/2, HEIGHT/2)
+
+        # move mobs toward player
+        for enemy in self.enemies:
+            enemy.accel = vec2(self.player.pos.x - enemy.pos.x,
+                               self.player.pos.y - enemy.pos.y)
+            enemy.accel = enemy.accel * (enemy.speed / enemy.accel.mag())
+            if pygame.sprite.collide_rect(enemy, self.player):
+                self.running = False
+
+    def draw(self):
+        self.screen.fill(BGCOLOR)
+        # uncommment to show FPS (useful for troubleshooting)
+        fps_txt = "{:.2f}".format(self.clock.get_fps())
+        draw_text(str(fps_txt), 18, WIDTH-50, 10)
+        self.all_sprites.update()
+        self.enemies.update()
+        self.all_sprites.draw(self.screen)
+        self.enemies.draw(self.screen)
+        score_txt = "Score: {:0}".format(self.score)
+        draw_text(score_txt, 18, 10, 10)
+        lvl_txt = "Level: {:0}".format(self.level)
+        draw_text(lvl_txt, 18, 10, 30)
+        pygame.display.flip()
+
+    def go_screen(self):
+        pass
+
+    def start_screen(self):
+        pass
+
+
+g = Game()
+g.start_screen()
+while True:
+    g.run()
+    g.go_screen()

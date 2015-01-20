@@ -7,6 +7,7 @@
 # time bonus
 # powerups
 # more mob features (different types, etc)
+# Level designs (walls, gravity (black holes?))
 
 import pygame
 import sys
@@ -22,7 +23,7 @@ YELLOW = (255, 255, 0)
 
 WIDTH = 800
 HEIGHT = 600
-FPS = 30
+FPS = 60
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -87,14 +88,17 @@ class Player(pygame.sprite.Sprite):
         self.accel = vec2(0, 0)
         # keep accelerating as long as that dir key is down
         keystate = pygame.key.get_pressed()
+        a = 1.5
+        if FPS == 60:
+            a = 0.7
         if keystate[pygame.K_LEFT]:
-            self.accel.x = -1.5
+            self.accel.x = -a
         if keystate[pygame.K_RIGHT]:
-            self.accel.x = 1.5
+            self.accel.x = a
         if keystate[pygame.K_UP]:
-            self.accel.y = -1.5
+            self.accel.y = -a
         if keystate[pygame.K_DOWN]:
-            self.accel.y = 1.5
+            self.accel.y = a
         # fix diagonals so they are same speed as orthoganal directions
         if self.accel.x != 0 and self.accel.y != 0:
             self.accel *= 0.7071
@@ -160,7 +164,7 @@ class Mob(pygame.sprite.Sprite):
 
     def update(self):
         # friction (based on vel)
-        self.accel += self.vel * -0.08
+        self.accel += self.vel * -0.09
 
         # equations of motion - see Player class
         self.pos += self.accel * 0.5 + self.vel
@@ -245,8 +249,8 @@ while running:
 
     screen.fill(BLACK)
     # uncommment to show FPS (useful for troubleshooting)
-    # fps_txt = "{:.2f}".format(clock.get_fps())
-    # draw_text(str(fps_txt), 18, WIDTH-50, 10)
+    fps_txt = "{:.2f}".format(clock.get_fps())
+    draw_text(str(fps_txt), 18, WIDTH-50, 10)
     all_sprites.update()
     mobs.update()
     all_sprites.draw(screen)
