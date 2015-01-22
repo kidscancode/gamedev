@@ -27,8 +27,8 @@ BGCOLOR = LIGHTBLUE
 
 # basic constants for your game options
 # higher gravity is harder!
-WIDTH = 600
-HEIGHT = 800
+WIDTH = 480
+HEIGHT = 640
 FPS = 30
 GRAVITY = 1
 TITLE = "Jump!"
