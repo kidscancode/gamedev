@@ -2,10 +2,6 @@
 # by KidsCanCode 2014
 # A generic space shooter - prototype (no art)
 # For educational purposes only
-# Art & sounds from http://opengameart.org
-# Meteors - http://opengameart.org/content/asteroids
-# Rocket - http://opengameart.org/content/rocket
-# Lasers - Modified from http://opengameart.org/content/lasers-and-beams
 import pygame
 import sys
 import random
@@ -205,6 +201,7 @@ while True:
                 # add any other key events here
 
         ##### Game logic goes here  #########
+        active_sprite_list.update()
         # filter meteors
         for meteor in meteor_sprite_list:
             if meteor.offscreen():
@@ -234,7 +231,7 @@ while True:
 
         ##### Draw/update screen ########
         screen.fill(BGCOLOR)
-        active_sprite_list.update()
+
         active_sprite_list.draw(screen)
         text = 'Score: %s' % player.score
         draw_text(text, 18, 45, 10)

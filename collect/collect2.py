@@ -27,21 +27,6 @@ HEIGHT = 640
 FPS = 60
 TITLE = "Collect the Stuff!"
 
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Collect the Blocks")
-clock = pygame.time.Clock()
-
-
-def draw_text(text, size, x, y):
-    # utility function to draw text on screen
-    font_name = pygame.font.match_font('arial')
-    font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, WHITE)
-    text_rect = text_surface.get_rect()
-    text_rect.topleft = (x, y)
-    screen.blit(text_surface, text_rect)
-
 
 class vec2:
     # a class to do vector math
@@ -188,20 +173,34 @@ class Mob(pygame.sprite.Sprite):
 
         # move the sprite
         self.rect.x = int(self.pos.x)
+        self.check_collisions('x')
         self.rect.y = int(self.pos.y)
-        # don't move offscreen
-        if self.rect.left < 0:
-            self.pos.x = 0
-            self.vel.x = 0
-        if self.rect.right > WIDTH:
-            self.pos.x = WIDTH - self.rect.width
-            self.vel.x = 0
-        if self.rect.top < 0:
-            self.pos.y = 0
-            self.vel.y = 0
-        if self.rect.bottom > HEIGHT:
-            self.pos.y = HEIGHT - self.rect.height
-            self.vel.y = 0
+        self.check_collisions('y')
+
+    def check_collisions(self, dir):
+        if dir == 'x':
+            hit_list = pygame.sprite.spritecollide(self, g.walls, False)
+            if hit_list:
+                if self.vel.x > 0:
+                    self.vel.x = 0
+                    self.pos.x = hit_list[0].rect.left - self.rect.width
+                    self.rect.right = hit_list[0].rect.left
+                elif self.vel.x < 0:
+                    self.vel.x = 0
+                    self.pos.x = hit_list[0].rect.right
+                    self.rect.left = hit_list[0].rect.right
+        elif dir == 'y':
+            hit_list = pygame.sprite.spritecollide(self, g.walls, False)
+            if hit_list:
+                if self.vel.y > 0:
+                    self.vel.y = 0
+                    self.pos.y = hit_list[0].rect.top - self.rect.height
+                    self.rect.bottom = hit_list[0].rect.top
+                elif self.vel.y < 0:
+                    self.vel.y = 0
+                    self.pos.y = hit_list[0].rect.bottom
+                    self.rect.top = hit_list[0].rect.bottom
+                self.speed_y = 0
 
 
 class Wall(pygame.sprite.Sprite):
@@ -221,6 +220,9 @@ class Game:
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.load_data()
+
+    def new(self):
+        # initialize for a new game
         self.running = True
         self.all_sprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
@@ -228,7 +230,7 @@ class Game:
         self.boxes = pygame.sprite.Group()
         self.player = Player()
         self.all_sprites.add(self.player)
-        self.level = 2
+        self.level = 1
         self.score = 0
         self.create_walls()
         self.create_enemies()
@@ -256,6 +258,11 @@ class Game:
 
     def create_walls(self):
         # load level based on self.level
+        # 1 = wall
+        # empty any old walls before creating new ones
+        for wall in self.walls:
+            self.all_sprites.remove(wall)
+        self.walls.empty()
         img = random.choice(self.wall_images)
         for row, tiles in enumerate(self.level_data[self.level]):
             for col, tile in enumerate(tiles):
@@ -266,11 +273,24 @@ class Game:
 
     def create_enemies(self):
         # create number/type of enemies based on self.level
-        pass
+        self.enemies.empty()
+        for i in range(self.level // 2):
+            enemy = Mob(random.choice([35, WIDTH-60]),
+                        random.choice([35, HEIGHT-60]))
+            self.enemies.add(enemy)
 
     def create_boxes(self):
         # create number/type of boxes based on self.level
-        pass
+        self.boxes.empty()
+        for i in range(self.level * 5):
+            box = Box(random.randrange(35, WIDTH-59),
+                      random.randrange(35, HEIGHT-59))
+            # keep trying locs until we find an open one
+            while pygame.sprite.spritecollide(box, self.walls, False):
+                box.rect.topleft = (random.randrange(35, WIDTH-59),
+                                    random.randrange(35, HEIGHT-59))
+            self.boxes.add(box)
+            self.all_sprites.add(box)
 
     def run(self):
         while self.running:
@@ -293,18 +313,18 @@ class Game:
                     self.quit()
 
     def update(self):
-        # collide w/boxes and remove them
+        # collide player w/boxes and remove them
         hit_list = pygame.sprite.spritecollide(self.player, self.boxes, True)
         self.score += len(hit_list)
 
         # if we level up
-        # if len(self.boxes) == 0:
-        #     self.level += 1
-        #     self.create_walls()
-        #     self.create_boxes()
-        #     self.create_enemies()
-        #     self.player.vel = vec2(0, 0)
-        #     self.player.pos = vec2(WIDTH/2, HEIGHT/2)
+        if len(self.boxes) == 0:
+            self.level += 1
+            self.create_walls()
+            self.create_boxes()
+            self.create_enemies()
+            self.player.vel = vec2(0, 0)
+            self.player.pos = vec2(WIDTH/2, HEIGHT/2)
 
         # move mobs toward player
         for enemy in self.enemies:
@@ -316,18 +336,27 @@ class Game:
 
     def draw(self):
         self.screen.fill(BGCOLOR)
-        # uncommment to show FPS (useful for troubleshooting)
-        fps_txt = "{:.2f}".format(self.clock.get_fps())
-        draw_text(str(fps_txt), 18, WIDTH-50, 10)
         self.all_sprites.update()
         self.enemies.update()
         self.all_sprites.draw(self.screen)
         self.enemies.draw(self.screen)
         score_txt = "Score: {:0}".format(self.score)
-        draw_text(score_txt, 18, 10, 10)
+        self.draw_text(score_txt, 18, 10, 10)
         lvl_txt = "Level: {:0}".format(self.level)
-        draw_text(lvl_txt, 18, 10, 30)
+        self.draw_text(lvl_txt, 18, 10, 30)
+        # uncommment to show FPS (useful for troubleshooting)
+        fps_txt = "{:.2f}".format(self.clock.get_fps())
+        self.draw_text(str(fps_txt), 18, WIDTH-50, 10)
         pygame.display.flip()
+
+    def draw_text(self, text, size, x, y):
+        # utility function to draw text on screen
+        font_name = pygame.font.match_font('arial')
+        font = pygame.font.Font(font_name, size)
+        text_surface = font.render(text, True, WHITE)
+        text_rect = text_surface.get_rect()
+        text_rect.topleft = (x, y)
+        self.screen.blit(text_surface, text_rect)
 
     def go_screen(self):
         pass
@@ -339,5 +368,6 @@ class Game:
 g = Game()
 g.start_screen()
 while True:
+    g.new()
     g.run()
     g.go_screen()

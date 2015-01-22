@@ -37,6 +37,7 @@ class Player(pygame.sprite.Sprite):
         self.speed_y = 0
         self.image = pygame.Surface((self.width, self.height))
         self.image.fill(RED)
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 50
