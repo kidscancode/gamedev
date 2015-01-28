@@ -258,18 +258,20 @@ class Game:
 
     def create_walls(self):
         # load level based on self.level
-        # 1 = wall
         # empty any old walls before creating new ones
-        for wall in self.walls:
-            self.all_sprites.remove(wall)
-        self.walls.empty()
-        img = random.choice(self.wall_images)
-        for row, tiles in enumerate(self.level_data[self.level]):
-            for col, tile in enumerate(tiles):
-                if tile == '1':
-                    wall = Wall(img, col*16, row*32)
-                    self.all_sprites.add(wall)
-                    self.walls.add(wall)
+        if self.level == len(self.level_data):
+            self.running = False
+        else:
+            for wall in self.walls:
+                self.all_sprites.remove(wall)
+            self.walls.empty()
+            img = random.choice(self.wall_images)
+            for row, tiles in enumerate(self.level_data[self.level]):
+                for col, tile in enumerate(tiles):
+                    if tile == '1':
+                        wall = Wall(img, col*16, row*32)
+                        self.all_sprites.add(wall)
+                        self.walls.add(wall)
 
     def create_enemies(self):
         # create number/type of enemies based on self.level
@@ -341,9 +343,9 @@ class Game:
         self.all_sprites.draw(self.screen)
         self.enemies.draw(self.screen)
         score_txt = "Score: {:0}".format(self.score)
-        self.draw_text(score_txt, 18, 10, 10)
+        self.draw_text(score_txt, 18, 33, 33)
         lvl_txt = "Level: {:0}".format(self.level)
-        self.draw_text(lvl_txt, 18, 10, 30)
+        self.draw_text(lvl_txt, 18, 33, 53)
         # uncommment to show FPS (useful for troubleshooting)
         fps_txt = "{:.2f}".format(self.clock.get_fps())
         self.draw_text(str(fps_txt), 18, WIDTH-50, 10)
@@ -366,8 +368,8 @@ class Game:
 
 
 g = Game()
-g.start_screen()
 while True:
+    g.start_screen()
     g.new()
     g.run()
     g.go_screen()

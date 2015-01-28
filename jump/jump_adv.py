@@ -4,11 +4,13 @@
 # For educational purposes only
 
 # TODO
-# Sound / Music
-# Enemies - rocks, shooters, ?
-# Health - hearts (3)
+# Sounds:
+#   * Hit enemy
+#   * Pow
+#   * Heart
+#   * Walk (step)
+# More enemies - shooters, ?
 # Background image / clouds
-# Powerups/boosts
 # Moving platforms
 # Particle effects
 
@@ -25,8 +27,6 @@ BLUE = (0, 0, 255)
 LIGHTBLUE = (0, 155, 155)
 BGCOLOR = LIGHTBLUE
 
-# basic constants for your game options
-# higher gravity is harder!
 WIDTH = 480
 HEIGHT = 640
 FPS = 30
@@ -69,8 +69,6 @@ class Player(pygame.sprite.Sprite):
         self.load_images()
         self.image = self.frames_standing_l[0]
         self.mask = pygame.mask.from_surface(self.image)
-        # self.image = pygame.Surface((24, 36))
-        # self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 48
@@ -234,6 +232,7 @@ class Player(pygame.sprite.Sprite):
         hit_list = pygame.sprite.spritecollide(self, self.game.platforms, False)
         self.rect.y -= 2
         if hit_list and not self.jumping:
+            self.game.player_jump_snd.play()
             self.jumping = True
             self.walking = False
             self.speed_y -= self.jump_speed
@@ -247,11 +246,13 @@ class PowerUp(pygame.sprite.Sprite):
         self.frames = []
         self.current_frame = 0
         self.last_update = 0
+        self.last_shimmer = 0
+        self.shimmer = False
         if kind == 'heart':
             for x in range(450, 850, 50):
                 image = self.game.sprite_sheet.get_image(x, 45, 50, 45)
                 self.frames.append(image)
-        elif kind == 'pow':
+        elif kind == 'boost':
             for x in range(400, 900, 50):
                 image = self.game.sprite_sheet.get_image(x, 100, 50, 50)
                 self.frames.append(image)
@@ -263,10 +264,20 @@ class PowerUp(pygame.sprite.Sprite):
 
     def update(self):
         now = pygame.time.get_ticks()
-        if now - self.last_update > 200:
-            self.last_update = now
-            self.current_frame = (self.current_frame + 1) % len(self.frames)
-            self.image = self.frames[self.current_frame]
+        if now - self.last_shimmer > 10000:
+            self.shimmer = not self.shimmer
+            self.last_shimmer = now
+            self.image = self.frames[0]
+            self.current_frame = 0
+        if self.shimmer:
+            if now - self.last_update > 200:
+                self.last_update = now
+                self.current_frame += 1
+                if self.current_frame == len(self.frames) - 1:
+                    self.shimmer = False
+                    self.image = self.frames[0]
+                else:
+                    self.image = self.frames[self.current_frame]
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -316,8 +327,6 @@ class Platform(pygame.sprite.Sprite):
         # platform init - set location and size (width)
         pygame.sprite.Sprite.__init__(self)
         self.game = game
-        # self.image = pygame.Surface((24, 36))
-        # self.image.fill(GREEN)
         self.image = game.sprite_sheet.get_image(0, 384, size*48, 48)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -341,6 +350,10 @@ class Game:
 
     def load_data(self):
         self.sprite_sheet = SpriteSheet("img/jump_sprites_sm.png")
+        self.player_jump_snd = pygame.mixer.Sound('snd/jump_10.wav')
+        self.player_jump_snd.set_volume(0.5)
+        pygame.mixer.music.load("snd/Casual game track.ogg")
+        pygame.mixer.music.set_volume(0.5)
 
     def new(self):
         # initialize for a new game
@@ -353,6 +366,7 @@ class Game:
         self.all_sprites.add(self.player, layer=1)
         self.score = 0
         self.create_start_layout()
+        pygame.mixer.music.play(loops=-1)
 
     def run(self):
         while self.running:
@@ -360,6 +374,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
+        pygame.mixer.music.stop()
 
     def quit(self):
         pygame.quit()
@@ -373,7 +388,7 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.quit()
-                if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
+                if event.key in [pygame.K_UP, pygame.K_SPACE]:
                     self.player.jump()
 
     def draw(self):
@@ -399,23 +414,22 @@ class Game:
 
     def create_start_layout(self):
         # create the starting platforms
-        platform_list = [[0, HEIGHT-48, 13],
-                         [25, 600, 2],
-                         [200, 475, 3],
-                         [450, 375, 3],
-                         [75, 250, 4],
-                         [475, 150, 2],
-                         [270, 40, 3]]
+        platform_list = [[0, HEIGHT-48, 10],
+                         [25, 448, 2],
+                         [220, 305, 3],
+                         [25, 120, 4],
+                         [320, 10, 3]]
         for loc in platform_list:
             plat = Platform(self, loc[0], loc[1], loc[2])
             self.all_sprites.add(plat)
             self.platforms.add(plat)
         # one enemy
-        enemy = Enemy(self, 171, 250)
+        enemy = Enemy(self, 111, 120)
         self.all_sprites.add(enemy)
         self.enemies.add(enemy)
         # a powerup
-        pow = PowerUp(self, 'pow', 10, 10)
+        pow = PowerUp(self, 'boost', 10, 10)
+        self.powerups.add(pow)
         self.all_sprites.add(pow)
 
     def update(self):
@@ -425,15 +439,17 @@ class Game:
                 sprite.rect.y += max(abs(self.player.speed_y), 8)
 
         # only collide with the platforms if falling down
-        if self.player.speed_y >= 0:
+        if self.player.speed_y > 0:
             hit_list = pygame.sprite.spritecollide(self.player,
-                                                   self.platforms, False,
-                                                   pygame.sprite.collide_mask)
-            if len(hit_list) > 0:
-                if self.player.rect.bottom < hit_list[0].rect.bottom:
-                    self.player.speed_y = 0
-                    self.player.jumping = False
-                    self.player.rect.bottom = hit_list[0].rect.top
+                                                   self.platforms, False)
+                                                   # pygame.sprite.collide_mask)
+            if hit_list:
+                plat = self.find_lowest(hit_list)
+                if self.player.rect.bottom < plat.rect.bottom:
+                    if self.player.rect.right > plat.rect.left+24 and self.player.rect.left < plat.rect.right-24:
+                        self.player.speed_y = 0
+                        self.player.jumping = False
+                        self.player.rect.bottom = plat.rect.top
 
         # hit enemies
         hit_list = pygame.sprite.spritecollide(self.player, self.enemies,
@@ -442,22 +458,41 @@ class Game:
             # bounce in the air and change briefly to hit image
             self.player.hit_enemy()
 
+        # hit powerups
+        hit_list = pygame.sprite.spritecollide(self.player, self.powerups,
+                                               True, pygame.sprite.collide_mask)
+        if hit_list:
+            if hit_list[0].kind == 'heart':
+                # self.heart_snd.play()
+                self.player.life += 1
+                if self.player.life > 3:
+                    self.player.life = 3
+            elif hit_list[0].kind == 'boost':
+                # self.boost_snd.play()
+                self.player.speed_y -= 75
+
         # delete platforms and enemies that fall off the screen
         # and create new ones to replace
         for enemy in self.enemies:
             if enemy.rect.top > HEIGHT + 5:
-                self.enemies.remove(enemy)
-                self.all_sprites.remove(enemy)
+                enemy.kill()
         for plat in self.platforms:
             if plat.offscreen():
-                self.all_sprites.remove(plat)
-                self.platforms.remove(plat)
+                plat.kill()
                 # new platform is created off the top of the screen
+                delta = 180 + random.randrange(10, 30)
                 newplat = Platform(self, random.randrange(-10, WIDTH-40),
-                                   -20, random.randrange(2, 5))
+                                   self.player.rect.y-delta,
+                                   random.randrange(2, 5))
                 self.all_sprites.add(newplat)
                 self.platforms.add(newplat)
                 self.score += 10
+                if random.random() > 0.9:
+                    kind = random.choice(['boost', 'heart'])
+                    pow = PowerUp(self, kind, random.randrange(5, WIDTH-55),
+                                  -50)
+                    self.powerups.add(pow)
+                    self.all_sprites.add(pow)
 
         # die
         if self.player.life == 0:
@@ -466,10 +501,19 @@ class Game:
             for sprite in self.all_sprites:
                 sprite.rect.y -= max(self.player.speed_y, 10)
                 if sprite.rect.bottom < -100:
-                    self.all_sprites.remove(sprite)
-                    self.platforms.remove(sprite)
+                    sprite.kill()
         if len(self.platforms) == 0:
             self.running = False
+
+    def find_lowest(self, sprites):
+        # find the lowest (highest y) sprite in a list of sprites
+        lowest = None
+        y = 0
+        for sprite in sprites:
+            if sprite.rect.y > y:
+                y = sprite.rect.y
+                lowest = sprite
+        return lowest
 
     def start_screen(self):
         pass
@@ -478,11 +522,16 @@ class Game:
         pass
 
     def draw_hearts(self):
-        pass
+        img = self.sprite_sheet.get_image(450, 45, 50, 45)
+        rect = img.get_rect()
+        for i in range(self.player.life):
+            rect.x = i * 50
+            rect.y = 10
+            self.screen.blit(img, rect)
 
 g = Game()
-g.start_screen()
 while True:
+    g.start_screen()
     g.new()
     g.run()
     g.go_screen()
