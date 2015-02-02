@@ -1,6 +1,7 @@
 # Orbital simulation, using real physical values
 # by KidsCanCode 2015
 # For educational purposes only
+# TODO: also do a tkinter version of this
 import pygame
 import sys
 import math
@@ -21,7 +22,7 @@ FPS = 60
 # Physical constants
 G = 6.67428e-11  # Newton's Grav. Constant
 AU = (149.6e6 * 1000)  # in meters
-SCALE = WIDTH / (4 * AU)  # Pixels per AU.  1 AU is 1/4 screen width
+SCALE = WIDTH / (4 * AU)  # Pixels per m.  1 AU is 1/4 screen width
 OFFSETX = WIDTH / 2  # places origin at center of screen
 OFFSETY = HEIGHT / 2
 TIMESTEP = 24 * 3600  # one day, in sec
@@ -42,41 +43,6 @@ def draw_text(text, size, x, y):
     screen.blit(text_surface, text_rect)
 
 
-class vec2:
-    # a class to do vector math
-    # includes operator overloading
-    # TODO: more operations
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __mul__(self, other):
-        # multiplying a vector by a scalar
-        x = self.x * other
-        y = self.y * other
-        return vec2(x, y)
-
-    def __add__(self, other):
-        # adding two vectors
-        x = self.x + other.x
-        y = self.y + other.y
-        return vec2(x, y)
-
-    def __sub__(self, other):
-        # subtract one vector from another
-        x = self.x - other.x
-        y = self.y - other.y
-        return vec2(x, y)
-
-    def __str__(self):
-        # the __str__ function defines how an object appears with print()
-        return "({:.4f},{:.4f})".format(self.x, self.y)
-
-    def mag(self):
-        # return the magnitude (length) of the vector
-        return math.sqrt(self.x*self.x + self.y*self.y)
-
-
 class Body(pygame.sprite.Sprite):
     # a generic astronomical body
     # requires radius (in pixels) and color for drawing
@@ -84,15 +50,12 @@ class Body(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((rad*2, rad*2))
         pygame.draw.circle(self.image, col, (rad, rad), rad)
-        self.mass = 1
         self.rad = rad
         self.col = col
         self.rect = self.image.get_rect()
-        self.pos = vec2(0, 0)
-        self.vel = vec2(0, 0)
-        self.accel = vec2(0, 0)
-        self.rect.x = self.pos.x * SCALE + OFFSETX - rad
-        self.rect.y = self.pos.y * SCALE + OFFSETY - rad
+        self.pos = pygame.math.Vector2(0, 0)
+        self.vel = pygame.math.Vector2(0, 0)
+        self.accel = pygame.math.Vector2(0, 0)
 
     def update(self):
         # move the sprite
@@ -112,7 +75,7 @@ earth = Body(8, BLUE)
 earth.name = "Earth"
 earth.mass = 5.9742e24  # kg
 earth.pos.x = -1 * AU
-earth.vel.y = 29.783e3  # km/s
+earth.vel.y = 29.783e3  # m/s
 bodies.add(earth)
 
 venus = Body(7, YELLOW)
@@ -156,7 +119,7 @@ while running:
     #     print(s)
     # print()
     # use this if you want to slow the animation down
-    # pygame.time.wait(1000)
+    # pygame.time.wait(100)
     step += 1
     clock.tick(FPS)
     # handle all events
@@ -173,17 +136,11 @@ while running:
     for body in bodies:
         if body is sun:
             continue
-        body.accel = vec2(0, 0)
-        d = (sun.pos - body.pos).mag()
-        dir = (sun.pos - body.pos) * (1/d)
-        a = G * sun.mass / (d**2)
-        body.accel += dir * a
-
-    # move each body
-    for body in bodies:
-        if body is sun:
-            continue
-        # equations of motion
+        dist = (sun.pos - body.pos).length()
+        dir = (sun.pos - body.pos).normalize()
+        a = G * sun.mass / (dist**2)
+        body.accel = dir * a
+        # move each body
         body.vel += body.accel * TIMESTEP
         body.pos += body.vel * TIMESTEP
 
