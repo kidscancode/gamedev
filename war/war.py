@@ -15,7 +15,6 @@ YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
 BGCOLOR = BLACK
 
-# basic constants for your game options
 TITLE = "War!"
 WIDTH = 1080
 HEIGHT = 720
