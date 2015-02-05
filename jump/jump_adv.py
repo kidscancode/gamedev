@@ -37,7 +37,7 @@ TITLE = "Jump!"
 class SpriteSheet:
     """Utility class to load and parse spritesheets"""
     def __init__(self, filename):
-        self.sprite_sheet = pygame.image.load(filename).convert()
+        self.sprite_sheet = pygame.image.load(filename).convert_alpha()
 
     def get_image(self, x, y, width, height):
         # grab an image out of a larger spritesheet

@@ -29,13 +29,9 @@ class Meteor(pygame.sprite.Sprite):
     def update(self):
         # move the sprite
         self.rect.y += self.speed
-
-    def offscreen(self):
-        # returns True if the meteor is offscreen
         if self.rect.y > HEIGHT + 10:
-            return True
-        else:
-            return False
+            self.rect.y = random.randrange(-50, 30)
+            self.rect.x = random.randrange(WIDTH)
 
 class Player(pygame.sprite.Sprite):
     speed = 12
@@ -79,6 +75,7 @@ class Player(pygame.sprite.Sprite):
         bullet_sprite_list.add(bullet)
         self.shoot_sound.play()
 
+
 class Bullet(pygame.sprite.Sprite):
     speed = -15
     def __init__(self, x, y, level):
@@ -94,6 +91,7 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
+
 def draw_text(text, size, x, y):
     # utility function to draw text on screen
     font_name = pygame.font.match_font('arial')
@@ -102,6 +100,7 @@ def draw_text(text, size, x, y):
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
     screen.blit(text_surface, text_rect)
+
 
 def show_start_screen():
     # Display the starting screen
@@ -117,6 +116,7 @@ def show_start_screen():
         if wait_for_key():
             pygame.event.get()
             return
+
 
 def show_go_screen(score):
     # display the Game Over screen
@@ -200,16 +200,8 @@ while True:
                     player.stop()
                 # add any other key events here
 
-        ##### Game logic goes here  #########
+        #sefl Game logic goes here  #########
         active_sprite_list.update()
-        # filter meteors
-        for meteor in meteor_sprite_list:
-            if meteor.offscreen():
-                active_sprite_list.remove(meteor)
-                meteor_sprite_list.remove(meteor)
-                newmeteor = Meteor()
-                active_sprite_list.add(newmeteor)
-                meteor_sprite_list.add(newmeteor)
         # check for collisions
         # first, ship with meteors
         hit = pygame.sprite.spritecollideany(player, meteor_sprite_list)
@@ -229,7 +221,7 @@ while True:
             active_sprite_list.add(newmeteor)
             meteor_sprite_list.add(newmeteor)
 
-        ##### Draw/update screen ########
+        # Draw/update screen ########
         screen.fill(BGCOLOR)
 
         active_sprite_list.draw(screen)

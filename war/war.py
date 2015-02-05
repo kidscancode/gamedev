@@ -13,6 +13,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
+LIGHTBLUE = (0, 155, 155)
 BGCOLOR = BLACK
 
 # basic constants for your game options
@@ -29,12 +30,12 @@ class Ship(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("img/playerShip1_red.png").convert()
+        self.image = pygame.image.load("img/playerShip1_red.png").convert_alpha()
         self.image = pygame.transform.smoothscale(self.image, (50, 38))
         self.image0 = self.image
         self.rect = self.image.get_rect()
         self.pos = pygame.math.Vector2(0, 250)
-        self.vel = pygame.math.Vector2(3, 0)
+        self.vel = pygame.math.Vector2(6, 0)
         self.acc = pygame.math.Vector2(0, 0)
         self.thrust = pygame.math.Vector2(0, 0)
         self.rot = 0
@@ -52,7 +53,7 @@ class Ship(pygame.sprite.Sprite):
             self.rot -= self.rot_speed
         if keystate[pygame.K_UP]:
             self.thrust = pygame.math.Vector2(0, -self.thrust_power)
-        # adjust thrust vector to facing dir
+        # rotate thrust vector to facing dir
         self.thrust = self.thrust.rotate(-self.rot)
 
     def update(self):
@@ -79,8 +80,8 @@ class Bullet(pygame.sprite.Sprite):
         self.image0 = self.image
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
-        self.pos = ship.pos - pygame.math.Vector2(0, 25).rotate(-ship.rot)
-        self.vel = ship.vel - pygame.math.Vector2(0, 5).rotate(-ship.rot)
+        self.pos = ship.pos - pygame.math.Vector2(0, 55).rotate(-ship.rot)
+        self.vel = ship.vel - pygame.math.Vector2(0, 10).rotate(-ship.rot)
         self.acc = pygame.math.Vector2(0, 0)
         self.thrust = pygame.math.Vector2(0, 0)
         self.spawn_time = pygame.time.get_ticks()
@@ -147,7 +148,7 @@ class Game:
                 body.kill()
                 continue
             dir = body.pos.normalize()
-            a = -2000 * dist**-2
+            a = -8000 * dist**-2
             body.acc = dir * a + body.thrust
             body.vel += body.acc
             body.pos += body.vel

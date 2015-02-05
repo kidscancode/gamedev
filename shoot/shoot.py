@@ -6,6 +6,12 @@
 # Meteors - http://opengameart.org/content/asteroids
 # Rocket - http://opengameart.org/content/rocket
 # Lasers = Modified from http://opengameart.org/content/lasers-and-beams
+# TODO:
+# * timer on powerups
+# * powerup variety (spray, beam, etc)
+# * auto-fire (as long as key is down)
+# * enemies, enemy health, enemy pushback
+# * moving starfield
 import pygame
 import sys
 import random
@@ -59,13 +65,10 @@ class Meteor(pygame.sprite.Sprite):
         self.rect.y += self.speed
         frame = (self.rect.y // 20) % len(self.frames)
         self.image = self.frames[frame]
-
-    def offscreen(self):
-        # kill the meteor when it's offscreen
         if self.rect.y > HEIGHT + 10:
-            return True
-        else:
-            return False
+            self.rect.y = random.randrange(-50, -30)
+            self.rect.x = random.randrange(WIDTH)
+
 
 class Player(pygame.sprite.Sprite):
     speed = 12
@@ -186,11 +189,9 @@ class Powerup(pygame.sprite.Sprite):
         self.rect.y += self.speed
         frame = (self.rect.y // 30) % len(self.frames)
         self.image = self.frames[frame]
-
-    def offscreen(self):
         if self.rect.top > HEIGHT:
-            return True
-        return False
+            self.kill()
+
 
 def draw_text(text, size, x, y):
     # utility function to draw text on screen
@@ -308,19 +309,6 @@ while True:
         if random.random() > 0.98 and powerup is None and player.level < 2:
             powerup = Powerup()
             active_sprite_list.add(powerup)
-        # filter meteors
-        for meteor in meteor_sprite_list:
-            if meteor.offscreen():
-                active_sprite_list.remove(meteor)
-                meteor_sprite_list.remove(meteor)
-                newmeteor = Meteor()
-                active_sprite_list.add(newmeteor)
-                meteor_sprite_list.add(newmeteor)
-        # remove powerup that got past
-        if powerup is not None:
-            if powerup.offscreen():
-                active_sprite_list.remove(powerup)
-                powerup = None
         # check for collisions
         # first, ship with meteors
         hit = pygame.sprite.spritecollideany(player, meteor_sprite_list,
