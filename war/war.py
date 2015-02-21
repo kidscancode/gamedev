@@ -24,6 +24,7 @@ FPS = 60
 OFFSETX = int(WIDTH / 2)
 OFFSETY = int(HEIGHT / 2)
 PLANET_SIZE = 70
+G = -3500
 
 
 class Ship(pygame.sprite.Sprite):
@@ -33,14 +34,15 @@ class Ship(pygame.sprite.Sprite):
         self.image = pygame.image.load("img/playerShip1_red.png").convert_alpha()
         self.image = pygame.transform.smoothscale(self.image, (50, 38))
         self.image0 = self.image
+        self.rot_cache = {}
         self.rect = self.image.get_rect()
         self.pos = pygame.math.Vector2(0, 250)
-        self.vel = pygame.math.Vector2(6, 0)
+        self.vel = pygame.math.Vector2(3.5, 0)
         self.acc = pygame.math.Vector2(0, 0)
         self.thrust = pygame.math.Vector2(0, 0)
         self.rot = 0
         self.player = True
-        self.thrust_power = 0.05
+        self.thrust_power = 0.02
         self.rot_speed = 3
         self.health = 100
 
@@ -56,6 +58,14 @@ class Ship(pygame.sprite.Sprite):
         # rotate thrust vector to facing dir
         self.thrust = self.thrust.rotate(-self.rot)
 
+    def make_image(self):
+        if self.rot in self.rot_cache:
+            image = self.rot_cache[self.rot]
+        else:
+            image = pygame.transform.rotozoom(self.image0, self.rot, 1.0)
+            self.rot_cache[self.rot] = image
+        return image
+
     def update(self):
         self.rot = self.rot % 360
         # use key controls
@@ -64,12 +74,13 @@ class Ship(pygame.sprite.Sprite):
             self.get_key_accel()
         # rotate image
         old_center = self.rect.center
-        self.image = pygame.transform.rotozoom(self.image0, self.rot, 1.0)
+        self.image = self.make_image()
         self.rect = self.image.get_rect()
         self.rect.center = old_center
         # move the sprite
         self.rect.centerx = self.pos.x + OFFSETX
         self.rect.centery = self.pos.y + OFFSETY
+
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, ship):
@@ -81,7 +92,7 @@ class Bullet(pygame.sprite.Sprite):
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
         self.pos = ship.pos - pygame.math.Vector2(0, 55).rotate(-ship.rot)
-        self.vel = ship.vel - pygame.math.Vector2(0, 10).rotate(-ship.rot)
+        self.vel = ship.vel - pygame.math.Vector2(0, 5).rotate(-ship.rot)
         self.acc = pygame.math.Vector2(0, 0)
         self.thrust = pygame.math.Vector2(0, 0)
         self.spawn_time = pygame.time.get_ticks()
@@ -148,7 +159,7 @@ class Game:
                 body.kill()
                 continue
             dir = body.pos.normalize()
-            a = -8000 * dist**-2
+            a = G * dist**-2
             body.acc = dir * a + body.thrust
             body.vel += body.acc
             body.pos += body.vel

@@ -14,6 +14,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BGCOLOR = BLACK
 
+
 class Meteor(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -32,6 +33,7 @@ class Meteor(pygame.sprite.Sprite):
         if self.rect.y > HEIGHT + 10:
             self.rect.y = random.randrange(-50, 30)
             self.rect.x = random.randrange(WIDTH)
+
 
 class Player(pygame.sprite.Sprite):
     speed = 12
@@ -78,6 +80,7 @@ class Player(pygame.sprite.Sprite):
 
 class Bullet(pygame.sprite.Sprite):
     speed = -15
+
     def __init__(self, x, y, level):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface([10, 20])
@@ -133,6 +136,7 @@ def show_go_screen(score):
         if wait_for_key():
             pygame.event.get()
             return
+
 
 def wait_for_key():
     # utility function to pause waiting for a keypress
@@ -200,7 +204,7 @@ while True:
                     player.stop()
                 # add any other key events here
 
-        #sefl Game logic goes here  #########
+        # Game logic goes here  #########
         active_sprite_list.update()
         # check for collisions
         # first, ship with meteors

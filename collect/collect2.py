@@ -69,8 +69,8 @@ class Player(pygame.sprite.Sprite):
         # for simplicity, using t=1 (change per timestep)
         # p' = 0.5 at**2 + vt + p
         # v' = at + v
-        self.pos += self.accel * 0.5 + self.vel
         self.vel += self.accel
+        self.pos += self.accel * 0.5 + self.vel
 
         # move the sprite
         self.rect.x = int(self.pos.x)

@@ -12,7 +12,6 @@
 import pygame
 import sys
 import random
-import math
 
 # define some colors
 BLACK = (0, 0, 0)
@@ -41,43 +40,14 @@ def draw_text(text, size, x, y):
     screen.blit(text_surface, text_rect)
 
 
-class vec2:
-    # a class to do vector math
-    # includes operator overloading
-    # TODO: more operations
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __mul__(self, other):
-        # multiplying a vector by a scalar
-        x = self.x * other
-        y = self.y * other
-        return vec2(x, y)
-
-    def __add__(self, other):
-        # adding two vectors
-        x = self.x + other.x
-        y = self.y + other.y
-        return vec2(x, y)
-
-    def __str__(self):
-        # the __str__ function defines how an object appears with print()
-        return "({:.2f},{:.2f})".format(self.x, self.y)
-
-    def mag(self):
-        # return the magnitude (length) of the vector
-        return math.sqrt(self.x*self.x + self.y*self.y)
-
-
 class Player(pygame.sprite.Sprite):
     # player sprite
     # realistic movement using equations of motion (pos, vel, accel)
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.pos = vec2(WIDTH/2, HEIGHT/2)
-        self.vel = vec2(0, 0)
-        self.accel = vec2(0, 0)
+        self.pos = pygame.math.Vector2(WIDTH/2, HEIGHT/2)
+        self.vel = pygame.math.Vector2(0, 0)
+        self.accel = pygame.math.Vector2(0, 0)
         self.image = pygame.Surface((24, 24))
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
@@ -85,7 +55,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = int(self.pos.y)
 
     def update(self):
-        self.accel = vec2(0, 0)
+        self.accel = pygame.math.Vector2(0, 0)
         # keep accelerating as long as that dir key is down
         keystate = pygame.key.get_pressed()
         a = 1.5
@@ -153,9 +123,9 @@ class Mob(pygame.sprite.Sprite):
         self.image = pygame.Surface((24, 24))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
-        self.pos = vec2(x, y)
-        self.vel = vec2(0, 0)
-        self.accel = vec2(0, 0)
+        self.pos = pygame.math.Vector2(x, y)
+        self.vel = pygame.math.Vector2(0, 0)
+        self.accel = pygame.math.Vector2(0, 0)
         # varied speeds (actually acceleration, but determines max speed)
         # TODO: different types of enemy based on speed?
         self.speed = random.choice([0.1, 0.2, 0.3, 0.4])
