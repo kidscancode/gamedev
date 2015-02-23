@@ -1,6 +1,14 @@
 # Spacewar!
 # by KidsCanCode 2015
 # For educational purposes only
+# TODO:
+# Sounds
+# Enemy AI
+# Other weapons (missile, beam)
+# Shields
+# Planet graphics
+# Menu/start/end screens
+
 import pygame
 import sys
 import random
@@ -27,26 +35,37 @@ PLANET_SIZE = 70
 G = -3500
 
 
-class Ship(pygame.sprite.Sprite):
+class SpriteSheet:
+    """Utility class to load and parse spritesheets"""
+    def __init__(self, filename):
+        self.sprite_sheet = pygame.image.load(filename)
 
+    def get_image(self, x, y, width, height):
+        # grab an image out of a larger spritesheet
+        image = pygame.Surface([width, height], pygame.SRCALPHA, 32).convert_alpha()
+        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
+        # image.set_colorkey(image.get_at((0, 0)))
+        return image
+
+
+class Ship(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("img/playerShip1_red.png").convert_alpha()
-        self.image = pygame.transform.smoothscale(self.image, (50, 38))
-        self.image0 = self.image
         self.rot_cache = {}
-        self.rect = self.image.get_rect()
-        self.pos = pygame.math.Vector2(0, 250)
-        self.vel = pygame.math.Vector2(3.5, 0)
+        self.pos = pygame.math.Vector2(0, 0)
+        self.vel = pygame.math.Vector2(0, 0)
         self.acc = pygame.math.Vector2(0, 0)
         self.thrust = pygame.math.Vector2(0, 0)
         self.rot = 0
-        self.player = True
         self.thrust_power = 0.02
         self.rot_speed = 3
         self.health = 100
+        self.shield = 100
+        self.fire_delay = 300
+        self.next_shot = 0
+        self.last_update = 0
 
-    def get_key_accel(self):
+    def get_keys(self):
         self.thrust = pygame.math.Vector2(0, 0)
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT]:
@@ -57,6 +76,14 @@ class Ship(pygame.sprite.Sprite):
             self.thrust = pygame.math.Vector2(0, -self.thrust_power)
         # rotate thrust vector to facing dir
         self.thrust = self.thrust.rotate(-self.rot)
+        if keystate[pygame.K_SPACE]:
+            if self.next_shot > pygame.time.get_ticks():
+                return
+            else:
+                self.next_shot = pygame.time.get_ticks() + self.fire_delay
+                bullet = Bullet(self)
+                g.bullets.add(bullet)
+                g.all_sprites.add(bullet)
 
     def make_image(self):
         if self.rot in self.rot_cache:
@@ -66,12 +93,20 @@ class Ship(pygame.sprite.Sprite):
             self.rot_cache[self.rot] = image
         return image
 
+    def animate(self):
+        pass
+
+    def draw_stats(self):
+        pass
+
     def update(self):
+        self.animate()
         self.rot = self.rot % 360
         # use key controls
         # TODO: ai controls
         if self.player:
-            self.get_key_accel()
+            # self.get_key_accel()
+            self.get_keys()
         # rotate image
         old_center = self.rect.center
         self.image = self.make_image()
@@ -82,32 +117,76 @@ class Ship(pygame.sprite.Sprite):
         self.rect.centery = self.pos.y + OFFSETY
 
 
+class Player(Ship):
+    def __init__(self):
+        super(Player, self).__init__()
+        # self.image = pygame.image.load("img/playerShip1_red.png").convert_alpha()
+        self.image = g.sprite_sheet.get_image(224, 832, 99, 75)
+        self.image = pygame.transform.smoothscale(self.image, (50, 38))
+        self.radius = 20
+        self.image0 = self.image
+        self.rect = self.image.get_rect()
+        # debug collision circle
+        # pygame.draw.circle(self.image, RED, self.rect.center, 20)
+        self.pos = pygame.math.Vector2(0, 250)
+        self.vel = pygame.math.Vector2(3.5, 0)
+        self.player = True
+
+    # def animate(self):
+    #     if self.thrust.length == 0:
+    #         return
+    #     now = pygame.time.get_ticks()
+    #     if now - self.last_update > 100:
+    #         self.
+
+
+class Enemy(Ship):
+    def __init__(self):
+        Ship.__init__(self)
+        self.image = g.sprite_sheet.get_image(222, 0, 103, 84)
+        self.image = pygame.transform.smoothscale(self.image, (51, 42))
+        self.radius = 200
+        self.image0 = self.image
+        self.rect = self.image.get_rect()
+        self.pos = pygame.math.Vector2(0, -250)
+        self.vel = pygame.math.Vector2(-3.5, 0)
+        self.player = False
+
+    def animate(self):
+        # find dir to player and then rotate toward it
+        pass
+
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, ship):
         pygame.sprite.Sprite.__init__(self)
         self.ship = ship
-        self.rot = ship.rot
-        self.image = pygame.Surface([5, 10])
-        self.image0 = self.image
-        self.image.fill(YELLOW)
+        if isinstance(self.ship, Player):
+            self.image = g.sprite_sheet.get_image(858, 475, 9, 37)
+        elif isinstance(self.ship, Enemy):
+            pass
         self.rect = self.image.get_rect()
-        self.pos = ship.pos - pygame.math.Vector2(0, 55).rotate(-ship.rot)
-        self.vel = ship.vel - pygame.math.Vector2(0, 5).rotate(-ship.rot)
+        self.image0 = self.image
+        self.pos = ship.pos - pygame.math.Vector2(0, 45).rotate(-ship.rot)
+        self.vel = -pygame.math.Vector2(0, 5).rotate(-ship.rot)
         self.acc = pygame.math.Vector2(0, 0)
         self.thrust = pygame.math.Vector2(0, 0)
         self.spawn_time = pygame.time.get_ticks()
+        self.update()
 
     def update(self):
         now = pygame.time.get_ticks()
-        if now - self.spawn_time > 5000:
+        if now - self.spawn_time > 6000:
             self.kill()
         # rotate image
         old_center = self.rect.center
+        self.rot = self.vel.angle_to(pygame.math.Vector2(0, 0)) + 90
         self.image = pygame.transform.rotozoom(self.image0, self.rot, 1.0)
         self.rect = self.image.get_rect()
         self.rect.center = old_center
         self.rect.centerx = self.pos.x + OFFSETX
         self.rect.centery = self.pos.y + OFFSETY
+
 
 class Game:
     def __init__(self):
@@ -119,14 +198,16 @@ class Game:
         self.load_data()
 
     def load_data(self):
-        pass
+        self.sprite_sheet = SpriteSheet("img/sheet.png")
 
     def new(self):
         self.running = True
         self.all_sprites = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
-        self.ship = Ship()
-        self.all_sprites.add(self.ship)
+        self.player = Player()
+        self.all_sprites.add(self.player)
+        self.enemy = Enemy()
+        self.all_sprites.add(self.enemy)
 
     def run(self):
         while self.running:
@@ -147,10 +228,6 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.quit()
-                if event.key == pygame.K_SPACE:
-                    bullet = Bullet(self.ship)
-                    self.bullets.add(bullet)
-                    self.all_sprites.add(bullet)
 
     def update(self):
         for body in self.all_sprites:
@@ -164,21 +241,27 @@ class Game:
             body.vel += body.acc
             body.pos += body.vel
         self.all_sprites.update()
-        hits = pygame.sprite.spritecollide(self.ship, self.bullets, True)
+        hits = pygame.sprite.spritecollide(self.player, self.bullets, True, pygame.sprite.collide_circle)
         for hit in hits:
-            self.ship.health -= 10
+            self.player.health -= 10
 
     def draw(self):
         self.screen.fill(BGCOLOR)
         self.draw_planet()
+        self.draw_stats()
         self.all_sprites.draw(self.screen)
-        msg = "H: {}".format(self.ship.health)
-        self.draw_text(msg, 18, 10, 10)
         # uncommment to show FPS (useful for troubleshooting)
         fps_txt = "{:.2f}".format(self.clock.get_fps())
         self.draw_text(str(fps_txt), 18, WIDTH-50, 10)
         pygame.display.flip()
 
+    def draw_stats(self):
+        for ship in [self.player]:
+            h_surf = pygame.Surface([ship.health, 20])
+            h_surf.fill(GREEN)
+            h_rect = h_surf.get_rect()
+            h_rect.topleft = (10, 10)
+            g.screen.blit(h_surf, h_rect)
     def draw_planet(self):
         pygame.draw.circle(self.screen, BLUE, (OFFSETX, OFFSETY), PLANET_SIZE)
 
