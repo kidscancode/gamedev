@@ -49,8 +49,8 @@ class SpriteSheet:
 
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
+    def __init__(self, *groups):
+        pygame.sprite.Sprite.__init__(self, *groups)
         self.rot_cache = {}
         self.pos = pygame.math.Vector2(0, 0)
         self.vel = pygame.math.Vector2(0, 0)
@@ -61,7 +61,7 @@ class Ship(pygame.sprite.Sprite):
         self.rot_speed = 3
         self.health = 100
         self.shield = 100
-        self.fire_delay = 300
+        self.fire_delay = 250
         self.next_shot = 0
         self.last_update = 0
 
@@ -81,23 +81,32 @@ class Ship(pygame.sprite.Sprite):
                 return
             else:
                 self.next_shot = pygame.time.get_ticks() + self.fire_delay
-                bullet = Bullet(self)
-                g.bullets.add(bullet)
-                g.all_sprites.add(bullet)
+                Bullet(self, [g.bullets, g.bodies, g.all_sprites])
+                # g.bullets.add(bullet)
+                # g.all_sprites.add(bullet)
 
-    def make_image(self):
+    def rotate(self):
         if self.rot in self.rot_cache:
             image = self.rot_cache[self.rot]
         else:
             image = pygame.transform.rotozoom(self.image0, self.rot, 1.0)
             self.rot_cache[self.rot] = image
-        return image
+        old_center = self.rect.center
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = old_center
 
     def animate(self):
         pass
 
-    def draw_stats(self):
-        pass
+    def hit(self, hit):
+        if self.shield > 0:
+            self.shield -= hit.damage
+            if self.shield < 0:
+                self.health += self.shield
+                self.shield = 0
+        else:
+            self.health -= hit.damage
 
     def update(self):
         self.animate()
@@ -108,18 +117,15 @@ class Ship(pygame.sprite.Sprite):
             # self.get_key_accel()
             self.get_keys()
         # rotate image
-        old_center = self.rect.center
-        self.image = self.make_image()
-        self.rect = self.image.get_rect()
-        self.rect.center = old_center
+        self.rotate()
         # move the sprite
         self.rect.centerx = self.pos.x + OFFSETX
         self.rect.centery = self.pos.y + OFFSETY
 
 
 class Player(Ship):
-    def __init__(self):
-        super(Player, self).__init__()
+    def __init__(self, *groups):
+        super(Player, self).__init__(*groups)
         # self.image = pygame.image.load("img/playerShip1_red.png").convert_alpha()
         self.image = g.sprite_sheet.get_image(224, 832, 99, 75)
         self.image = pygame.transform.smoothscale(self.image, (50, 38))
@@ -131,6 +137,7 @@ class Player(Ship):
         self.pos = pygame.math.Vector2(0, 250)
         self.vel = pygame.math.Vector2(3.5, 0)
         self.player = True
+        self.stats_pos = (10, 10)
 
     # def animate(self):
     #     if self.thrust.length == 0:
@@ -141,8 +148,8 @@ class Player(Ship):
 
 
 class Enemy(Ship):
-    def __init__(self):
-        Ship.__init__(self)
+    def __init__(self, *groups):
+        Ship.__init__(self, *groups)
         self.image = g.sprite_sheet.get_image(222, 0, 103, 84)
         self.image = pygame.transform.smoothscale(self.image, (51, 42))
         self.radius = 200
@@ -151,6 +158,7 @@ class Enemy(Ship):
         self.pos = pygame.math.Vector2(0, -250)
         self.vel = pygame.math.Vector2(-3.5, 0)
         self.player = False
+        self.stats_pos = (10, WIDTH - 110)
 
     def animate(self):
         # find dir to player and then rotate toward it
@@ -158,8 +166,9 @@ class Enemy(Ship):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, ship):
-        pygame.sprite.Sprite.__init__(self)
+    def __init__(self, ship, *groups):
+        pygame.sprite.Sprite.__init__(self, *groups)
+        self.rot_cache = {}
         self.ship = ship
         if isinstance(self.ship, Player):
             self.image = g.sprite_sheet.get_image(858, 475, 9, 37)
@@ -172,20 +181,44 @@ class Bullet(pygame.sprite.Sprite):
         self.acc = pygame.math.Vector2(0, 0)
         self.thrust = pygame.math.Vector2(0, 0)
         self.spawn_time = pygame.time.get_ticks()
+        self.damage = 10
         self.update()
+
+    def rotate(self):
+        # rotate image
+        old_center = self.rect.center
+        self.rot = self.vel.angle_to(pygame.math.Vector2(0, 0)) + 90
+        if self.rot in self.rot_cache:
+            image = self.rot_cache[self.rot]
+        else:
+            image = pygame.transform.rotozoom(self.image0, self.rot, 1.0)
+            self.rot_cache[self.rot] = image
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = old_center
 
     def update(self):
         now = pygame.time.get_ticks()
         if now - self.spawn_time > 6000:
             self.kill()
-        # rotate image
-        old_center = self.rect.center
-        self.rot = self.vel.angle_to(pygame.math.Vector2(0, 0)) + 90
-        self.image = pygame.transform.rotozoom(self.image0, self.rot, 1.0)
-        self.rect = self.image.get_rect()
-        self.rect.center = old_center
+        self.rotate()
         self.rect.centerx = self.pos.x + OFFSETX
         self.rect.centery = self.pos.y + OFFSETY
+
+
+class RenderText(pygame.sprite.Sprite):
+    def __init__(self, size, color, pos, *groups):
+        pygame.sprite.Sprite.__init__(self, *groups)
+        font_name = pygame.font.match_font('arial')
+        self.font = pygame.font.Font(font_name, size)
+        self.color = color
+        self.image = None
+        self.rect = None
+        self.pos = pos
+
+    def update_text(self, text):
+        self.image = self.font.render(text, 0, self.color)
+        self.rect = self.image.get_rect(topleft=self.pos)
 
 
 class Game:
@@ -198,16 +231,19 @@ class Game:
         self.load_data()
 
     def load_data(self):
+        self.bg_img = pygame.image.load('img/starfield-1.jpg').convert()
         self.sprite_sheet = SpriteSheet("img/sheet.png")
 
     def new(self):
         self.running = True
-        self.all_sprites = pygame.sprite.Group()
-        self.bullets = pygame.sprite.Group()
-        self.player = Player()
-        self.all_sprites.add(self.player)
-        self.enemy = Enemy()
-        self.all_sprites.add(self.enemy)
+        self.all_sprites = pygame.sprite.RenderUpdates()
+        self.bullets = pygame.sprite.RenderUpdates()
+        self.bodies = pygame.sprite.RenderUpdates()
+        self.player = Player([self.all_sprites, self.bodies])
+        self.enemy = Enemy([self.all_sprites, self.bodies])
+        # self.fps_text = RenderText(18, WHITE, (WIDTH-50, 10), self.all_sprites)
+        self.screen.blit(self.bg_img, [0, 0])
+        pygame.display.update()
 
     def run(self):
         while self.running:
@@ -230,7 +266,7 @@ class Game:
                     self.quit()
 
     def update(self):
-        for body in self.all_sprites:
+        for body in self.bodies:
             dist = body.pos.length()
             if dist < PLANET_SIZE:
                 body.kill()
@@ -240,28 +276,41 @@ class Game:
             body.acc = dir * a + body.thrust
             body.vel += body.acc
             body.pos += body.vel
+        fps_txt = "{:.2f}".format(self.clock.get_fps())
+        # self.fps_text.update_text(fps_txt)
         self.all_sprites.update()
+        self.collide()
+
+    def collide(self):
         hits = pygame.sprite.spritecollide(self.player, self.bullets, True, pygame.sprite.collide_circle)
         for hit in hits:
-            self.player.health -= 10
+            self.player.hit(hit)
 
     def draw(self):
-        self.screen.fill(BGCOLOR)
+        # self.screen.fill(BGCOLOR)
+        # self.screen.blit(self.bg_img, [0, 0])
+        self.all_sprites.clear(self.screen, self.bg_img)
         self.draw_planet()
-        self.draw_stats()
-        self.all_sprites.draw(self.screen)
+        # self.draw_stats()
+        dirty = self.all_sprites.draw(self.screen)
         # uncommment to show FPS (useful for troubleshooting)
-        fps_txt = "{:.2f}".format(self.clock.get_fps())
-        self.draw_text(str(fps_txt), 18, WIDTH-50, 10)
-        pygame.display.flip()
+        # fps_txt = "{:.2f}".format(self.clock.get_fps())
+        # text_rect = self.draw_text(str(fps_txt), 18, WIDTH-50, 10)
+        pygame.display.update(dirty)
 
     def draw_stats(self):
         for ship in [self.player]:
             h_surf = pygame.Surface([ship.health, 20])
             h_surf.fill(GREEN)
             h_rect = h_surf.get_rect()
-            h_rect.topleft = (10, 10)
+            h_rect.topleft = ship.stats_pos
             g.screen.blit(h_surf, h_rect)
+            s_surf = pygame.Surface([ship.shield, 20])
+            s_surf.fill(BLUE)
+            s_rect = s_surf.get_rect()
+            s_rect.topleft = (ship.stats_pos[0], ship.stats_pos[1]+25)
+            g.screen.blit(s_surf, s_rect)
+
     def draw_planet(self):
         pygame.draw.circle(self.screen, BLUE, (OFFSETX, OFFSETY), PLANET_SIZE)
 
@@ -273,7 +322,7 @@ class Game:
         text_surface = font.render(text, True, WHITE)
         text_rect = text_surface.get_rect()
         text_rect.topleft = (x, y)
-        self.screen.blit(text_surface, text_rect)
+        return self.screen.blit(text_surface, text_rect)
 
     def start_screen(self):
         pass
