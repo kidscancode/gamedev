@@ -4,7 +4,6 @@
 # TODO: also do a tkinter version of this
 import pygame
 import sys
-import math
 
 # define some colors
 BLACK = (0, 0, 0)
