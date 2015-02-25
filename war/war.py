@@ -88,7 +88,7 @@ class Ship(pygame.sprite.Sprite):
         if self.rot in self.rot_cache:
             image = self.rot_cache[self.rot]
         else:
-            image = pygame.transform.rotozoom(self.image0, self.rot, 1.0)
+            image = pygame.transform.rotate(self.image0, self.rot)
             self.rot_cache[self.rot] = image
         old_center = self.rect.center
         self.image = image
@@ -199,7 +199,7 @@ class Bullet(pygame.sprite.Sprite):
         if self.rot in self.rot_cache:
             image = self.rot_cache[self.rot]
         else:
-            image = pygame.transform.rotozoom(self.image0, self.rot, 1.0)
+            image = pygame.transform.rotate(self.image0, self.rot)
             self.rot_cache[self.rot] = image
         self.image = image
         self.rect = self.image.get_rect()
@@ -243,13 +243,14 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        flags = pygame.DOUBLEBUF | pygame.HWSURFACE  # | pygame.FULLSCREEN
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.load_data()
 
     def load_data(self):
-        self.bg_img = pygame.image.load('img/space_bg.png').convert()
+        self.bg_img = pygame.image.load('img/space_bg.png').convert_alpha()
         self.sprite_sheet = SpriteSheet("img/sheet.png")
 
     def new(self):
@@ -259,8 +260,7 @@ class Game:
         self.bodies = pygame.sprite.Group()
         self.player = Player([self.all_sprites, self.bodies])
         self.enemy = Enemy([self.all_sprites, self.bodies])
-        # self.fps_text = RenderText(18, WHITE, (WIDTH-50, 10), self.all_sprites)
-        # self.screen.blit(self.bg_img, [0, 0])
+        self.screen.blit(self.bg_img, [0, 0])
         pygame.display.update()
 
     def run(self):
@@ -268,7 +268,7 @@ class Game:
             self.clock.tick(FPS)
             self.events()  # check for events
             self.update()  # update the game state
-            self.draw_old()    # draw the next frame
+            self.draw_test()    # draw the next frame
 
     def quit(self):
         pygame.quit()
@@ -294,9 +294,6 @@ class Game:
             body.acc = dir * a + body.thrust
             body.vel += body.acc
             body.pos += body.vel
-        fps_txt = "{:.2f}".format(self.clock.get_fps())
-        # if pygame.time.get_ticks() % 20 == 0:
-        #     self.fps_text.update_text(fps_txt)
         self.all_sprites.update()
         self.collide()
 
@@ -306,23 +303,23 @@ class Game:
             self.player.hit(hit)
 
     def draw(self):
-        # TODO: Figure out why bg img is so slow
         self.all_sprites.clear(self.screen, self.bg_img)
         self.draw_planet()
         self.draw_stats()
         dirty = self.all_sprites.draw(self.screen)
         pygame.display.update(dirty)
 
-    def draw_old(self):
-        # self.screen.fill(BGCOLOR)
-        self.all_sprites.clear(self.screen, self.clear_cb)
+    def draw_test(self):
+        self.screen.fill(BGCOLOR)
         # self.screen.blit(self.bg_img, [0, 0])
         self.draw_planet()
-        self.draw_stats()
-        dirty = self.all_sprites.draw(self.screen)
-        fps_txt = "{:.2f}".format(self.clock.get_fps())
-        self.draw_text(fps_txt, 18, WIDTH-50, 10)
-        pygame.display.update(dirty)
+        # dirty = self.draw_stats()
+        # self.all_sprites.clear(self.screen, self.clear_cb)
+        # dirty += self.all_sprites.draw(self.screen)
+        self.all_sprites.draw(self.screen)
+        fps_txt = "FPS: {:.2f}".format(self.clock.get_fps())
+        pygame.display.set_caption(fps_txt)
+        pygame.display.update()
 
     def clear_cb(self, surf, rect):
         surf.fill(BGCOLOR, rect)
@@ -339,6 +336,7 @@ class Game:
             s_rect = s_surf.get_rect()
             s_rect.topleft = (ship.stats_pos[0], ship.stats_pos[1]+25)
             g.screen.blit(s_surf, s_rect)
+        return [h_rect, s_rect]
 
     def draw_planet(self):
         pygame.draw.circle(self.screen, BLUE, (OFFSETX, OFFSETY), PLANET_SIZE)
