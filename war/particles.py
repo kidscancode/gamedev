@@ -81,6 +81,7 @@ class ParticleEmitter:
         self.particles = []
         self.timer = 0
         self.prevcurve = [self.pos for x in range(3)]
+        self.active = True
 
     def print_state(self):
         print("c:{}, p:{}".format(self.count, len(self.particles)))
@@ -96,7 +97,7 @@ class ParticleEmitter:
                 # print("p.kill")
 
         # create a new particle
-        if self.count != 0:
+        if self.count != 0 and self.active:
             self.timer += self.game.dt
             newparticles = self.count * self.timer
             if newparticles > 1:
@@ -125,3 +126,7 @@ class ParticleEmitter:
             rects.append(part.blit())
         return rects
 
+    def kill_all(self):
+        self.count = 0
+        self.active = False
+        self.particles = []
