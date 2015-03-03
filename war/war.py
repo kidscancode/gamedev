@@ -65,8 +65,8 @@ class Ship(pygame.sprite.DirtySprite):
         self.last_update = 0
         emitter_offset = pygame.math.Vector2(0, 15)
         part_vel = pygame.math.Vector2(0, 3)
-        self.emitter = ParticleEmitter(g, self, emitter_offset, part_vel,
-                                       g.ship_part_img, 0, 0.6, 0, 35, 10)
+        self.engine_emitter = ParticleEmitter(g, self, emitter_offset, part_vel,
+                                              g.ship_part_img, 0, 0.6, 0, 35, 10)
 
     def get_keys(self):
         self.thrust = pygame.math.Vector2(0, 0)
@@ -97,9 +97,6 @@ class Ship(pygame.sprite.DirtySprite):
         self.rect = self.image.get_rect()
         self.rect.center = old_center
 
-    def animate(self):
-        pass
-
     def hit(self, hit):
         if self.shield > 0:
             self.shield -= hit.damage
@@ -110,7 +107,6 @@ class Ship(pygame.sprite.DirtySprite):
             self.health -= hit.damage
 
     def update(self):
-        self.animate()
         self.rot = self.rot % 360
         # use key controls
         # TODO: ai controls
@@ -119,11 +115,11 @@ class Ship(pygame.sprite.DirtySprite):
             self.get_keys()
         # rotate image
         self.rotate()
-        self.emitter.count = 0
+        self.engine_emitter.count = 0
         if self.thrust.length():
-            self.emitter.count = 50
-        self.emitter.update()
-        self.emitter.print_state()
+            self.engine_emitter.count = 50
+        self.engine_emitter.update()
+        # self.engine_emitter.print_state()
         # check edges - wrap around
         if self.pos.y > HEIGHT / 2:
             self.pos.y = -HEIGHT / 2
@@ -152,13 +148,6 @@ class Player(Ship):
         self.vel = pygame.math.Vector2(2.5, 0)
         self.player = True
         self.stats_pos = (10, 10)
-
-    # def animate(self):
-    #     if self.thrust.length == 0:
-    #         return
-    #     now = pygame.time.get_ticks()
-    #     if now - self.last_update > 100:
-    #         self.
 
 
 class Enemy(Ship):
@@ -258,7 +247,7 @@ class RenderText(pygame.sprite.Sprite):
 class Game:
     def __init__(self):
         pygame.init()
-        pygame.mixer.init()
+        # pygame.mixer.init()
         flags = pygame.DOUBLEBUF | pygame.HWSURFACE  # | pygame.FULLSCREEN
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
         pygame.display.set_caption(TITLE)
@@ -289,7 +278,7 @@ class Game:
             self.dt = self.clock.tick(FPS) * 0.001
             self.events()  # check for events
             self.update()  # update the game state
-            self.draw()    # draw the next frame
+            self.draw_test()    # draw the next frame
 
     def quit(self):
         # pygame.quit()
@@ -308,7 +297,9 @@ class Game:
         for body in self.bodies:
             dist = body.pos.length()
             if dist < self.planet.radius:
-                # call explosion animation (and remove leftover particles)
+                # call explosion animation on ships(and remove leftover particles)
+                if type(body) is Ship:
+                    body.engine_emitter.kill_all()
                 body.kill()
                 continue
             dir = body.pos.normalize()
@@ -332,7 +323,7 @@ class Game:
         self.all_sprites.clear(self.screen, self.bg_img)
         # self.draw_stats()
         dirty = self.all_sprites.draw(self.screen)
-        dirty += self.player.emitter.draw()
+        dirty += self.player.engine_emitter.draw()
         pygame.display.update(dirty)
 
     def draw_test(self):
@@ -344,9 +335,9 @@ class Game:
         # self.all_sprites.clear(self.screen, self.clear_cb)
         # dirty += self.all_sprites.draw(self.screen)
         self.all_sprites.draw(self.screen)
-        self.player.emitter.draw()
-        # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.player.emitter.pos.x),
-        #                                               int(self.player.emitter.pos.y)), 5)
+        self.player.engine_emitter.draw()
+        pygame.draw.circle(self.screen, (0, 255, 0), (int(self.player.engine_emitter.pos.x),
+                                                      int(self.player.engine_emitter.pos.y)), 5)
         pygame.display.update()
 
     def clear_cb(self, surf, rect):
