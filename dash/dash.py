@@ -34,14 +34,10 @@ GRAVITY = 1
 PLAYER_JUMP = 16
 WORLD_SPEED = 8
 
-# initialize pygame
-pygame.init()
-# initialize sound - remove if you're not using sound (always use sound!)
-# pygame.mixer.init()
-
 class Player(pygame.sprite.Sprite):
-    def __init__(self, image, *groups):
+    def __init__(self, game, image, *groups):
         pygame.sprite.Sprite.__init__(self, *groups)
+        self.game = game
         self.vx, self.vy = 0, 0
         self.image = image
         # self.image = pygame.Surface([24, 24])
@@ -62,8 +58,24 @@ class Player(pygame.sprite.Sprite):
         self.rot = self.rot % 360
         self.vy += GRAVITY
 
-        self.rect.x += self.vx
+        # move SPEED pixels forward just to see if we're going to hit something
+        self.rect.x += self.game.speed / 2
+        hits = pygame.sprite.spritecollide(self, self.game.obstacles, False)
+        self.rect.x -= self.game.speed / 2
+        if hits:
+            self.game.speed = 0
+            self.kill()
+        # now move in y and see if we need to land on something
         self.rect.y += self.vy
+        hits = pygame.sprite.spritecollide(self, self.game.obstacles, False)
+        if hits:
+            if hits[0].type == 'plat':
+                self.rect.bottom = hits[0].rect.top # - 1
+                self.vy = 0
+                self.jumping = False
+            elif hits[0].type == 'spike':
+                self.game.speed = 0
+                self.kill()
 
         if self.rect.top <= 0:
             self.rect.top = 0
@@ -73,18 +85,20 @@ class Player(pygame.sprite.Sprite):
             self.vy = 0
             self.jumping = False
 
+
     def get_keys(self):
         keystate = pygame.key.get_pressed()
         mousestate = pygame.mouse.get_pressed()
         if keystate[pygame.K_SPACE] or mousestate[0]:
             if not self.jumping:
+                self.rect.y -= 1
                 self.vy = -PLAYER_JUMP
                 self.jumping = True
                 self.jump_time = pygame.time.get_ticks()
 
     def rotate(self):
         if self.jumping:
-            self.rot -= 4
+            self.rot -= 5
         else:
             self.rot = 0
         if self.rot in self.rot_cache:
@@ -98,8 +112,9 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = old_center
 
 class Background(pygame.sprite.Sprite):
-    def __init__(self, image, x, *groups):
+    def __init__(self, game, image, x, *groups):
         pygame.sprite.Sprite.__init__(self, *groups)
+        self.game = game
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -107,15 +122,18 @@ class Background(pygame.sprite.Sprite):
         self.layer = 0
 
     def update(self):
-        self.rect.x -= (WORLD_SPEED - 6)
+        if self.game.speed > 0:
+            self.rect.x -= (self.game.speed - 6)
 
 class Stage:
     pass
 
 class Object(pygame.sprite.Sprite):
-    def __init__(self, x, *groups):
+    def __init__(self, game, x, object_type, *groups):
         pygame.sprite.Sprite.__init__(self, *groups)
-        self.image = pygame.Surface([48, 32])
+        self.game = game
+        self.type = object_type
+        self.image = pygame.Surface([188, 32])
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.x = WIDTH + x
@@ -123,13 +141,17 @@ class Object(pygame.sprite.Sprite):
         self.layer = 1
 
     def update(self):
-        self.rect.x += -WORLD_SPEED
+        self.rect.x += -self.game.speed
         if self.rect.right <= 0:
             self.kill()
 
 class Game:
     def __init__(self):
         # initialize game settings
+        # initialize pygame
+        pygame.init()
+        # initialize sound
+        # pygame.mixer.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("My Game")
         self.clock = pygame.time.Clock()
@@ -137,13 +159,14 @@ class Game:
 
     def new(self):
         # initialize all your variables and do all the setup for a new game
+        self.speed = WORLD_SPEED
         self.all_sprites = pygame.sprite.LayeredUpdates()
         self.obstacles = pygame.sprite.Group()
-        self.bg1 = Background(self.background, 0, self.all_sprites)
-        self.bg2 = Background(self.background, self.background.get_width(), self.all_sprites)
-        self.player = Player(self.player_image, self.all_sprites)
+        self.bg1 = Background(self, self.background, 0, self.all_sprites)
+        self.bg2 = Background(self, self.background, self.background.get_width(), self.all_sprites)
+        self.player = Player(self, self.player_image, self.all_sprites)
         for i in range(8):
-            Object(i * 300, [self.all_sprites, self.obstacles])
+            Object(self, i * 300, "plat", [self.all_sprites, self.obstacles])
 
     def load_data(self):
         # load all your assets (sound, images, etc.)
@@ -171,12 +194,6 @@ class Game:
         if self.bg2.rect.right <= 0:
             self.bg2.rect.left = self.bg1.rect.right
         self.all_sprites.update()
-        hits = pygame.sprite.spritecollide(self.player, self.obstacles, False)
-        if hits:
-            if self.player.vy > 0:
-                self.player.vy = 0
-                self.player.jumping = False
-                self.player.rect.bottom = hits[0].rect.top
 
     def draw(self):
         # draw everything to the screen
