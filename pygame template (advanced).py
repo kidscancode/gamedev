@@ -36,26 +36,44 @@ pygame.mixer.init()
 
 class Game:
     def __init__(self):
+        # initialize game settings
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("My Game")
         self.clock = pygame.time.Clock()
-        self.running = True
+        self.load_data()
+
+    def new(self):
+        # initialize all your variables and do all the setup for a new game
+        pass
+
+    def load_data(self):
+        # load all your assets (sound, images, etc.)
+        pass
 
     def run(self):
+        # The Game Loop
+        self.running = True
         while self.running:
             self.clock.tick(FPS)
             self.events()
+            self.update()
             self.draw()
 
     def quit(self):
         pygame.quit()
         sys.exit()
 
+    def update(self):
+        # the update part of the game loop
+        pass
+
     def draw(self):
+        # draw everything to the screen
         self.screen.fill(BGCOLOR)
         pygame.display.flip()
 
     def events(self):
+        # catch all events here
         for event in pygame.event.get():
             # this one checks for the window being closed
             if event.type == pygame.QUIT:
@@ -67,5 +85,18 @@ class Game:
                     self.quit()
                 # add any other key events here
 
+    def show_start_screen(self):
+        # show the start screen
+        pass
+
+    def show_go_screen(self):
+        # show the game over screen
+        pass
+
 g = Game()
-g.run()
+g.show_start_screen()
+while True:
+    g.new()
+    g.run()
+    g.show_go_screen()
+
