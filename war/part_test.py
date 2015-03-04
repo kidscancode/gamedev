@@ -62,9 +62,9 @@ class Game:
         self.box = Box(self, self.box_img, self.all_sprites)
         self.OFFSET = OFFSET
         em_offset = pygame.math.Vector2(0, 15)
-        part_vel = pygame.math.Vector2(0, 3)
+        part_vel = pygame.math.Vector2(0, 4)
         self.emitter = ParticleEmitter(self, self.box, em_offset, part_vel,
-                                       self.part_img, 0, 1, 0, 35, 10)
+                                       self.part_img, 0, .5, 0, 35, 8)
         act_em_offset_r = pygame.math.Vector2(23, 6)
         act_em_offset_l = pygame.math.Vector2(-23, 6)
         act_part_vel = pygame.math.Vector2(0, 2)

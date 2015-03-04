@@ -336,8 +336,8 @@ class Game:
         # dirty += self.all_sprites.draw(self.screen)
         self.all_sprites.draw(self.screen)
         self.player.engine_emitter.draw()
-        pygame.draw.circle(self.screen, (0, 255, 0), (int(self.player.engine_emitter.pos.x),
-                                                      int(self.player.engine_emitter.pos.y)), 5)
+        # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.player.engine_emitter.pos.x),
+        #                                               int(self.player.engine_emitter.pos.y)), 5)
         pygame.display.update()
 
     def clear_cb(self, surf, rect):
@@ -356,7 +356,6 @@ class Game:
             s_rect.topleft = (ship.stats_pos[0], ship.stats_pos[1]+25)
             g.screen.blit(s_surf, s_rect)
         return [h_rect, s_rect]
-
 
     def draw_text(self, text, size, x, y):
         # utility function to draw text at a given location
