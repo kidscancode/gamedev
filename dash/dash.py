@@ -32,7 +32,7 @@ FPS = 60
 # Game settings
 GRAVITY = 1
 PLAYER_JUMP = 16
-WORLD_SPEED = 10
+WORLD_SPEED = 8
 
 # initialize pygame
 pygame.init()
@@ -107,25 +107,25 @@ class Background(pygame.sprite.Sprite):
         self.layer = 0
 
     def update(self):
-        self.rect.x -= (WORLD_SPEED - 4)
+        self.rect.x -= (WORLD_SPEED - 6)
 
 class Stage:
     pass
 
 class Object(pygame.sprite.Sprite):
-    def __init__(self, *groups):
+    def __init__(self, x, *groups):
         pygame.sprite.Sprite.__init__(self, *groups)
-        self.image = pygame.Surface([32, 32])
+        self.image = pygame.Surface([48, 32])
         self.image.fill(RED)
         self.rect = self.image.get_rect()
-        self.rect.x = WIDTH + 50
+        self.rect.x = WIDTH + x
         self.rect.bottom = HEIGHT
         self.layer = 1
 
     def update(self):
         self.rect.x += -WORLD_SPEED
         if self.rect.right <= 0:
-            self.rect.x = WIDTH + 50
+            self.kill()
 
 class Game:
     def __init__(self):
@@ -142,7 +142,8 @@ class Game:
         self.bg1 = Background(self.background, 0, self.all_sprites)
         self.bg2 = Background(self.background, self.background.get_width(), self.all_sprites)
         self.player = Player(self.player_image, self.all_sprites)
-        self.obs = Object([self.all_sprites, self.obstacles])
+        for i in range(8):
+            Object(i * 300, [self.all_sprites, self.obstacles])
 
     def load_data(self):
         # load all your assets (sound, images, etc.)
@@ -165,11 +166,17 @@ class Game:
 
     def update(self):
         # the update part of the game loop
-        self.all_sprites.update()
         if self.bg1.rect.right <= 0:
             self.bg1.rect.left = self.bg2.rect.right
         if self.bg2.rect.right <= 0:
             self.bg2.rect.left = self.bg1.rect.right
+        self.all_sprites.update()
+        hits = pygame.sprite.spritecollide(self.player, self.obstacles, False)
+        if hits:
+            if self.player.vy > 0:
+                self.player.vy = 0
+                self.player.jumping = False
+                self.player.rect.bottom = hits[0].rect.top
 
     def draw(self):
         # draw everything to the screen
