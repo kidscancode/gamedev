@@ -34,15 +34,24 @@ GRAVITY = 1
 PLAYER_JUMP = 16
 WORLD_SPEED = 8
 
+class SpriteSheet:
+    """Utility class to load and parse spritesheets"""
+    def __init__(self, filename):
+        self.sprite_sheet = pygame.image.load(filename)
+
+    def get_image(self, x, y, width, height):
+        # grab an image out of a larger spritesheet
+        image = pygame.Surface([width, height], pygame.SRCALPHA, 32).convert_alpha()
+        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
+        # image.set_colorkey(image.get_at((0, 0)))
+        return image
+
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game, image, *groups):
+    def __init__(self, game, *groups):
         pygame.sprite.Sprite.__init__(self, *groups)
         self.game = game
         self.vx, self.vy = 0, 0
-        self.image = image
-        # self.image = pygame.Surface([24, 24])
-        # pygame.draw.rect(self.image, GREEN, [0, 0, 23, 23], 2)
-        # self.image.fill(GREEN)
+        self.image = self.game.sprite_sheet.get_image(288, 128, 32, 32)
         self.image_orig = self.image.copy()
         self.rot = 0
         self.rot_speed = 0
@@ -70,7 +79,7 @@ class Player(pygame.sprite.Sprite):
         hits = pygame.sprite.spritecollide(self, self.game.obstacles, False)
         if hits:
             if hits[0].type == 'plat':
-                self.rect.bottom = hits[0].rect.top # - 1
+                self.rect.bottom = hits[0].rect.top
                 self.vy = 0
                 self.jumping = False
             elif hits[0].type == 'spike':
@@ -84,7 +93,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = HEIGHT
             self.vy = 0
             self.jumping = False
-
 
     def get_keys(self):
         keystate = pygame.key.get_pressed()
@@ -133,10 +141,12 @@ class Object(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, *groups)
         self.game = game
         self.type = object_type
-        self.image = pygame.Surface([188, 32])
-        self.image.fill(RED)
+        if self.type == 'plat':
+            self.image = self.game.sprite_sheet.get_image(0, 32, 96, 32)
+        elif self.type == 'spike':
+            self.image = self.game.sprite_sheet.get_image(128, 190, 32, 32)
         self.rect = self.image.get_rect()
-        self.rect.x = WIDTH + x
+        self.rect.x = x
         self.rect.bottom = HEIGHT
         self.layer = 1
 
@@ -152,7 +162,8 @@ class Game:
         pygame.init()
         # initialize sound
         # pygame.mixer.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        flags = pygame.DOUBLEBUF | pygame.HWSURFACE  # | pygame.FULLSCREEN
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
         pygame.display.set_caption("My Game")
         self.clock = pygame.time.Clock()
         self.load_data()
@@ -164,15 +175,18 @@ class Game:
         self.obstacles = pygame.sprite.Group()
         self.bg1 = Background(self, self.background, 0, self.all_sprites)
         self.bg2 = Background(self, self.background, self.background.get_width(), self.all_sprites)
-        self.player = Player(self, self.player_image, self.all_sprites)
+        self.player = Player(self, self.all_sprites)
         for i in range(8):
-            Object(self, i * 300, "plat", [self.all_sprites, self.obstacles])
+            Object(self, WIDTH + i * 300, "plat", [self.all_sprites, self.obstacles])
+            Object(self, WIDTH + 200 + i * 300, "spike", [self.all_sprites, self.obstacles])
+
 
     def load_data(self):
         # load all your assets (sound, images, etc.)
         self.background = pygame.image.load('img/game_bg_01_001.png').convert()
         self.background = pygame.transform.scale(self.background, [640, 640])
-        self.player_image = pygame.image.load('img/element_green_square.png').convert_alpha()
+        self.sprite_sheet = SpriteSheet("img/sprites.png")
+        # self.player_image = pygame.image.load('img/element_green_square.png').convert_alpha()
 
     def run(self):
         # The Game Loop
