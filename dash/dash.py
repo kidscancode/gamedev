@@ -73,7 +73,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x -= self.game.speed / 2
         if hits:
             self.game.speed = 0
-            self.kill()
+            self.game.running = False
         # now move in y and see if we need to land on something
         self.rect.y += self.vy
         hits = pygame.sprite.spritecollide(self, self.game.obstacles, False)
@@ -84,7 +84,7 @@ class Player(pygame.sprite.Sprite):
                 self.jumping = False
             elif hits[0].type == 'spike':
                 self.game.speed = 0
-                self.kill()
+                self.game.running = False
 
         if self.rect.top <= 0:
             self.rect.top = 0
@@ -179,7 +179,6 @@ class Game:
         for i in range(8):
             Object(self, WIDTH + i * 300, "plat", [self.all_sprites, self.obstacles])
             Object(self, WIDTH + 200 + i * 300, "spike", [self.all_sprites, self.obstacles])
-
 
     def load_data(self):
         # load all your assets (sound, images, etc.)
