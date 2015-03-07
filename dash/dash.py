@@ -74,12 +74,16 @@ class TileRenderer:
         if self.tmxdata.background_color:
             surface.fill(self.tmxdata.background_color)
 
+        test_img = pygame.Surface([32, 32])
+        test_img.fill(GREEN)
         for layer in self.tmxdata.visible_layers:
             if isinstance(layer, pytmx.TiledTileLayer):
                 for x, y, gid in layer:
                     tile = gt(gid)
                     if tile:
                         surface.blit(tile, (x*tw, y*th))
+                    # else:
+                    #     surface.blit(test_img, (x*tw, y*th))
             elif isinstance(layer, pytmx.TiledObjectGroup):
                 pass
             elif isinstance(layer, pytmx.TiledImageLayer):
@@ -198,7 +202,7 @@ class Game:
         # initialize game settings
         pygame.init()
         # pygame.mixer.init()
-        flags = pygame.DOUBLEBUF | pygame.HWSURFACE  # | pygame.FULLSCREEN
+        flags = pygame.DOUBLEBUF | pygame.HWSURFACE  | pygame.SRCALPHA  # | pygame.FULLSCREEN
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
         pygame.display.set_caption("My Game")
         self.clock = pygame.time.Clock()
@@ -213,6 +217,7 @@ class Game:
         self.level = 1
         # TODO: add per-level loading of tmx
         self.map_surface = self.tile_renderer.make_map()
+        self.map_surface.set_colorkey(BLACK)
         self.map_rect = self.map_surface.get_rect()
         for tile_object in self.tile_renderer.tmxdata.objects:
             properties = tile_object.__dict__
@@ -263,7 +268,7 @@ class Game:
         # draw everything to the screen
         fps_txt = "FPS: {:.2f}".format(self.clock.get_fps())
         pygame.display.set_caption(fps_txt)
-        self.screen.fill(WHITE)
+        self.screen.fill(GREEN)
         # self.backgrounds.draw(self.screen)
         self.screen.blit(self.map_surface, self.map_rect)
         self.all_sprites.draw(self.screen)
