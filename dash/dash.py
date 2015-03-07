@@ -202,7 +202,7 @@ class Game:
         # initialize game settings
         pygame.init()
         # pygame.mixer.init()
-        flags = pygame.DOUBLEBUF | pygame.HWSURFACE  | pygame.SRCALPHA  # | pygame.FULLSCREEN
+        flags = pygame.DOUBLEBUF | pygame.HWSURFACE  # | pygame.FULLSCREEN
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
         pygame.display.set_caption("My Game")
         self.clock = pygame.time.Clock()
@@ -239,7 +239,7 @@ class Game:
         self.background = pygame.image.load('img/game_bg_01_001.png').convert()
         self.background = pygame.transform.scale(self.background, [640, 640])
         self.sprite_sheet = SpriteSheet("img/sprites.png")
-        self.tile_renderer = TileRenderer('img/dash.tmx')
+        self.tile_renderer = TileRenderer('img/dash2.tmx')
 
     def run(self):
         # The Game Loop
@@ -260,6 +260,7 @@ class Game:
             self.bg1.rect.left = self.bg2.rect.right
         if self.bg2.rect.right <= 0:
             self.bg2.rect.left = self.bg1.rect.right
+        self.backgrounds.update()
         self.all_sprites.update()
         self.map_rect.x -= self.speed
         self.obstacles.update()
@@ -268,8 +269,8 @@ class Game:
         # draw everything to the screen
         fps_txt = "FPS: {:.2f}".format(self.clock.get_fps())
         pygame.display.set_caption(fps_txt)
-        self.screen.fill(GREEN)
-        # self.backgrounds.draw(self.screen)
+        # self.screen.fill(GREEN)
+        self.backgrounds.draw(self.screen)
         self.screen.blit(self.map_surface, self.map_rect)
         self.all_sprites.draw(self.screen)
         pygame.display.flip()
