@@ -1,6 +1,7 @@
 # GameMenu.py
 # Utility classes to display a menu on the screen
 import pygame
+import sys
 
 class MenuItem(pygame.font.Font):
     def __init__(self, text, font, font_size=30, color=(255, 255, 255), padding=0):
@@ -65,6 +66,7 @@ class GameMenu:
         # highlight the mouse hover item
         if item.is_selected_mouse():
             item.set_color(self.hcolor)
+            self.cur_item = self.items.index(item)
             # item.set_italic(True)
         else:
             item.set_color(self.color)
@@ -79,7 +81,9 @@ class GameMenu:
         if self.cur_item is None:
             self.cur_item = 0
         else:
-            if key == pygame.K_UP:
+            if key == pygame.K_RETURN:
+                self.go()
+            elif key == pygame.K_UP:
                 self.cur_item -= 1
             elif key == pygame.K_DOWN:
                 self.cur_item += 1
@@ -88,23 +92,35 @@ class GameMenu:
         # self.items[self.cur_item].set_italic(True)
         self.items[self.cur_item].set_color(self.hcolor)
 
+    def go(self):
+        # execute the selected item's action
+        if self.cur_item is None:
+            return
+        if self.items[self.cur_item].text == "Quit":
+            pygame.quit()
+            sys.exit()
+        elif self.items[self.cur_item].text == "Play":
+            self.running = False
+
     def run(self):
-        running = True
-        while running:
+        self.running = True
+        while self.running:
             self.game.clock.tick(30)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit()
-                    elif event.key in [pygame.K_UP, pygame.K_DOWN]:
+                        sys.exit()
+                    elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_RETURN]:
                         self.mouse_visible = False
                         self.set_keyb_selection(event.key)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for item in self.items:
                         if item.is_selected_mouse():
-                            pass
+                            self.go()
             # return mouse visibility if mouse moves
             if pygame.mouse.get_rel() != (0, 0):
                 self.mouse_visible = True
@@ -148,5 +164,8 @@ if __name__ == "__main__":
 
     g = Game()
     font = pygame.font.match_font("Ubuntu Mono")
+    # standard list of options and customized labels
+    items = {"play": "Play", "opt": "Options", "quit": "Quit"}
     menu = GameMenu(g, "My Game", ["Play", "Options", "Quit"], font=font, font_size=40)
     menu.run()
+    print("starting game")
