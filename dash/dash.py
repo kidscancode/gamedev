@@ -7,12 +7,11 @@ import sys
 import pytmx
 
 # TODO:
-# Tile-based level design (level.txt)
 # level progression
 # level exit
 # explosion on die
 # particles (jump/land)
-# sprite animations
+# sprite animations?
 # sounds
 # music
 # gravity reversal
@@ -230,9 +229,16 @@ class Game:
         self.bg1 = Background(self, self.background, 0, self.backgrounds)
         self.bg2 = Background(self, self.background, self.background.get_width(), self.backgrounds)
         self.player = Player(self, self.all_sprites)
-        # for i in range(8):
-        #     Object(self, WIDTH + i * 320, "plat", [self.all_sprites, self.obstacles])
-        #     Object(self, WIDTH + 200 + i * 320, "spike", [self.all_sprites, self.obstacles])
+
+    def draw_text(self, text, size, x, y):
+        # utility function to draw text at a given location
+        # TODO: move font matching to beginning of file (don't repeat)
+        font_name = pygame.font.match_font('arial')
+        font = pygame.font.Font(font_name, size)
+        text_surface = font.render(text, True, WHITE)
+        text_rect = text_surface.get_rect()
+        text_rect.topleft = (x, y)
+        return self.screen.blit(text_surface, text_rect)
 
     def load_data(self):
         # load all your assets (sound, images, etc.)
@@ -297,8 +303,8 @@ class Game:
         pass
 
 g = Game()
-g.show_start_screen()
 while True:
+    g.show_start_screen()
     g.new()
     g.run()
     g.show_go_screen()

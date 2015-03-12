@@ -5,7 +5,7 @@
  </tileset>
  <layer name="Tile Layer 1" width="200" height="10">
   <data encoding="base64" compression="zlib">
-   eJzt10EKQEAAhlFHwH1wFLec8xllahqZiZKF9+orC2Qx/0LX/U+oBNgGtNgG1NkGAEBdHxuOxo+/Bb6Qb6As38STf4v1CN6Qzu5+TteL7tzT2kApFNdX768975+dZIrNkk4tsQ0oSUiF
+   eJztlm0KgzAQBXOE6gVa//US6lG8pefrCgoSs3HT+lHNDAwKiUHDe0Hn8qOPCAB0A9bJPRN0A2KQC/YAdMgGgA79OJen+BKrwNhDLAKWievExizjOXPHfsxzFcrSkZDNa3PVfmhnq9+Jb76vG7Xwa/7px3/yHq979GPK7pDTTjFljvUfY6L37rX1Y89b92XLfljfz63MTRmzngO5MuSgFhtEXNiKH3piWaM=
   </data>
  </layer>
  <objectgroup name="Object Layer 1" width="200" height="10">
@@ -15,8 +15,22 @@
   <object name="platform" type="platform" x="1442" y="225" width="220" height="26"/>
   <object name="platform" type="platform" x="1666" y="194" width="122" height="26"/>
   <object name="spike" type="spike" x="1801" y="260" width="176" height="20"/>
-  <object name="spike" type="spike" x="2182" y="229" width="52" height="52"/>
+  <object name="spike" type="spike" x="2181" y="232" width="52" height="52"/>
   <object name="spike" type="spike" x="1030" y="260" width="178" height="20"/>
   <object name="spike" type="spike" x="742" y="260" width="178" height="20"/>
+  <object name="spike" type="spike" x="2025" y="36" width="52" height="52"/>
+  <object name="platform" type="platform" x="2532" y="228" width="86" height="47"/>
+  <object name="platform" type="platform" x="2788" y="198" width="84" height="78"/>
+  <object name="platform" type="platform" x="3046" y="165" width="83" height="116"/>
+  <object name="platform" type="platform" x="3270" y="162" width="211" height="26"/>
+  <object name="platform" type="platform" x="3619" y="162" width="88" height="28"/>
+  <object name="platform" type="platform" x="3843" y="161" width="88" height="28"/>
+  <object name="platform" type="platform" x="4099" y="160" width="88" height="28"/>
+  <object name="spike" type="spike" x="6370" y="35" width="27" height="249"/>
+  <object name="end" type="end" x="6308" y="226" width="26" height="29"/>
+  <object name="spike" type="spike" x="3143" y="261" width="112" height="23"/>
+  <object name="spike" type="spike" x="3496" y="263" width="112" height="23"/>
+  <object name="spike" type="spike" x="3720" y="259" width="112" height="23"/>
+  <object name="spike" type="spike" x="3942" y="260" width="147" height="22"/>
  </objectgroup>
 </map>
