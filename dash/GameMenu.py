@@ -1,5 +1,11 @@
 # GameMenu.py
 # Utility classes to display a menu on the screen
+# TODO:
+# Background image
+# Button/text images
+# Select cursor / highlight
+# Sounds
+# Animations?
 import pygame
 import sys
 
@@ -37,7 +43,8 @@ class MenuItem(pygame.font.Font):
 
 class GameMenu:
     def __init__(self, game, title, items, bg_color=(0, 0, 0), bg_image=None,
-                 font=None, font_size=30, color=(255, 255, 255), hcolor=(255, 0, 0)):
+                 font=None, font_size=30, color=(255, 255, 255), hcolor=(255, 0, 0),
+                 padding=40):
         self.game = game
         self.bg_image = bg_image
         self.title = title
@@ -53,7 +60,7 @@ class GameMenu:
         self.items = []
         self.cur_item = None
         self.mouse_visible = True
-        self.padding = 40
+        self.padding = padding
         for index, item in enumerate(items):
             menu_item = MenuItem(item, font, font_size, color, self.padding)
             total_height = len(items) * menu_item.height
@@ -132,7 +139,7 @@ class GameMenu:
                 self.game.screen.blit(self.bg_image, (0, 0))
 
             if type(self.title) is str:
-                self.game.draw_text(self.title, 60, self.game.screen.get_width()/2, 40)
+                self.game.draw_text(self.title, 40, self.game.screen.get_width()/2, 40)
 
             for item in self.items:
                 if self.mouse_visible:

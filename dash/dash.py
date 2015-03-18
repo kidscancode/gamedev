@@ -4,7 +4,9 @@
 # install pytmx: pip3 install pytmx
 import pygame
 import sys
+import os
 import pytmx
+from GameMenu import *
 
 # TODO:
 # level progression
@@ -199,6 +201,8 @@ class Blocker(pygame.sprite.Sprite):
 class Game:
     def __init__(self):
         # initialize game settings
+        os.environ['SDL_VIDEO_CENTERED'] = '1'
+        # os.environ['SDL_VIDEO_WINDOW_POS'] = '0,0'
         pygame.init()
         # pygame.mixer.init()
         flags = pygame.DOUBLEBUF | pygame.HWSURFACE  # | pygame.FULLSCREEN
@@ -206,6 +210,9 @@ class Game:
         pygame.display.set_caption("My Game")
         self.clock = pygame.time.Clock()
         self.load_data()
+        font = pygame.font.match_font("Ubuntu Mono")
+        self.menu = GameMenu(self, "Dash!", ["Play", "Options", "Quit"], font=font, font_size=30,
+                             padding=20)
 
     def new(self):
         # initialize all your variables and do all the setup for a new game
@@ -230,15 +237,18 @@ class Game:
         self.bg2 = Background(self, self.background, self.background.get_width(), self.backgrounds)
         self.player = Player(self, self.all_sprites)
 
-    def draw_text(self, text, size, x, y):
-        # utility function to draw text at a given location
-        # TODO: move font matching to beginning of file (don't repeat)
-        font_name = pygame.font.match_font('arial')
-        font = pygame.font.Font(font_name, size)
-        text_surface = font.render(text, True, WHITE)
-        text_rect = text_surface.get_rect()
-        text_rect.topleft = (x, y)
-        return self.screen.blit(text_surface, text_rect)
+    def draw_text(self, text, size, x, y, center=True):
+            # utility function to draw text at a given location
+            # TODO: move font matching to beginning of file (don't repeat)
+            font_name = pygame.font.match_font('arial')
+            font = pygame.font.Font(font_name, size)
+            text_surface = font.render(text, True, (255, 255, 255))
+            text_rect = text_surface.get_rect()
+            if center:
+                text_rect.midtop = (x, y)
+            else:
+                text_rect.topleft = (x, y)
+            return self.screen.blit(text_surface, text_rect)
 
     def load_data(self):
         # load all your assets (sound, images, etc.)
@@ -296,7 +306,7 @@ class Game:
 
     def show_start_screen(self):
         # show the start screen
-        pass
+        self.menu.run()
 
     def show_go_screen(self):
         # show the game over screen

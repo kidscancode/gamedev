@@ -54,9 +54,9 @@ class Game:
         self.new()
 
     def new(self):
-        self.part_img = pygame.image.load('img/ship_particle.png').convert()
-        self.box_img = pygame.image.load('img/playerShip1_red.png').convert_alpha()
-        self.bg_img = pygame.image.load('img/scrolling2.png').convert_alpha()
+        self.part_img = pygame.image.load('../war/img/ship_particle.png').convert()
+        self.box_img = pygame.image.load('../war/img/playerShip1_red.png').convert_alpha()
+        self.bg_img = pygame.image.load('../war/img/scrolling2.png').convert_alpha()
 
         self.all_sprites = pygame.sprite.Group()
         self.box = Box(self, self.box_img, self.all_sprites)

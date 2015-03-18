@@ -229,6 +229,7 @@ class Planet(pygame.sprite.DirtySprite):
 
 
 class RenderText(pygame.sprite.Sprite):
+    # TODO: Do we need this?
     def __init__(self, size, color, pos, *groups):
         pygame.sprite.Sprite.__init__(self, *groups)
         font_name = pygame.font.match_font('arial')
