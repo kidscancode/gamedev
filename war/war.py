@@ -1,15 +1,15 @@
 # Spacewar!
 # by KidsCanCode 2015
 # For educational purposes only
-# TODO:
-# Sounds
-# Enemy AI
-# Other weapons (missile, beam)
-# Shields
-# Fuel
-# More particles?
-# explosions
-# Menu/start/end screens
+
+# TODO: Sounds
+# TODO: Enemy AI
+# TODO: Other weapons (missile, beam)
+# TODO: Shields
+# TODO: Fuel
+# TODO: More particles?
+# TODO: explosions
+# TODO: Menu/start/end screens
 
 import pygame
 import sys

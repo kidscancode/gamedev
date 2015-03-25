@@ -6,17 +6,19 @@ import pygame
 import sys
 import os
 import pytmx
-from GameMenu import *
+# game menu module currently located in above directory
+# TODO: when finished, will become a package
+sys.path.insert(0, '../')
+from GameMenu.GameMenu import *
 
-# TODO:
-# level progression
-# level exit
-# explosion on die
-# particles (jump/land)
-# sprite animations?
-# sounds
-# music
-# gravity reversal
+# TODO: level progression
+# TODO: level exit
+# TODO: explosion on die
+# TODO: particles (jump/land)
+# TODO: sprite animations?
+# TODO: sounds
+# TODO: music
+# TODO: gravity reversal
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)

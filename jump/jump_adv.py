@@ -1,18 +1,17 @@
 # Jump!
-# by KidsCanCode 2014
+# by KidsCanCode 2015
 # A Doodle Jump style game in Pygame
 # For educational purposes only
 
-# TODO
-# Sounds:
+# TODO: Sounds:
 #   * Hit enemy
 #   * Pow
 #   * Heart
 #   * Walk (step)
-# More enemies - shooters, ?
-# Background image / clouds
-# Moving platforms
-# Particle effects
+# TODO: More enemies - shooters, ?
+# TODO: Background image / clouds
+# TODO: Moving platforms
+# TODO: Particle effects
 
 import pygame
 import sys

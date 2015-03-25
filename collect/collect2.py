@@ -3,11 +3,10 @@
 # Run around and collect the blocks
 # For educational purposes only
 
-# TODO
-# time bonus
-# powerups
-# more mob features (different types, etc)
-# Level designs (walls, gravity (black holes?))
+# TODO: time bonus
+# TODO: powerups
+# TODO: more mob features (different types, etc)
+# TODO: Level designs (walls, gravity (black holes?))
 
 import pygame
 import sys
@@ -170,7 +169,6 @@ class Mob(pygame.sprite.Sprite):
                     self.vel.y = 0
                     self.pos.y = hit_list[0].rect.bottom
                     self.rect.top = hit_list[0].rect.bottom
-                self.speed_y = 0
 
 
 class Wall(pygame.sprite.Sprite):

@@ -6,12 +6,12 @@
 # Meteors - http://opengameart.org/content/asteroids
 # Rocket - http://opengameart.org/content/rocket
 # Lasers = Modified from http://opengameart.org/content/lasers-and-beams
-# TODO:
-# * timer on powerups
-# * powerup variety (spray, beam, etc)
-# * auto-fire (as long as key is down)
-# * enemies, enemy health, enemy pushback
-# * moving starfield
+
+# TODO: timer on powerups
+# TODO: powerup variety (spray, beam, etc)
+# TODO: auto-fire (as long as key is down)
+# TODO: enemies, enemy health, enemy pushback
+# TODO: moving starfield
 import pygame
 import sys
 import random

@@ -1,10 +1,18 @@
+# Particles for pygame
+# by KidsCanCode 2015
+# For educational purposes only
 import pygame
 import math
 import random
 
+# TODO: particle rotations
+# TODO: test with varied particle images
+# TODO: more particle paths
+
 def interpolate(v1, v2, range):
     return pygame.math.Vector2(v1.x + (v2.x - v1.x) * range,
                                v1.y + (v2.y - v1.y) * range)
+
 class Particle(pygame.sprite.Sprite):
     def __init__(self, game, image, pos, vel, life, lifetime,
                  fade_start, dorotate):
@@ -41,8 +49,8 @@ class Particle(pygame.sprite.Sprite):
         self.life += self.game.dt
         self.fade()
         self.pos += self.vel
-        self.rect.centerx = self.pos.x #+ self.game.OFFSET.x
-        self.rect.centery = self.pos.y #+ self.game.OFFSET.y
+        self.rect.centerx = self.pos.x  #+ self.game.OFFSET.x
+        self.rect.centery = self.pos.y  #+ self.game.OFFSET.y
 
     def blit(self):
         return self.game.screen.blit(self.image, self.rect, special_flags=pygame.BLEND_ADD)

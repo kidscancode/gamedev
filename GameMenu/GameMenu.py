@@ -1,11 +1,10 @@
 # GameMenu.py
 # Utility classes to display a menu on the screen
-# TODO:
-# Background image
-# Button/text images
-# Select cursor / highlight
-# Sounds
-# Animations?
+# TODO: Background image
+# TODO: Button/text images
+# TODO: Select cursor / highlight
+# TODO: Sounds
+# TODO: Animations?
 import pygame
 import sys
 
