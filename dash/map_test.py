@@ -1,6 +1,7 @@
 import pygame
 import pytmx
 import sys
+import os
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -103,7 +104,9 @@ class Blocker(pygame.sprite.Sprite):
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        os.environ['SDL_VIDEODRIVER'] = 'fbcon'
+        flags = pygame.DOUBLEBUF | pygame.HWSURFACE  # | pygame.FULLSCREEN
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
         self.screen_rect = self.screen.get_rect()
         pygame.display.set_caption("Map Test")
         self.clock = pygame.time.Clock()
