@@ -14,6 +14,7 @@ ISO_OFFSETX = 400
 ISO_OFFSETY = 50
 ORTHO_OFFSETX = 50
 ORTHO_OFFSETY = 50
+GRIDSIZE = 50
 # alias for Vector2 class (saves typing)
 vec = pygame.math.Vector2
 
@@ -27,30 +28,36 @@ def iso_to_screen(pt):
     screen_y = (pt.x + pt.y) / 2 + ISO_OFFSETY
     return vec(screen_x, screen_y)
 
+def screen_to_iso(pos):
+    # convert a screen coordinate to grid position (ex: mouse click)
+    grid_x = (pos.x + 2 * pos.y - ISO_OFFSETX - 2 * ISO_OFFSETY) / 2
+    grid_y = (2 * pos.y - pos.x + ISO_OFFSETX - 2 * ISO_OFFSETY) / 2
+    return vec(grid_x, grid_y)
+
 def draw_ortho_grid():
     # draw the orthographic grid
-    for x in range(0, 550, 50):
+    for x in range(0, GRIDSIZE*11, GRIDSIZE):
         start = vec(x, 0)
-        end = vec(x, 500)
+        end = vec(x, GRIDSIZE*10)
         pygame.draw.line(screen, (128, 128, 128),
                          (start.x+ORTHO_OFFSETX, start.y+ORTHO_OFFSETY),
                          (end.x+ORTHO_OFFSETX, end.y+ORTHO_OFFSETY))
-    for y in range(0, 550, 50):
+    for y in range(0, GRIDSIZE*11, GRIDSIZE):
         start = vec(0, y)
-        end = vec(500, y)
+        end = vec(GRIDSIZE*10, y)
         pygame.draw.line(screen, (128, 128, 128),
                          (start.x+ORTHO_OFFSETX, start.y+ORTHO_OFFSETY),
                          (end.x+ORTHO_OFFSETX, end.y+ORTHO_OFFSETY))
 
 def draw_iso_grid():
     # draw the isometric grid
-    for x in range(0, 550, 50):
+    for x in range(0, GRIDSIZE*11, GRIDSIZE):
         start = iso_to_screen(vec(x, 0))
-        end = iso_to_screen(vec(x, 500))
+        end = iso_to_screen(vec(x, GRIDSIZE*10))
         pygame.draw.line(screen, (128, 128, 128), (start.x, start.y), (end.x, end.y))
-    for y in range(0, 550, 50):
+    for y in range(0, GRIDSIZE*11, GRIDSIZE):
         start = iso_to_screen(vec(0, y))
-        end = iso_to_screen(vec(500, y))
+        end = iso_to_screen(vec(GRIDSIZE*10, y))
         pygame.draw.line(screen, (128, 128, 128), (start.x, start.y), (end.x, end.y))
 
 def draw_point(pos, iso_mode):
@@ -88,6 +95,15 @@ def draw_labels(iso_mode):
         ptext.draw("Screen Pos:", topleft=(560, 120), fontsize=30, fontname=None)
         ptext.draw("({:.0f}, {:.0f})".format(scr_pos.x, scr_pos.y),
                    topleft=(560, 150), fontsize=40, fontname=None)
+
+def do_click(pos, iso_mode):
+    # testing the screen_to_iso conversion
+    if iso_mode:
+        pos = vec(pos[0], pos[1])
+        grid_pos = screen_to_iso(pos)
+        print("Screen: ({}, {})".format(pos.x, pos.y))
+        print("Grid: ({}, {})".format(grid_pos.x, grid_pos.y))
+
 # Flag for iso/ortho mode - start in Ortho
 iso_mode = False
 while True:
@@ -95,6 +111,8 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            do_click(event.pos, iso_mode)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
@@ -102,22 +120,22 @@ while True:
                 # toggle between iso & ortho mode
                 iso_mode = not iso_mode
             elif event.key == pygame.K_LEFT:
-                pos.x -= 50
+                pos.x -= GRIDSIZE
             elif event.key == pygame.K_RIGHT:
-                pos.x += 50
+                pos.x += GRIDSIZE
             elif event.key == pygame.K_UP:
-                pos.y -= 50
+                pos.y -= GRIDSIZE
             elif event.key == pygame.K_DOWN:
-                pos.y += 50
+                pos.y += GRIDSIZE
             # don't allow movement off the grid
             if pos.x < 0:
                 pos.x = 0
             if pos.y < 0:
                 pos.y = 0
-            if pos.x > 500:
-                pos.x = 500
-            if pos.y > 500:
-                pos.y = 500
+            if pos.x > GRIDSIZE*10:
+                pos.x = GRIDSIZE*10
+            if pos.y > GRIDSIZE*10:
+                pos.y = GRIDSIZE*10
 
     screen.fill((0, 0, 0))
     if iso_mode:
