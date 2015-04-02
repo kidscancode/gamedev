@@ -39,13 +39,11 @@ def draw_ortho_grid():
     for x in range(0, GRIDSIZE*11, GRIDSIZE):
         start = vec(x+ORTHO_OFFSETX, 0+ORTHO_OFFSETY)
         end = vec(x+ORTHO_OFFSETX, GRIDSIZE*10+ORTHO_OFFSETY)
-        pygame.draw.line(screen, (128, 128, 128),
-                         (start.x, start.y), (end.x, end.y))
+        pygame.draw.line(screen, (128, 128, 128), (start.x, start.y), (end.x, end.y))
     for y in range(0, GRIDSIZE*11, GRIDSIZE):
         start = vec(0+ORTHO_OFFSETX, y+ORTHO_OFFSETY)
         end = vec(GRIDSIZE*10+ORTHO_OFFSETX, y+ORTHO_OFFSETY)
-        pygame.draw.line(screen, (128, 128, 128),
-                         (start.x, start.y), (end.x, end.y))
+        pygame.draw.line(screen, (128, 128, 128), (start.x, start.y), (end.x, end.y))
 
 def draw_iso_grid():
     # draw the isometric grid
