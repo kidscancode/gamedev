@@ -1,8 +1,6 @@
 # Template for new Pygame project
 # KidsCanCode 2014
 import pygame
-import sys
-import time
 import random
 
 # define some colors (R, G, B)
@@ -20,7 +18,6 @@ PURPLE = (128, 0, 128)
 RED = (255, 0, 0)
 SILVER = (192, 192, 192)
 TEAL = (0, 128, 128)
-WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255)

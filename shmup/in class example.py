@@ -58,12 +58,12 @@ class Powerup(pygame.sprite.Sprite):
         self.speedy = random.randrange(3, 8)
         self.rect.x = random.randrange(0, WIDTH-20)
         self.rect.y = -30
-        
+
     def update(self):
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT:
             self.kill()
-                
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -73,12 +73,12 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.bottom = y
         self.rect.centerx = x
         self.speedy = -15
-    
+
     def update(self):
         self.rect.y += self.speedy
         if self.rect.bottom < 0:
             self.kill()
-        
+
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -94,7 +94,7 @@ class Mob(pygame.sprite.Sprite):
         self.rot = 0
         self.last_update = pygame.time.get_ticks()
         self.rot_speed = random.randrange(-8, 8)
-        
+
     def rotate(self):
         now = pygame.time.get_ticks()
         if now - self.last_update > 50:
@@ -105,7 +105,7 @@ class Mob(pygame.sprite.Sprite):
             self.image = new_image
             self.rect =  self.image.get_rect()
             self.rect.center = old_center
-               
+
     def update(self):
         self.rotate()
         self.rect.y += self.speedy
@@ -113,7 +113,7 @@ class Mob(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-80, -50)
             self.rect.x = random.randrange(WIDTH-self.rect.width)
             self.speedy = random.randrange(3, 12)
-        
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -128,7 +128,7 @@ class Player(pygame.sprite.Sprite):
         self.speedx, self.speedy = 0, 0
         self.power = 1
         self.power_time = pygame.time.get_ticks()
-    
+
     def shoot(self):
         if self.power == 1:
             bullet = Bullet(self.rect.centerx, self.rect.top)
@@ -143,7 +143,7 @@ class Player(pygame.sprite.Sprite):
             bullets.add(bullet1)
             bullets.add(bullet2)
             pew_sound.play()
-            
+
     def update(self):
         if self.power == 2 and pygame.time.get_ticks() - self.power_time > 5000:
             self.power = 1
@@ -153,25 +153,25 @@ class Player(pygame.sprite.Sprite):
             self.speedx = -10
         if keystate[pygame.K_RIGHT]:
             self.speedx = 10
-        
+
         self.rect.x += self.speedx
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
- 
-while True:    
-    pygame.mixer.music.play(loops=-1)    
+
+while True:
+    pygame.mixer.music.play(loops=-1)
     all_sprites = pygame.sprite.Group()
     mobs = pygame.sprite.Group()
     bullets = pygame.sprite.Group()
     powerups = pygame.sprite.Group()
     player = Player()
-    all_sprites.add(player) 
+    all_sprites.add(player)
     for i in range(10):
         mob = Mob()
         all_sprites.add(mob)
-        mobs.add(mob)       
+        mobs.add(mob)
     score = 0
     # Game Loop
     running = True
@@ -214,6 +214,5 @@ while True:
         score_text = "Score: " + str(score)
         draw_text(score_text, 18, WIDTH/2, 10)
         pygame.display.flip()
-        
+
     show_go_screen()
-    
