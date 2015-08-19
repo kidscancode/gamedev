@@ -28,7 +28,7 @@ BGCOLOR = BLACK
 WIDTH = 360
 HEIGHT = 480
 FPS = 30
-
+TITLE = "My Game"
 # initialize pygame
 pygame.init()
 # initialize sound - remove if you're not using sound (always use sound!)
@@ -38,7 +38,7 @@ class Game:
     def __init__(self):
         # initialize game settings
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption("My Game")
+        pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.load_data()
 

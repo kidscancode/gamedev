@@ -5,6 +5,7 @@
 # TODO: Select cursor / highlight
 # TODO: Sounds
 # TODO: Animations?
+# TODO: Convert to use ptext.py
 import pygame
 import sys
 
@@ -47,10 +48,6 @@ class GameMenu:
         self.game = game
         self.bg_image = bg_image
         self.title = title
-        # if type(self.title) is str:
-        #     self.game
-        # elif type(self.title) is pygame.Surface:
-        #     pass
         self.width = self.game.screen.get_width()
         self.height = self.game.screen.get_height()
         self.bg_color = bg_color
@@ -140,6 +137,8 @@ class GameMenu:
             if type(self.title) is str:
                 self.game.draw_text(self.title, 40, self.game.screen.get_width()/2, 40)
 
+            if self.bg_image:
+                self.game.screen.blit(self.bg_image, self.bg_rect)
             for item in self.items:
                 if self.mouse_visible:
                     self.set_mouse_hover(item)

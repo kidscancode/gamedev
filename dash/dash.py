@@ -7,7 +7,7 @@ import sys
 import os
 import pytmx
 # game menu module currently located in above directory
-# TODO: when finished, will become a package
+# this adds the parent directory to the path so we can import GameMenu
 sys.path.insert(0, '../')
 from GameMenu.GameMenu import *
 
