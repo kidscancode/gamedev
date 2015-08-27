@@ -1,5 +1,6 @@
-# Template for new Pygame project
-# KidsCanCode 2014
+# Pygame Template
+# Use this to start a new Pygame project
+# KidsCanCode 2015
 import pygame
 import random
 
@@ -23,39 +24,40 @@ ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255)
 BGCOLOR = BLACK
 
-# basic constants for your game options
+# basic constants to set up your game
 WIDTH = 360
 HEIGHT = 480
 FPS = 30
 
 # initialize pygame
 pygame.init()
-# initialize sound - remove if you're not using sound (always use sound!)
-pygame.mixer.init()
+# initialize sound - uncomment if you're using sound
+# pygame.mixer.init()
+# create the game window and set the title
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("My Game")
+# start the clock
 clock = pygame.time.Clock()
 
+# set the 'running' variable to False to end the game
 running = True
+# start the game loop
 while running:
+    # keep the loop running at the right speed
     clock.tick(FPS)
-    # check for all your events
+    ##### Game loop part 1: Events #####
     for event in pygame.event.get():
         # this one checks for the window being closed
         if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit()
-        # now check for keypresses
-        elif event.type == pygame.KEYDOWN:
-            # this one quits if the player presses Esc
-            if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                sys.exit()
-            # add any other key events here
+        # add any other events here (keys, mouse, etc.)
 
-    ##### Game logic goes here  #########
+    ##### Game loop part 2: Updates #####
 
-    ##### Draw/update screen #########
+    ##### Game loop part 3: Draw #####
     screen.fill(BGCOLOR)
     # after drawing, flip the display
     pygame.display.flip()
+
+# close the window
+pygame.quit()

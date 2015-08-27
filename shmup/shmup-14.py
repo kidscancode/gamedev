@@ -1,5 +1,5 @@
 # Shmup - Part 14
-#   more gun levels
+#   explosions
 # by KidsCanCode 2015
 # A space shmup in multiple parts
 # For educational purposes only
@@ -110,7 +110,7 @@ class Mob(pygame.sprite.Sprite):
         self.radius = int(self.rect.width * 0.85 / 2)
         # uncomment to test the radius
         # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
-        self.rect.x = random.randrange(WIDTH-self.rect.width)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-80, -50)
         self.speedy = random.randrange(1, 8)
         self.rot = 0
@@ -133,7 +133,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10:
             self.rect.y = random.randrange(-80, -50)
-            self.rect.x = random.randrange(WIDTH-self.rect.width)
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.speedy = random.randrange(1, 8)
 
 class Bullet(pygame.sprite.Sprite):
@@ -160,7 +160,7 @@ class Powerup(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.bottom = -20
-        self.rect.x = random.randrange(WIDTH-self.rect.width)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.speedy = 3
 
     def update(self):

@@ -2,7 +2,6 @@
 # by KidsCanCode 2015
 # For educational purposes only
 import pygame
-import math
 import random
 
 # TODO: particle rotations
@@ -49,8 +48,8 @@ class Particle(pygame.sprite.Sprite):
         self.life += self.game.dt
         self.fade()
         self.pos += self.vel
-        self.rect.centerx = self.pos.x  #+ self.game.OFFSET.x
-        self.rect.centery = self.pos.y  #+ self.game.OFFSET.y
+        self.rect.centerx = self.pos.x  # + self.game.OFFSET.x
+        self.rect.centery = self.pos.y  # + self.game.OFFSET.y
 
     def blit(self):
         return self.game.screen.blit(self.image, self.rect, special_flags=pygame.BLEND_ADD)
@@ -113,7 +112,7 @@ class ParticleEmitter:
                     t = i / newparticles
                     time_elapsed = (1.0 - t) * self.game.dt
 
-                    vel = self.particle_vel.rotate(-self.parent.rot+self.rand_angle)
+                    vel = self.particle_vel.rotate(-self.parent.rot + self.rand_angle)
                     pos = interpolate(self.prevcurve[0], self.pos, t)
                     pos += (self.parent.vel + vel) * time_elapsed
                     # pos += vel * time_elapsed

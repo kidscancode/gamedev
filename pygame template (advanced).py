@@ -1,7 +1,8 @@
-# Template for new Pygame project
-# KidsCanCode 2014
+# Pygame Template (advanced)
+# Use this to start a new Pygame project
+# KidsCanCode 2015
 import pygame
-import sys
+import random
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -23,21 +24,26 @@ ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255)
 BGCOLOR = BLACK
 
-# basic constants for your game options
+# basic constants to set up your game
 WIDTH = 360
 HEIGHT = 480
 FPS = 30
 TITLE = "My Game"
+
 # initialize pygame
 pygame.init()
-# initialize sound - remove if you're not using sound (always use sound!)
-pygame.mixer.init()
+# initialize sound - uncomment if you're using sound
+# pygame.mixer.init()
 
 class Game:
+    # The Game object will initialize the game, run the game loop,
+    # and display start/end screens
+
     def __init__(self):
-        # initialize game settings
+        # initialize the game and create the window
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
+        # start the clock
         self.clock = pygame.time.Clock()
         self.load_data()
 
@@ -46,11 +52,11 @@ class Game:
         pass
 
     def load_data(self):
-        # load all your assets (sound, images, etc.)
+        # load all your assets (sounds, images, etc.)
         pass
 
     def run(self):
-        # The Game Loop
+        # The Game loop - set self.running to False to end the game
         self.running = True
         while self.running:
             self.clock.tick(FPS)
@@ -60,7 +66,6 @@ class Game:
 
     def quit(self):
         pygame.quit()
-        sys.exit()
 
     def update(self):
         # the update part of the game loop
@@ -77,12 +82,7 @@ class Game:
             # this one checks for the window being closed
             if event.type == pygame.QUIT:
                 self.quit()
-            # now check for keypresses
-            elif event.type == pygame.KEYDOWN:
-                # this one quits if the player presses Esc
-                if event.key == pygame.K_ESCAPE:
-                    self.quit()
-                # add any other key events here
+            # add any other events here (keys, mouse, etc.)
 
     def show_start_screen(self):
         # show the start screen
@@ -92,6 +92,7 @@ class Game:
         # show the game over screen
         pass
 
+# create the game object
 g = Game()
 while True:
     g.show_start_screen()
