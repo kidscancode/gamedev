@@ -1,5 +1,6 @@
-# Shmup - Part 14
-#   add sideways movement to rocks
+# Shmup - Part 16
+#   more powerup levels
+#   power level indicator
 # by KidsCanCode 2015
 # A space shmup in multiple parts
 # For educational purposes only
@@ -22,6 +23,7 @@ HEIGHT = 600
 FPS = 60
 TITLE = "SHMUP"
 BGCOLOR = BLACK
+POWERUP_TIME = 5000
 
 def draw_text(text, size, x, y):
     # generic function to draw some text
@@ -43,6 +45,9 @@ def draw_shield_bar(x, y, pct):
     pygame.draw.rect(screen, GREEN, fill_rect)
     pygame.draw.rect(screen, WHITE, outline_rect, 2)
 
+def draw_power_icons(x, y, num):
+    pass
+
 ############  DEFINE SPRITES  ############
 class Player(pygame.sprite.Sprite):
     # player sprite - moves left/right, shoots
@@ -61,8 +66,13 @@ class Player(pygame.sprite.Sprite):
         self.shoot_delay = 250
         self.last_shot = pygame.time.get_ticks()
         self.power = 1
+        self.power_time = pygame.time.get_ticks()
 
     def update(self):
+        # timeout for powerups
+        if self.power >= 2 and pygame.time.get_ticks() - self.power_time > POWERUP_TIME:
+            self.power -= 1
+            self.power_time = pygame.time.get_ticks()
         # only move if arrow key is pressed
         self.speedx = 0
         keystate = pygame.key.get_pressed()
@@ -81,16 +91,23 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+    def powerup(self):
+        power_sound.play()
+        self.power += 1
+        self.power_time = pygame.time.get_ticks()
+
     def shoot(self):
         now = pygame.time.get_ticks()
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
             if self.power == 1:
+                self.shoot_delay = 250
                 bullet = Bullet(self.rect.centerx, self.rect.top)
                 all_sprites.add(bullet)
                 bullets.add(bullet)
                 pew_sound.play()
-            if self.power >= 2:
+            if self.power == 2:
+                self.shoot_delay = 250
                 bullet1 = Bullet(self.rect.left, self.rect.centery)
                 bullet2 = Bullet(self.rect.right, self.rect.centery)
                 all_sprites.add(bullet1)
@@ -98,6 +115,19 @@ class Player(pygame.sprite.Sprite):
                 bullets.add(bullet1)
                 bullets.add(bullet2)
                 pew_sound.play()
+            if self.power >= 3:
+                self.shoot_delay = 150
+                bullet1 = Bullet(self.rect.left, self.rect.centery)
+                bullet2 = Bullet(self.rect.right, self.rect.centery)
+                bullet3 = Bullet(self.rect.centerx, self.rect.top)
+                all_sprites.add(bullet1)
+                all_sprites.add(bullet2)
+                all_sprites.add(bullet3)
+                bullets.add(bullet1)
+                bullets.add(bullet2)
+                bullets.add(bullet3)
+                pew_sound.play()
+
 
 class Mob(pygame.sprite.Sprite):
     # mob sprite - spawns above top and moves downward
@@ -199,6 +229,8 @@ for img in meteor_list:
 powerup_images = {}
 powerup_images['shield'] = pygame.image.load('img/shield_gold.png').convert()
 powerup_images['gun'] = pygame.image.load('img/bolt_gold.png').convert()
+powerup_icons = {}
+powerup_icons['gun'] = pygame.image.load('img/bolt_gold_small.png').convert()
 
 # set up new game
 def newmob():
@@ -256,8 +288,7 @@ while running:
             if player.shield > 100:
                 player.shield = 100
         if hit.type == 'gun':
-            power_sound.play()
-            player.power += 1
+            player.powerup()
 
     # spawn a powerup (maybe)
     now = pygame.time.get_ticks()
@@ -274,5 +305,6 @@ while running:
     score_text = str(score)
     draw_text(score_text, 18, WIDTH / 2, 10)
     draw_shield_bar(5, 5, player.shield)
+    draw_power_icons(WIDTH - 50, 5, player.power)
     # after drawing, flip the display
     pygame.display.flip()

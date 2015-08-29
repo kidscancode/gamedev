@@ -1,5 +1,5 @@
-# Shmup - Part 14
-#   add sideways movement to rocks
+# Shmup - Part 15
+#   add timer to powerup
 # by KidsCanCode 2015
 # A space shmup in multiple parts
 # For educational purposes only
@@ -22,6 +22,7 @@ HEIGHT = 600
 FPS = 60
 TITLE = "SHMUP"
 BGCOLOR = BLACK
+POWERUP_TIME = 5000
 
 def draw_text(text, size, x, y):
     # generic function to draw some text
@@ -61,8 +62,12 @@ class Player(pygame.sprite.Sprite):
         self.shoot_delay = 250
         self.last_shot = pygame.time.get_ticks()
         self.power = 1
+        self.power_time = pygame.time.get_ticks()
 
     def update(self):
+        # timeout for powerups
+        if self.power >= 2 and pygame.time.get_ticks() - self.power_time > POWERUP_TIME:
+            self.power -= 1
         # only move if arrow key is pressed
         self.speedx = 0
         keystate = pygame.key.get_pressed()
@@ -80,6 +85,11 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
+
+    def powerup(self):
+        power_sound.play()
+        self.power += 1
+        self.power_time = pygame.time.get_ticks()
 
     def shoot(self):
         now = pygame.time.get_ticks()
@@ -256,8 +266,7 @@ while running:
             if player.shield > 100:
                 player.shield = 100
         if hit.type == 'gun':
-            power_sound.play()
-            player.power += 1
+            player.powerup()
 
     # spawn a powerup (maybe)
     now = pygame.time.get_ticks()

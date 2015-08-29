@@ -22,12 +22,12 @@ TEAL = (0, 128, 128)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255)
-BGCOLOR = BLACK
 
 # basic constants to set up your game
 WIDTH = 360
 HEIGHT = 480
 FPS = 30
+BGCOLOR = BLACK
 
 # initialize pygame
 pygame.init()

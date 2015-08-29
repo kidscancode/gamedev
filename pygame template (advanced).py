@@ -1,7 +1,7 @@
 # Pygame Template (advanced)
 # Use this to start a new Pygame project
 # KidsCanCode 2015
-import pygame
+import pygame as pg
 import random
 
 # define some colors (R, G, B)
@@ -22,16 +22,16 @@ TEAL = (0, 128, 128)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 128, 0)
 CYAN = (0, 255, 255)
-BGCOLOR = BLACK
 
 # basic constants to set up your game
 WIDTH = 360
 HEIGHT = 480
 FPS = 30
 TITLE = "My Game"
+BGCOLOR = BLACK
 
 # initialize pygame
-pygame.init()
+pg.init()
 # initialize sound - uncomment if you're using sound
 # pygame.mixer.init()
 
@@ -41,10 +41,10 @@ class Game:
 
     def __init__(self):
         # initialize the game and create the window
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption(TITLE)
+        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+        pg.display.set_caption(TITLE)
         # start the clock
-        self.clock = pygame.time.Clock()
+        self.clock = pg.time.Clock()
         self.load_data()
 
     def new(self):
@@ -65,7 +65,7 @@ class Game:
             self.draw()
 
     def quit(self):
-        pygame.quit()
+        pg.quit()
 
     def update(self):
         # the update part of the game loop
@@ -74,13 +74,13 @@ class Game:
     def draw(self):
         # draw everything to the screen
         self.screen.fill(BGCOLOR)
-        pygame.display.flip()
+        pg.display.flip()
 
     def events(self):
         # catch all events here
-        for event in pygame.event.get():
+        for event in pg.event.get():
             # this one checks for the window being closed
-            if event.type == pygame.QUIT:
+            if event.type == pg.QUIT:
                 self.quit()
             # add any other events here (keys, mouse, etc.)
 

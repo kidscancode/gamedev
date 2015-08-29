@@ -90,7 +90,7 @@ class Player(pygame.sprite.Sprite):
                 all_sprites.add(bullet)
                 bullets.add(bullet)
                 pew_sound.play()
-            if self.power == 2:
+            if self.power >= 2:
                 bullet1 = Bullet(self.rect.left, self.rect.centery)
                 bullet2 = Bullet(self.rect.right, self.rect.centery)
                 all_sprites.add(bullet1)
@@ -110,7 +110,7 @@ class Mob(pygame.sprite.Sprite):
         self.radius = int(self.rect.width * 0.85 / 2)
         # uncomment to test the radius
         # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
-        self.rect.x = random.randrange(WIDTH-self.rect.width)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-80, -50)
         self.speedy = random.randrange(1, 8)
         self.rot = 0
@@ -133,7 +133,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10:
             self.rect.y = random.randrange(-80, -50)
-            self.rect.x = random.randrange(WIDTH-self.rect.width)
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.speedy = random.randrange(1, 8)
 
 class Bullet(pygame.sprite.Sprite):
@@ -160,7 +160,7 @@ class Powerup(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.bottom = -20
-        self.rect.x = random.randrange(WIDTH-self.rect.width)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.speedy = 3
 
     def update(self):
@@ -270,7 +270,7 @@ while running:
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     score_text = str(score)
-    draw_text(score_text, 18, WIDTH/2, 10)
+    draw_text(score_text, 18, WIDTH / 2, 10)
     draw_shield_bar(5, 5, player.shield)
     # after drawing, flip the display
     pygame.display.flip()
