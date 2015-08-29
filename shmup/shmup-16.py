@@ -1,6 +1,5 @@
 # Shmup - Part 16
 #   more powerup levels
-#   power level indicator
 # by KidsCanCode 2015
 # A space shmup in multiple parts
 # For educational purposes only
@@ -45,8 +44,6 @@ def draw_shield_bar(x, y, pct):
     pygame.draw.rect(screen, GREEN, fill_rect)
     pygame.draw.rect(screen, WHITE, outline_rect, 2)
 
-def draw_power_icons(x, y, num):
-    pass
 
 ############  DEFINE SPRITES  ############
 class Player(pygame.sprite.Sprite):
@@ -229,8 +226,6 @@ for img in meteor_list:
 powerup_images = {}
 powerup_images['shield'] = pygame.image.load('img/shield_gold.png').convert()
 powerup_images['gun'] = pygame.image.load('img/bolt_gold.png').convert()
-powerup_icons = {}
-powerup_icons['gun'] = pygame.image.load('img/bolt_gold_small.png').convert()
 
 # set up new game
 def newmob():
@@ -305,6 +300,5 @@ while running:
     score_text = str(score)
     draw_text(score_text, 18, WIDTH / 2, 10)
     draw_shield_bar(5, 5, player.shield)
-    draw_power_icons(WIDTH - 50, 5, player.power)
     # after drawing, flip the display
     pygame.display.flip()

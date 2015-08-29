@@ -1,4 +1,6 @@
 Powerups
+    improve spawning
+    invincibility
     more multifire levels
       diagonal shots
       level indicator
@@ -13,6 +15,7 @@ improved sounds
   different sounds for shot levels
 start screen
 game over screen
+high score
 
 ** Move to Game object **
 ** Break into separate files **
