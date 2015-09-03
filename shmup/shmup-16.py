@@ -125,7 +125,6 @@ class Player(pygame.sprite.Sprite):
                 bullets.add(bullet3)
                 pew_sound.play()
 
-
 class Mob(pygame.sprite.Sprite):
     # mob sprite - spawns above top and moves downward
     def __init__(self):

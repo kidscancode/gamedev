@@ -17,5 +17,4 @@ start screen
 game over screen
 high score
 
-** Move to Game object **
 ** Break into separate files **
