@@ -2,6 +2,7 @@
 # Use this to start a new Pygame project
 # KidsCanCode 2015
 import pygame as pg
+import sys
 import random
 
 # define some colors (R, G, B)
@@ -66,6 +67,7 @@ class Game:
 
     def quit(self):
         pg.quit()
+        sys.exit()
 
     def update(self):
         # the update part of the game loop

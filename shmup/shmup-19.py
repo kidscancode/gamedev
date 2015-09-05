@@ -1,5 +1,5 @@
-# Shmup - Part 17
-#   explosions
+# Shmup - Part 19
+#   lives
 # by KidsCanCode 2015
 # A space shmup in multiple parts
 # For educational purposes only
@@ -44,6 +44,12 @@ def draw_shield_bar(x, y, pct):
     pygame.draw.rect(screen, GREEN, fill_rect)
     pygame.draw.rect(screen, WHITE, outline_rect, 2)
 
+def draw_lives(x, y, lives):
+    for i in range(lives):
+        img_rect = player_mini_image.get_rect()
+        img_rect.x = x + 30 * i
+        img_rect.y = y
+        screen.blit(player_mini_image, img_rect)
 
 ############  DEFINE SPRITES  ############
 class Player(pygame.sprite.Sprite):
@@ -51,7 +57,6 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(player_image, (50, 38))
-        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = 22
         # uncomment to test the radius
@@ -64,8 +69,22 @@ class Player(pygame.sprite.Sprite):
         self.last_shot = pygame.time.get_ticks()
         self.power = 1
         self.power_time = pygame.time.get_ticks()
+        self.lives = 3
+        self.hidden = False
+        self.hide_timer = pygame.time.get_ticks()
+
+    def hide(self):
+        # hide player temporarily
+        self.hidden = True
+        self.hide_timer = pygame.time.get_ticks()
+        self.loc = self.rect.center
+        self.rect.center = (WIDTH / 2, HEIGHT + 200)
 
     def update(self):
+        # unhide if hidden
+        if self.hidden and pygame.time.get_ticks() - self.hide_timer > 1000:
+            self.hidden = False
+            self.rect.center = self.loc
         # timeout for powerups
         if self.power >= 2 and pygame.time.get_ticks() - self.power_time > POWERUP_TIME:
             self.power -= 1
@@ -95,7 +114,7 @@ class Player(pygame.sprite.Sprite):
 
     def shoot(self):
         now = pygame.time.get_ticks()
-        if now - self.last_shot > self.shoot_delay:
+        if not self.hidden and now - self.last_shot > self.shoot_delay:
             self.last_shot = now
             if self.power == 1:
                 self.shoot_delay = 250
@@ -206,7 +225,7 @@ class Explosion(pygame.sprite.Sprite):
         self.rect.center = center
         self.frame = 0
         self.last_update = pygame.time.get_ticks()
-        self.frame_rate = 50
+        self.frame_rate = 75
 
     def update(self):
         now = pygame.time.get_ticks()
@@ -232,6 +251,7 @@ clock = pygame.time.Clock()
 pew_sound = pygame.mixer.Sound('snd/pew.wav')
 shield_sound = pygame.mixer.Sound('snd/pow4.wav')
 power_sound = pygame.mixer.Sound('snd/pow5.wav')
+player_die_sound = pygame.mixer.Sound('snd/rumble1.ogg')
 expl_sounds = []
 for snd in ['snd/expl3.wav', 'snd/expl6.wav']:
     expl_sounds.append(pygame.mixer.Sound(snd))
@@ -240,6 +260,8 @@ pygame.mixer.music.set_volume(0.4)
 background = pygame.image.load("img/starfield.png").convert()
 background_rect = background.get_rect()
 player_image = pygame.image.load('img/playerShip1_orange.png').convert()
+player_image.set_colorkey(BLACK)
+player_mini_image = pygame.transform.scale(player_image, (25, 19))
 bullet_image = pygame.image.load('img/laserRed16.png').convert()
 meteor_list = ['img/meteorBrown_med3.png', 'img/meteorBrown_med1.png',
                'img/meteorBrown_small2.png', 'img/meteorBrown_tiny1.png']
@@ -252,6 +274,7 @@ powerup_images['gun'] = pygame.image.load('img/bolt_gold.png').convert()
 explosion_anim = {}
 explosion_anim['lg'] = []
 explosion_anim['sm'] = []
+explosion_anim['player'] = []
 for i in range(9):
     img = pygame.image.load('img/regularExplosion0{}.png'.format(i)).convert()
     img.set_colorkey(BLACK)
@@ -259,6 +282,9 @@ for i in range(9):
     explosion_anim['lg'].append(img1)
     img2 = pygame.transform.scale(img, (32, 32))
     explosion_anim['sm'].append(img2)
+    img = pygame.image.load('img/sonicExplosion0{}.png'.format(i)).convert()
+    img.set_colorkey(BLACK)
+    explosion_anim['player'].append(img)
 
 # set up new game
 def newmob():
@@ -309,7 +335,18 @@ while running:
         all_sprites.add(expl)
         newmob()
         if player.shield <= 0:
-            running = False
+            # spawn a player explosion and delete the player sprite
+            player_die_sound.play()
+            death_explosion = Explosion(player.rect.center, 'player')
+            all_sprites.add(death_explosion)
+            player.hide()
+            player.lives -= 1
+            player.shield = 100
+            player.power = 1
+    # if player died and explosion finished
+    if player.lives == 0 and not death_explosion.alive():
+        running = False
+        pygame.mixer.music.stop()
 
     # check if player hits powerup
     hits = pygame.sprite.spritecollide(player, powerups, True)
@@ -337,5 +374,6 @@ while running:
     score_text = str(score)
     draw_text(score_text, 18, WIDTH / 2, 10)
     draw_shield_bar(5, 5, player.shield)
+    draw_lives(WIDTH - 100, 5, player.lives)
     # after drawing, flip the display
     pygame.display.flip()

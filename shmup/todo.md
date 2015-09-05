@@ -5,16 +5,24 @@ Powerups
       diagonal shots
       level indicator
 shield graphics (fades out when low)
-explosions
 particles
+floating combat text
+waves/levels
 enemy ships
 big rocks break into little rocks
 UI improvements
 improved sounds
   variable shot sounds
   different sounds for shot levels
+  score font
 start screen
 game over screen
 high score
+sprite group cleanup (add to init)
+layered sprites (explosions on top of mobs)
+pause
 
 ** Break into separate files **
+** move to adv. template (game object)
+** consolidate graphics to spritesheet
+

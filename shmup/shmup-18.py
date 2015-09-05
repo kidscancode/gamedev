@@ -1,5 +1,5 @@
-# Shmup - Part 17
-#   explosions
+# Shmup - Part 18
+#   player death explosion
 # by KidsCanCode 2015
 # A space shmup in multiple parts
 # For educational purposes only
@@ -206,7 +206,7 @@ class Explosion(pygame.sprite.Sprite):
         self.rect.center = center
         self.frame = 0
         self.last_update = pygame.time.get_ticks()
-        self.frame_rate = 50
+        self.frame_rate = 75
 
     def update(self):
         now = pygame.time.get_ticks()
@@ -232,6 +232,7 @@ clock = pygame.time.Clock()
 pew_sound = pygame.mixer.Sound('snd/pew.wav')
 shield_sound = pygame.mixer.Sound('snd/pow4.wav')
 power_sound = pygame.mixer.Sound('snd/pow5.wav')
+player_die_sound = pygame.mixer.Sound('snd/rumble1.ogg')
 expl_sounds = []
 for snd in ['snd/expl3.wav', 'snd/expl6.wav']:
     expl_sounds.append(pygame.mixer.Sound(snd))
@@ -252,6 +253,7 @@ powerup_images['gun'] = pygame.image.load('img/bolt_gold.png').convert()
 explosion_anim = {}
 explosion_anim['lg'] = []
 explosion_anim['sm'] = []
+explosion_anim['player'] = []
 for i in range(9):
     img = pygame.image.load('img/regularExplosion0{}.png'.format(i)).convert()
     img.set_colorkey(BLACK)
@@ -259,6 +261,9 @@ for i in range(9):
     explosion_anim['lg'].append(img1)
     img2 = pygame.transform.scale(img, (32, 32))
     explosion_anim['sm'].append(img2)
+    img = pygame.image.load('img/sonicExplosion0{}.png'.format(i)).convert()
+    img.set_colorkey(BLACK)
+    explosion_anim['player'].append(img)
 
 # set up new game
 def newmob():
@@ -309,7 +314,15 @@ while running:
         all_sprites.add(expl)
         newmob()
         if player.shield <= 0:
-            running = False
+            # spawn a player explosion and delete the player sprite
+            player_die_sound.play()
+            death_explosion = Explosion(player.rect.center, 'player')
+            all_sprites.add(death_explosion)
+            player.kill()
+    # if player died and explosion finished
+    if not player.alive() and not death_explosion.alive():
+        running = False
+        pygame.mixer.music.stop()
 
     # check if player hits powerup
     hits = pygame.sprite.spritecollide(player, powerups, True)
