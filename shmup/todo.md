@@ -11,13 +11,11 @@ waves/levels
 enemy ships
 big rocks break into little rocks
 UI improvements
+    score font
 improved sounds
     sound when ship hit
     variable shot sounds
     different sounds for shot levels
-    score font
-start screen
-game over screen
 high score
 sprite group cleanup (add to init)
 layered sprites (explosions on top of mobs)
