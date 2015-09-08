@@ -12,9 +12,10 @@ enemy ships
 big rocks break into little rocks
 UI improvements
 improved sounds
-  variable shot sounds
-  different sounds for shot levels
-  score font
+    sound when ship hit
+    variable shot sounds
+    different sounds for shot levels
+    score font
 start screen
 game over screen
 high score
