@@ -399,6 +399,8 @@ class Game:
         draw_text(self.screen, score_text, 18, WIDTH / 2, 10)
         draw_shield_bar(self.screen, 5, 5, self.player.shield)
         draw_lives(self.screen, self.player_mini_image, WIDTH - 100, 5, self.player.lives)
+        fps_txt = "FPS: {:.2f}".format(self.clock.get_fps())
+        pg.display.set_caption(fps_txt)
         pg.display.flip()
 
     def events(self):

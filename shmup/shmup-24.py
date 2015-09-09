@@ -1,5 +1,5 @@
 # Shmup - Part 23
-#   add graphical score font
+#   floating combat text
 # by KidsCanCode 2015
 # A space shmup in multiple parts
 # For educational purposes only
@@ -270,6 +270,31 @@ class Explosion(pg.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.center = center
 
+class FloatingScore(pg.sprite.Sprite):
+    def __init__(self, images, center, score, *groups):
+        pg.sprite.Sprite.__init__(self, *groups)
+        self.images = images
+        num_rect = images[0].get_rect()
+        width = len(str(score)) * num_rect.width
+        self.image = pg.Surface([width, num_rect.height])
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        for pos, char in enumerate(str(score)):
+            digit_img = images[int(char)]
+            digit_rect = digit_img.get_rect()
+            digit_rect.topleft = (pos * num_rect.width, 0)
+            self.image.blit(digit_img, digit_rect)
+        self.time_started = pg.time.get_ticks()
+        self.speedx = random.choice([1, -1])
+        self.speedy = random.choice([1, -1])
+
+    def update(self):
+        if pg.time.get_ticks() - self.time_started > 750:
+            self.kill()
+        else:
+            self.rect.x += self.speedx
+            self.rect.y += self.speedy
+
 # initialize pg
 pg.init()
 pg.mixer.init()
@@ -342,7 +367,9 @@ class Game:
             self.explosion_anim['player'].append(img)
         self.num_images = []
         for i in range(10):
-            self.num_images.append(pg.image.load(img_dir + 'numeral{}.png'.format(i)).convert())
+            img = pg.image.load(img_dir + 'numeral{}.png'.format(i)).convert()
+            img.set_colorkey(BLACK)
+            self.num_images.append(img)
 
     def run(self):
         # The Game loop - set self.running to False to end the game
@@ -367,6 +394,7 @@ class Game:
             # more points for smaller hits
             self.score += 25 - hit.radius
             Explosion(self.explosion_anim, hit.rect.center, 'lg', [self.all_sprites])
+            FloatingScore(self.num_images, hit.rect.center, 25 - hit.radius, [self.all_sprites])
             random.choice(self.expl_sounds).play()
             Mob(self.meteor_images, [self.all_sprites, self.mobs])
 
@@ -412,14 +440,14 @@ class Game:
         self.screen.fill(BGCOLOR)
         self.screen.blit(self.background, self.background_rect)
         self.all_sprites.draw(self.screen)
-        score_text = str(self.score)
-        draw_text(self.screen, score_text, 18, WIDTH / 2, 10)
-        # draw_score(self.screen, self.num_images, WIDTH / 2, 10, self.score)
+        # score_text = str(self.score)
+        # draw_text(self.screen, score_text, 18, WIDTH / 2, 10)
+        draw_score(self.screen, self.num_images, WIDTH / 2, 10, self.score)
         draw_shield_bar(self.screen, 5, 5, self.player.shield)
         draw_lives(self.screen, self.player_mini_image, WIDTH - 100, 5, self.player.lives)
         # for testing purposes
-        # fps_txt = "FPS: {:.2f}".format(self.clock.get_fps())
-        # pg.display.set_caption(fps_txt)
+        fps_txt = "FPS: {:.2f}".format(self.clock.get_fps())
+        pg.display.set_caption(fps_txt)
         pg.display.flip()
 
     def events(self):
