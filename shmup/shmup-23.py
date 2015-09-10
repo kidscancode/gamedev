@@ -75,6 +75,7 @@ def draw_score(surf, images, x, y, score):
     num_rect = images[0].get_rect()
     width = len(str(score)) * num_rect.width
     score_surf = pg.Surface([width, num_rect.height])
+    score_surf.set_colorkey(BLACK)
     score_rect = score_surf.get_rect()
     score_rect.midtop = (x, y)
     for pos, char in enumerate(str(score)):
@@ -412,9 +413,9 @@ class Game:
         self.screen.fill(BGCOLOR)
         self.screen.blit(self.background, self.background_rect)
         self.all_sprites.draw(self.screen)
-        score_text = str(self.score)
-        draw_text(self.screen, score_text, 18, WIDTH / 2, 10)
-        # draw_score(self.screen, self.num_images, WIDTH / 2, 10, self.score)
+        # score_text = str(self.score)
+        # draw_text(self.screen, score_text, 18, WIDTH / 2, 10)
+        draw_score(self.screen, self.num_images, WIDTH / 2, 10, self.score)
         draw_shield_bar(self.screen, 5, 5, self.player.shield)
         draw_lives(self.screen, self.player_mini_image, WIDTH - 100, 5, self.player.lives)
         # for testing purposes
