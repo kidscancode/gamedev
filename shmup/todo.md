@@ -6,7 +6,6 @@ Powerups
       level indicator
 shield graphics (fades out when low)
 particles
-floating combat text
 waves/levels
 improved movement (inertia/friction)
 enemy ships
@@ -16,6 +15,7 @@ improved sounds
     variable shot sounds
     different sounds for shot levels
 high score
+    top 10
 layered sprites (explosions on top of mobs)
 pause
 
