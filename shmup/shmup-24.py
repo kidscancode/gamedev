@@ -1,4 +1,4 @@
-# Shmup - Part 23
+# Shmup - Part 24
 #   floating combat text
 # by KidsCanCode 2015
 # A space shmup in multiple parts

@@ -8,6 +8,7 @@ shield graphics (fades out when low)
 particles
 floating combat text
 waves/levels
+improved movement (inertia/friction)
 enemy ships
 big rocks break into little rocks
 improved sounds
