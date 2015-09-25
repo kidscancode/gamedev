@@ -31,17 +31,16 @@ FPS = 30
 TITLE = "My Game"
 BGCOLOR = BLACK
 
-# initialize pygame
-pg.init()
-# initialize sound - uncomment if you're using sound
-# pygame.mixer.init()
-
 class Game:
     # The Game object will initialize the game, run the game loop,
     # and display start/end screens
 
     def __init__(self):
         # initialize the game and create the window
+        # initialize pygame
+        pg.init()
+        # initialize sound - uncomment if you're using sound
+        # pygame.mixer.init()
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         # start the clock
