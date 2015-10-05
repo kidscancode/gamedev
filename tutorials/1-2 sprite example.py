@@ -1,7 +1,6 @@
 # Pygame sprite Example
 import pygame
 import random
-import os
 
 WIDTH = 800
 HEIGHT = 600
@@ -22,7 +21,6 @@ class Player(pygame.sprite.Sprite):
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH / 2, HEIGHT / 2)
-        self.y_speed = 5
 
     def update(self):
         self.rect.x += 5
