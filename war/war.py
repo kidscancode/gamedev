@@ -13,6 +13,7 @@
 
 import pygame
 import sys
+from os import path
 import random
 from particles import *
 
@@ -257,10 +258,12 @@ class Game:
         self.load_data()
 
     def load_data(self):
-        self.bg_img = pygame.image.load('img/scrolling2.png').convert_alpha()
-        self.sprite_sheet = SpriteSheet("img/sheet.png")
-        self.planet_img = pygame.image.load('img/planet3.png').convert_alpha()
-        self.ship_part_img = pygame.image.load('img/ship_particle.png').convert()
+        game_dir = path.dirname(__file__)
+        img_dir = path.join(game_dir, 'img')
+        self.bg_img = pygame.image.load(path.join(img_dir, 'scrolling2.png')).convert_alpha()
+        self.sprite_sheet = SpriteSheet(path.join(img_dir, "sheet.png"))
+        self.planet_img = pygame.image.load(path.join(img_dir, 'planet3.png')).convert_alpha()
+        self.ship_part_img = pygame.image.load(path.join(img_dir, 'ship_particle.png')).convert()
         # self.ship_part_img.set_colorkey(BLACK)
 
     def new(self):

@@ -15,6 +15,7 @@
 
 import pygame
 import sys
+from os import path
 import random
 
 # define some colors
@@ -348,10 +349,13 @@ class Game:
         self.load_data()
 
     def load_data(self):
-        self.sprite_sheet = SpriteSheet("img/jump_sprites_sm.png")
-        self.player_jump_snd = pygame.mixer.Sound('snd/jump_10.wav')
+        game_dir = path.dirname(__file__)
+        img_dir = path.join(game_dir, 'img')
+        snd_dir = path.join(game_dir, 'snd')
+        self.sprite_sheet = SpriteSheet(path.join(img_dir, "jump_sprites_sm.png"))
+        self.player_jump_snd = pygame.mixer.Sound(path.join(snd_dir, 'jump_10.wav'))
         self.player_jump_snd.set_volume(0.5)
-        pygame.mixer.music.load("snd/Casual game track.ogg")
+        pygame.mixer.music.load(path.join(snd_dir, "Casual game track.ogg"))
         pygame.mixer.music.set_volume(0.5)
 
     def new(self):

@@ -10,6 +10,7 @@
 # combine sprites into one spritesheet
 import pygame
 import sys
+from os import path
 import random
 
 # define some colors
@@ -36,6 +37,11 @@ PIPE_SPEED = 3
 # how powerful is a flap?
 FLAP_SPEED = 15
 
+# set up asset folders
+game_dir = path.dirname(__file__)
+img_dir = path.join(game_dir, 'img')
+snd_dir = path.join(game_dir, 'snd')
+
 class SpriteSheet:
     """Utility class to load and parse spritesheets"""
     def __init__(self, filename):
@@ -59,10 +65,10 @@ class Bird(pygame.sprite.Sprite):
         self.alive = True
         self.speed_x = 0
         self.speed_y = 0
-        self.flap_snd = pygame.mixer.Sound("snd/bird_flap.wav")
+        self.flap_snd = pygame.mixer.Sound(path.join(snd_dir, "bird_flap.wav"))
         self.flap_snd.set_volume(0.2)
         self.frames = []
-        sprite_sheet = SpriteSheet("img/bird_sprites.png")
+        sprite_sheet = SpriteSheet(path.join(img_dir, "bird_sprites.png"))
         image = sprite_sheet.get_image(3, 7, 34, 24)
         image.set_colorkey(BLACK)
         self.frames.append(image)
@@ -118,7 +124,7 @@ class Pipe(pygame.sprite.Sprite):
         # loc = upper or lower
         # y = where to place it
         pygame.sprite.Sprite.__init__(self)
-        sprite_sheet = SpriteSheet("img/pipes.png")
+        sprite_sheet = SpriteSheet(path.join(img_dir, "pipes.png"))
         if loc == 'u':
             self.image = sprite_sheet.get_image(2, 8, 52, 320)
         else:
@@ -189,7 +195,7 @@ def show_ready_image():
     screen.blit(ready_image, ready_rect)
 
 def load_score_images():
-    sprite_sheet = SpriteSheet('img/numbers.png')
+    sprite_sheet = SpriteSheet(path.join(img_dir, 'numbers.png'))
     score_images = []
     image = sprite_sheet.get_image(114, 45, 24, 36)
     score_images.append(image)
@@ -231,27 +237,27 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Flap")
 try:
-    pygame.mixer.music.load("snd/Choro_bavario_loop.ogg")
+    pygame.mixer.music.load(path.join(snd_dir, "Choro_bavario_loop.ogg"))
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(loops=-1)
 except:
     print("Can't load music.")
 # background
-background = pygame.image.load("img/background.png").convert()
+background = pygame.image.load(path.join(img_dir, "background.png")).convert()
 background_rect = background.get_rect()
 background_rect.bottom = HEIGHT
 background_rect.left = 0
 # load some other images we need
-go_image = pygame.image.load("img/gameover.png").convert()
+go_image = pygame.image.load(path.join(img_dir, "gameover.png")).convert()
 go_image.set_colorkey(BLACK)
 go_rect = go_image.get_rect()
-ready_image = pygame.image.load("img/getready.png").convert()
+ready_image = pygame.image.load(path.join(img_dir, "getready.png")).convert()
 ready_image.set_colorkey(BLACK)
 ready_rect = ready_image.get_rect()
 score_images = load_score_images()
 # load the ground tile images
 ground_list = []
-ground = pygame.image.load("img/ground.png").convert()
+ground = pygame.image.load(path.join(img_dir, "ground.png")).convert()
 # three tiles (increase for v. large screen sizes)
 for i in range(3):
     image_rect = ground.get_rect()

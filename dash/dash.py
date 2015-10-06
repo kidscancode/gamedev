@@ -4,11 +4,11 @@
 # install pytmx: pip3 install pytmx
 import pygame
 import sys
-import os
+from os import path
 import pytmx
 # game menu module currently located in above directory
 # this adds the parent directory to the path so we can import GameMenu
-sys.path.insert(0, '../')
+sys.path.insert(0, path.join(path.dirname(__file__), '..'))
 from GameMenu.GameMenu import *
 
 # TODO: level progression
@@ -203,7 +203,7 @@ class Blocker(pygame.sprite.Sprite):
 class Game:
     def __init__(self):
         # initialize game settings
-        os.environ['SDL_VIDEO_CENTERED'] = '1'
+        # os.environ['SDL_VIDEO_CENTERED'] = '1'
         # os.environ['SDL_VIDEO_WINDOW_POS'] = '0,0'
         pygame.init()
         # pygame.mixer.init()
@@ -254,10 +254,12 @@ class Game:
 
     def load_data(self):
         # load all your assets (sound, images, etc.)
-        self.background = pygame.image.load('img/game_bg_01_001.png').convert()
+        game_dir = path.dirname(__file__)
+        img_dir = path.join(game_dir, "img")
+        self.background = pygame.image.load(path.join(img_dir, 'game_bg_01_001.png')).convert()
         self.background = pygame.transform.scale(self.background, [640, 640])
-        self.sprite_sheet = SpriteSheet("img/sprites.png")
-        self.tile_renderer = TileRenderer('img/dash2.tmx')
+        self.sprite_sheet = SpriteSheet(path.join(img_dir, "sprites.png"))
+        self.tile_renderer = TileRenderer(path.join(img_dir, 'dash2.tmx'))
 
     def run(self):
         # The Game Loop

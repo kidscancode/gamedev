@@ -10,6 +10,7 @@
 
 import pygame
 import sys
+import os
 import random
 
 # define some colors
@@ -206,16 +207,19 @@ class Game:
 
     def load_data(self):
         # load image and sound data
-        wall_images = ["img/brick_blue32.png",
-                       "img/brick_green32.png",
-                       "img/brick_red32.png"]
+        game_dir = os.path.dirname(__file__)
+        img_dir = os.path.join(game_dir, "img")
+        wall_images = ["brick_blue32.png",
+                       "brick_green32.png",
+                       "brick_red32.png"]
         self.wall_images = []
         for img in wall_images:
-            self.wall_images.append(pygame.image.load(img).convert())
+            filename = os.path.join(img_dir, img)
+            self.wall_images.append(pygame.image.load(filename).convert())
 
         # load level data from txt file
         self.level_data = [[]]
-        with open("levels.txt", 'rt') as f:
+        with open(os.path.join(game_dir, "levels.txt"), 'rt') as f:
             lines = f.read().splitlines()
         for line in lines:
             if line[0] == ":":

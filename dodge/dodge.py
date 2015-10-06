@@ -4,6 +4,7 @@
 # For educational purposes only
 import pygame
 import sys
+from os import path
 import random
 import math
 
@@ -14,6 +15,11 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 GRAY = (52, 73, 94)
 BGCOLOR = GRAY
+
+# set up asset folders
+game_dir = path.dirname(__file__)
+img_dir = path.join(game_dir, 'img')
+snd_dir = path.join(game_dir, 'snd')
 
 class SpriteSheet:
     """Utility class to load and parse spritesheets"""
@@ -41,7 +47,7 @@ class Player(pygame.sprite.Sprite):
         self.speed_x = 0
         self.speed_y = 0
         # use bfxr.net to get a good sound
-        self.explode_snd = pygame.mixer.Sound("snd/Explosion6.wav")
+        self.explode_snd = pygame.mixer.Sound(path.join(snd_dir, "Explosion6.wav"))
         self.explode_snd.set_volume(0.2)
         # We will have animation frames for all 4 directions of movement
         # Load them from the sprite sheet and add to a list
@@ -51,7 +57,7 @@ class Player(pygame.sprite.Sprite):
         self.frames_d = []
         # starting direction
         self.dir = 'r'
-        sprite_sheet = SpriteSheet('img/dodgemobs.png')
+        sprite_sheet = SpriteSheet(path.join(img_dir, 'dodgemobs.png'))
         # use SpriteCutie - http://spritecutie.com/ - to cut the spritesheet
         image = sprite_sheet.get_image(232, 33, 40, 48)
         self.frames_d.append(image)
@@ -275,7 +281,7 @@ clock = pygame.time.Clock()
 # create a timer to count seconds for score
 pygame.time.set_timer(pygame.USEREVENT, 1000)
 # load the mob spritesheet
-MOB_SPRITESHEET = SpriteSheet("img/dodgemobs.png")
+MOB_SPRITESHEET = SpriteSheet(path.join(img_dir, "dodgemobs.png"))
 
 running = True
 show_start_screen()
