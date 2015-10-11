@@ -13,6 +13,7 @@
 #        ball trail, particles
 import pygame
 import sys
+from os import path
 import random
 
 # define some colors (R, G, B)
@@ -174,24 +175,30 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
+        # set up assets folders
+        # Windows: "C:\Users\chris\Documents\img"
+        # Mac: "/Users/chris/Documents/img"
+        self.game_folder = path.dirname(__file__)
+        self.img_folder = path.join(self.game_folder, "img")
+        self.snd_folder= path.join(self.game_folder, "snd")
         self.load_data()
 
     def load_data(self):
         self.ball_images = []
-        for fname in ['img/ballGrey.png', 'img/ballBlue.png']:
-            img = pygame.image.load(fname).convert()
+        for fname in ['ballGrey.png', 'ballBlue.png']:
+            img = pygame.image.load(path.join(self.img_folder, fname)).convert()
             self.ball_images.append(img)
         self.paddle_images = []
-        for fname in ['img/paddleBlu.png', 'img/paddleRed.png']:
-            img = pygame.image.load(fname).convert()
+        for fname in ['paddleBlu.png', 'paddleRed.png']:
+            img = pygame.image.load(path.join(self.img_folder,fname)).convert()
             self.paddle_images.append(img)
-        pygame.mixer.music.load('snd/tgfcoder-FrozenJam-SeamlessLoop.ogg')
+        pygame.mixer.music.load(path.join(self.snd_folder, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
         pygame.mixer.music.set_volume(0.5)
-        self.paddle_snd = pygame.mixer.Sound('snd/tone1.ogg')
+        self.paddle_snd = pygame.mixer.Sound(path.join(self.snd_folder, 'tone1.ogg'))
         # self.paddle_snd.set_volume(0.9)
         self.brick_sounds = []
-        for fname in ['snd/zap1.ogg', 'snd/zap2.ogg']:
-            snd = pygame.mixer.Sound(fname)
+        for fname in ['zap1.ogg', 'zap2.ogg']:
+            snd = pygame.mixer.Sound(path.join(self.snd_folder, fname))
             # snd.set_volume(0.9)
             self.brick_sounds.append(snd)
 
