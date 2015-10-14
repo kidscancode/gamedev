@@ -8,11 +8,11 @@
 
 import pygame as pg
 import random
-import os
+from os import path
 import sys
 
-sound_dir = os.path.realpath(os.path.dirname(__file__)) + '/snd/'
-img_dir = os.path.realpath(os.path.dirname(__file__)) + '/img/'
+sound_dir = path.join(path.dirname(__file__), 'snd')
+img_dir = path.join(path.dirname(__file__), 'img')
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -330,46 +330,46 @@ class Game:
 
     def load_data(self):
         # load all your assets (sounds, images, etc.)
-        self.pew_sound = pg.mixer.Sound(sound_dir + 'pew.wav')
-        self.shield_sound = pg.mixer.Sound(sound_dir + 'pow4.wav')
-        self.power_sound = pg.mixer.Sound(sound_dir + 'pow5.wav')
-        self.player_die_sound = pg.mixer.Sound(sound_dir + 'rumble1.ogg')
+        self.pew_sound = pg.mixer.Sound(path.join(sound_dir, 'pew.wav'))
+        self.shield_sound = pg.mixer.Sound(path.join(sound_dir, 'pow4.wav'))
+        self.power_sound = pg.mixer.Sound(path.join(sound_dir, 'pow5.wav'))
+        self.player_die_sound = pg.mixer.Sound(path.join(sound_dir, 'rumble1.ogg'))
         self.expl_sounds = []
         for snd in ['expl3.wav', 'expl6.wav']:
-            self.expl_sounds.append(pg.mixer.Sound(sound_dir + snd))
-        pg.mixer.music.load(sound_dir + 'tgfcoder-FrozenJam-SeamlessLoop.ogg')
+            self.expl_sounds.append(pg.mixer.Sound(path.join(sound_dir, snd)))
+        pg.mixer.music.load(path.join(sound_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
         pg.mixer.music.set_volume(0.4)
-        self.background = pg.image.load(img_dir + 'starfield.png').convert()
+        self.background = pg.image.load(path.join(img_dir, 'starfield.png')).convert()
         self.background_rect = self.background.get_rect()
-        self.player_image = pg.image.load(img_dir + 'playerShip1_orange.png').convert()
+        self.player_image = pg.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
         self.player_image.set_colorkey(BLACK)
         self.player_mini_image = pg.transform.scale(self.player_image, (25, 19))
-        self.bullet_image = pg.image.load(img_dir + 'laserRed16.png').convert()
+        self.bullet_image = pg.image.load(path.join(img_dir, 'laserRed16.png')).convert()
         meteor_list = ['meteorBrown_med3.png', 'meteorBrown_med1.png',
                        'meteorBrown_small2.png', 'meteorBrown_tiny1.png']
         self.meteor_images = []
         for img in meteor_list:
-            self.meteor_images.append(pg.image.load(img_dir + img).convert())
+            self.meteor_images.append(pg.image.load(path.join(img_dir, img)).convert())
         self.powerup_images = {}
-        self.powerup_images['shield'] = pg.image.load(img_dir + 'shield_gold.png').convert()
-        self.powerup_images['gun'] = pg.image.load(img_dir + 'bolt_gold.png').convert()
+        self.powerup_images['shield'] = pg.image.load(path.join(img_dir, 'shield_gold.png')).convert()
+        self.powerup_images['gun'] = pg.image.load(path.join(img_dir, 'bolt_gold.png')).convert()
         self.explosion_anim = {}
         self.explosion_anim['lg'] = []
         self.explosion_anim['sm'] = []
         self.explosion_anim['player'] = []
         for i in range(9):
-            img = pg.image.load(img_dir + 'regularExplosion0{}.png'.format(i)).convert()
+            img = pg.image.load(path.join(img_dir, 'regularExplosion0{}.png'.format(i))).convert()
             img.set_colorkey(BLACK)
             img1 = pg.transform.scale(img, (75, 75))
             self.explosion_anim['lg'].append(img1)
             img2 = pg.transform.scale(img, (32, 32))
             self.explosion_anim['sm'].append(img2)
-            img = pg.image.load(img_dir + 'sonicExplosion0{}.png'.format(i)).convert()
+            img = pg.image.load(path.join(img_dir, 'sonicExplosion0{}.png'.format(i))).convert()
             img.set_colorkey(BLACK)
             self.explosion_anim['player'].append(img)
         self.num_images = []
         for i in range(10):
-            img = pg.image.load(img_dir + 'numeral{}.png'.format(i)).convert()
+            img = pg.image.load(path.join(img_dir, 'numeral{}.png'.format(i))).convert()
             img.set_colorkey(BLACK)
             self.num_images.append(img)
 
@@ -462,10 +462,10 @@ class Game:
     def show_start_screen(self):
         # show the start screen
         self.screen.blit(self.background, self.background_rect)
-        draw_text(self.screen, "Shmup!", 72, WIDTH/2, HEIGHT/4)
-        draw_text(self.screen, "Move with the arrow keys", 24, WIDTH/2, HEIGHT/2)
-        draw_text(self.screen, "Shoot the meteors", 24, WIDTH/2, HEIGHT*5/8)
-        draw_text(self.screen, "Press a key to begin", 24, WIDTH/2, HEIGHT*3/4)
+        draw_text(self.screen, "Shmup!", 72, WIDTH / 2, HEIGHT / 4)
+        draw_text(self.screen, "Move with the arrow keys", 24, WIDTH / 2, HEIGHT / 2)
+        draw_text(self.screen, "Shoot the meteors", 24, WIDTH / 2, HEIGHT * 5 / 8)
+        draw_text(self.screen, "Press a key to begin", 24, WIDTH / 2, HEIGHT * 3 / 4)
         pg.display.update()
         # wait for a keypress to start
         wait_for_key()
@@ -477,10 +477,10 @@ class Game:
     def show_go_screen(self):
         # show the game over screen
         self.screen.blit(self.background, self.background_rect)
-        draw_text(self.screen, "GAME OVER", 58, WIDTH/2, HEIGHT/4)
+        draw_text(self.screen, "GAME OVER", 58, WIDTH / 2, HEIGHT / 4)
         text = "Score: %s" % self.score
-        draw_text(self.screen, text, 24, WIDTH/2, HEIGHT/2)
-        draw_text(self.screen, "Press a key to begin", 24, WIDTH/2, HEIGHT*3/4)
+        draw_text(self.screen, text, 24, WIDTH / 2, HEIGHT / 2)
+        draw_text(self.screen, "Press a key to begin", 24, WIDTH / 2, HEIGHT * 3 / 4)
         pg.display.update()
         # pause for a moment and then wait for key
         pg.time.wait(500)

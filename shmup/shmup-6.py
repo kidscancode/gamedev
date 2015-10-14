@@ -7,6 +7,10 @@
 
 import pygame
 import random
+from os import path
+
+sound_dir = path.join(path.dirname(__file__), 'snd')
+img_dir = path.join(path.dirname(__file__), 'img')
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -69,7 +73,7 @@ class Mob(pygame.sprite.Sprite):
         self.radius = int(self.rect.width * 0.85 / 2)
         # uncomment to test the radius
         # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
-        self.rect.x = random.randrange(WIDTH-self.rect.width)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-80, -50)
         self.speedy = random.randrange(1, 8)
 
@@ -77,7 +81,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10:
             self.rect.y = random.randrange(-80, -50)
-            self.rect.x = random.randrange(WIDTH-self.rect.width)
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.speedy = random.randrange(1, 8)
 
 class Bullet(pygame.sprite.Sprite):
@@ -103,11 +107,11 @@ pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
 
 # load graphics
-background = pygame.image.load("img/starfield.png").convert()
+background = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
 background_rect = background.get_rect()
-player_image = pygame.image.load('img/playerShip1_orange.png').convert()
-meteor_image = pygame.image.load('img/meteorBrown_med1.png').convert()
-bullet_image = pygame.image.load('img/laserRed16.png').convert()
+player_image = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
+meteor_image = pygame.image.load(path.join(img_dir, 'meteorBrown_med1.png')).convert()
+bullet_image = pygame.image.load(path.join(img_dir, 'laserRed16.png')).convert()
 
 # set up new game
 all_sprites = pygame.sprite.Group()

@@ -36,7 +36,7 @@ while running:
     all_sprites.update()
 
     # Draw / render
-    screen.fill((random.randrange(256), random.randrange(256), random.randrange(256)))
+    screen.fill(BLACK)
     all_sprites.draw(screen)
     # *after* drawing everything, flip the display
     pygame.display.flip()

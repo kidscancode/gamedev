@@ -8,6 +8,10 @@
 
 import pygame
 import random
+from os import path
+
+sound_dir = path.join(path.dirname(__file__), 'snd')
+img_dir = path.join(path.dirname(__file__), 'img')
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -179,26 +183,26 @@ pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
 
 # load graphics and sounds
-pew_sound = pygame.mixer.Sound('snd/pew.wav')
-shield_sound = pygame.mixer.Sound('snd/pow4.wav')
-power_sound = pygame.mixer.Sound('snd/pow5.wav')
+pew_sound = pygame.mixer.Sound(path.join(sound_dir, 'pew.wav'))
+shield_sound = pygame.mixer.Sound(path.join(sound_dir, 'pow4.wav'))
+power_sound = pygame.mixer.Sound(path.join(sound_dir, 'pow5.wav'))
 expl_sounds = []
-for snd in ['snd/expl3.wav', 'snd/expl6.wav']:
-    expl_sounds.append(pygame.mixer.Sound(snd))
-pygame.mixer.music.load('snd/tgfcoder-FrozenJam-SeamlessLoop.ogg')
+for snd in ['expl3.wav', 'expl6.wav']:
+    expl_sounds.append(pygame.mixer.Sound(path.join(sound_dir, snd)))
+pygame.mixer.music.load(path.join(sound_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
-background = pygame.image.load("img/starfield.png").convert()
+background = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
 background_rect = background.get_rect()
-player_image = pygame.image.load('img/playerShip1_orange.png').convert()
-bullet_image = pygame.image.load('img/laserRed16.png').convert()
-meteor_list = ['img/meteorBrown_med3.png', 'img/meteorBrown_med1.png',
-               'img/meteorBrown_small2.png', 'img/meteorBrown_tiny1.png']
+player_image = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
+bullet_image = pygame.image.load(path.join(img_dir, 'laserRed16.png')).convert()
+meteor_list = ['meteorBrown_med3.png', 'meteorBrown_med1.png',
+               'meteorBrown_small2.png', 'meteorBrown_tiny1.png']
 meteor_images = []
 for img in meteor_list:
-    meteor_images.append(pygame.image.load(img).convert())
+    meteor_images.append(pygame.image.load(path.join(img_dir, img)).convert())
 powerup_images = {}
-powerup_images['shield'] = pygame.image.load('img/shield_gold.png').convert()
-powerup_images['gun'] = pygame.image.load('img/bolt_gold.png').convert()
+powerup_images['shield'] = pygame.image.load(path.join(img_dir, 'shield_gold.png')).convert()
+powerup_images['gun'] = pygame.image.load(path.join(img_dir, 'bolt_gold.png')).convert()
 
 # set up new game
 def newmob():

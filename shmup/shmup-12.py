@@ -8,6 +8,10 @@
 
 import pygame
 import random
+from os import path
+
+sound_dir = path.join(path.dirname(__file__), 'snd')
+img_dir = path.join(path.dirname(__file__), 'img')
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -100,7 +104,7 @@ class Mob(pygame.sprite.Sprite):
         self.radius = int(self.rect.width * 0.85 / 2)
         # uncomment to test the radius
         # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
-        self.rect.x = random.randrange(WIDTH-self.rect.width)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-80, -50)
         self.speedy = random.randrange(1, 8)
         self.rot = 0
@@ -123,7 +127,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10:
             self.rect.y = random.randrange(-80, -50)
-            self.rect.x = random.randrange(WIDTH-self.rect.width)
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.speedy = random.randrange(1, 8)
 
 class Bullet(pygame.sprite.Sprite):
@@ -150,7 +154,7 @@ class Powerup(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.bottom = -20
-        self.rect.x = random.randrange(WIDTH-self.rect.width)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.speedy = 3
 
     def update(self):
@@ -167,24 +171,24 @@ pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
 
 # load graphics and sounds
-pew_sound = pygame.mixer.Sound('snd/pew.wav')
+pew_sound = pygame.mixer.Sound(path.join(sound_dir, 'pew.wav'))
 expl_sounds = []
-for snd in ['snd/expl3.wav', 'snd/expl6.wav']:
-    expl_sounds.append(pygame.mixer.Sound(snd))
-pygame.mixer.music.load('snd/tgfcoder-FrozenJam-SeamlessLoop.ogg')
+for snd in ['expl3.wav', 'expl6.wav']:
+    expl_sounds.append(pygame.mixer.Sound(path.join(sound_dir, snd)))
+pygame.mixer.music.load(path.join(sound_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
-background = pygame.image.load("img/starfield.png").convert()
+background = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
 background_rect = background.get_rect()
-player_image = pygame.image.load('img/playerShip1_orange.png').convert()
-bullet_image = pygame.image.load('img/laserRed16.png').convert()
-meteor_list = ['img/meteorBrown_med3.png', 'img/meteorBrown_med1.png',
-               'img/meteorBrown_small2.png', 'img/meteorBrown_tiny1.png']
+player_image = pygame.image.load(path.join(img_dir, 'playerShip1_orange.png')).convert()
+bullet_image = pygame.image.load(path.join(img_dir, 'laserRed16.png')).convert()
+meteor_list = ['meteorBrown_med3.png', 'meteorBrown_med1.png',
+               'meteorBrown_small2.png', 'meteorBrown_tiny1.png']
 meteor_images = []
 for img in meteor_list:
-    meteor_images.append(pygame.image.load(img).convert())
+    meteor_images.append(pygame.image.load(path.join(img_dir, img)).convert())
 powerup_images = {}
-powerup_images['shield'] = pygame.image.load('img/shield_gold.png').convert()
-powerup_images['gun'] = pygame.image.load('img/bolt_gold.png').convert()
+powerup_images['shield'] = pygame.image.load(path.join(img_dir, 'shield_gold.png')).convert()
+powerup_images['gun'] = pygame.image.load(path.join(img_dir, 'bolt_gold.png')).convert()
 
 # set up new game
 def newmob():
@@ -254,7 +258,7 @@ while running:
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     score_text = str(score)
-    draw_text(score_text, 18, WIDTH/2, 10)
+    draw_text(score_text, 18, WIDTH / 2, 10)
     draw_shield_bar(5, 5, player.shield)
     # after drawing, flip the display
     pygame.display.flip()
