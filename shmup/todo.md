@@ -5,6 +5,8 @@ Powerups
       diagonal shots
       level indicator
 shield graphics (fades out when low)
+simple moving stars in background
+full scrolling background
 particles
 waves/levels
 improved movement (inertia/friction)
@@ -21,4 +23,3 @@ pause
 
 ** Break into separate files **
 ** consolidate graphics to spritesheet
-
