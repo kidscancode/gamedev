@@ -25,6 +25,7 @@ class Player(pg.sprite.Sprite):
         self.rect.centerx = 200
         self.vx = 0
         self.vy = 0
+        self.jumping = False
 
     def get_keys(self):
         keystate = pg.key.get_pressed()
@@ -33,12 +34,18 @@ class Player(pg.sprite.Sprite):
         if keystate[pg.K_RIGHT]:
             self.vx = 5
 
+    def jump_cut(self):
+        if self.jumping:
+            if self.vy < -3:
+                self.vy = -3
+
     def jump(self):
         self.rect.y += 2
         hits = pg.sprite.spritecollide(self, platforms, False)
         self.rect.y -= 2
-        if hits:
+        if hits and not self.jumping:
             self.vy = -20
+            self.jumping = True
 
     def check_collisions(self, dir):
         if dir == 'x':
@@ -57,6 +64,7 @@ class Player(pg.sprite.Sprite):
                 elif self.vy < 0:
                     self.rect.top = hit.rect.bottom
                 self.vy = 0
+                self.jumping = False
 
     def update(self):
         self.vx = 0
@@ -122,6 +130,9 @@ while running:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 player.jump()
+        elif event.type == pg.KEYUP:
+            if event.key == pg.K_SPACE:
+                player.jump_cut()
 
     # Update
     all_sprites.update()
