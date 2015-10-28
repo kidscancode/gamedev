@@ -1,4 +1,7 @@
-# Shmup game
+# KidsCanCode - Game Development with Pygame video series
+# Shmup game - part 4
+# Video link: https://www.youtube.com/watch?v=mOckdKp3V38
+# Adding graphics
 import pygame
 import random
 from os import path

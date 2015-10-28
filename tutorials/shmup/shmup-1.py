@@ -1,7 +1,9 @@
-# Shmup game
+# KidsCanCode - Game Development with Pygame video series
+# Shmup game - part 1
+# Video link: https://www.youtube.com/watch?v=nGufy7weyGY
+# Player sprite and movement
 import pygame
 import random
-from os import path
 
 WIDTH = 480
 HEIGHT = 600

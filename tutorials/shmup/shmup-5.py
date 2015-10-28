@@ -1,4 +1,7 @@
-# Shmup game
+# KidsCanCode - Game Development with Pygame video series
+# Shmup game - part 5
+# Video link: https://www.youtube.com/watch?v=_y5U8tB36Vk
+# Improved collisions
 import pygame
 import random
 from os import path
