@@ -1,4 +1,7 @@
-# Shmup game
+# KidsCanCode - Game Development with Pygame video series
+# Shmup game - part 8
+# Video link: 
+# Sound and Music
 # Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3
 # Art from Kenney.nl
 import pygame
