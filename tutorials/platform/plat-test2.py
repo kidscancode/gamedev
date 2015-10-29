@@ -1,7 +1,7 @@
 # Platform game tutorial
 
 import pygame as pg
-# import random
+import random
 
 WIDTH = 600
 HEIGHT = 480
@@ -21,63 +21,74 @@ class Player(pg.sprite.Sprite):
         self.image = pg.Surface((30, 50))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
-        self.rect.bottom = HEIGHT - 100
-        self.rect.centerx = 200
-        self.vx = 0
-        self.vy = 0
+        self.acc = pg.math.Vector2(0, 0)
+        self.vel = pg.math.Vector2(0, 0)
+        self.pos = pg.math.Vector2(200, HEIGHT - 100)
+        # pos will be bottom center of sprite
         self.jumping = False
+        self.rect.midbottom = (self.pos)
 
     def get_keys(self):
         keystate = pg.key.get_pressed()
         if keystate[pg.K_LEFT]:
-            self.vx = -5
+            self.acc.x = -1
         if keystate[pg.K_RIGHT]:
-            self.vx = 5
+            self.acc.x = 1
 
     def jump_cut(self):
         if self.jumping:
-            if self.vy < -3:
-                self.vy = -3
+            if self.vel.y < -3:
+                self.vel.y = -3
 
     def jump(self):
         self.rect.y += 2
         hits = pg.sprite.spritecollide(self, platforms, False)
         self.rect.y -= 2
         if hits and not self.jumping:
-            self.vy = -20
+            self.acc.y = -5
             self.jumping = True
 
     def check_collisions(self, dir):
         if dir == 'x':
             hits = pg.sprite.spritecollide(self, platforms, False)
             if hits:
-                if self.vx > 0:
+                if self.vel.x > 0:
+                    self.pos.x = hits[0].rect.left - self.rect.width / 2
                     self.rect.right = hits[0].rect.left
-                elif self.vx < 0:
+                elif self.vel.x < 0:
+                    self.pos.x = hits[0].rect.right + self.rect.width / 2
                     self.rect.left = hits[0].rect.right
+                self.vel.x = 0
         elif dir == 'y':
             hits = pg.sprite.spritecollide(self, platforms, False)
             for hit in hits:
-                if self.vy >= 0:
-                    self.rect.bottom = hit.rect.top
-                    self.vx += hit.vx
-                elif self.vy < 0:
-                    self.rect.top = hit.rect.bottom
-                self.vy = 0
+                if self.vel.y > 0:
+                    self.pos.y = hit.rect.top
+                    self.vel.x += hit.vx
+                elif self.vel.y < 0:
+                    self.pos.y = hit.rect.bottom + self.rect.height
+                self.vel.y = 0
                 self.jumping = False
 
     def update(self):
-        self.vx = 0
-        self.vy += 1
+        self.acc = pg.math.Vector2(0, 1)
         self.get_keys()
-        self.rect.y += self.vy
+        # add friction (l/r)
+        self.acc.x += self.vel.x * -0.18
+        self.vel += self.acc
+        self.pos += self.vel
+        self.rect.bottom = self.pos.y
         self.check_collisions('y')
-        self.rect.x += self.vx
+        self.rect.centerx = self.pos.x
         self.check_collisions('x')
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
-        if self.rect.left < 0:
-            self.rect.left = 0
+        # if self.rect.right > WIDTH:
+        #     self.px = WIDTH - self.rect.width / 2
+        #     self.vx = 0
+        #     self.rect.right = WIDTH
+        # if self.rect.left < 0:
+        #     self.px = self.rect.width / 2
+        #     self.vx = 0
+        #     self.rect.left = 0
 
 class Platform(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, vx, vy):

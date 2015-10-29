@@ -4,11 +4,6 @@ Player sprite
     screen edges
     jumping
 
-
-Platform sprite
-    collision (down only)
-    collision (all sides)
-
 graphics
     animation
 movement w/inertia
