@@ -1,7 +1,7 @@
 # KidsCanCode - Game Development with Pygame video series
-# Shmup game - part 8
-# Video link: https://www.youtube.com/watch?v=abm1VwFxv9o
-# Sound and Music
+# Shmup game - part 9
+# Video link: https://www.youtube.com/watch?v=vvgWfNLgK9c
+# Player shield
 # Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3
 # Art from Kenney.nl
 import pygame
@@ -38,6 +38,22 @@ def draw_text(surf, text, size, x, y):
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
 
+def newmob():
+    m = Mob()
+    all_sprites.add(m)
+    mobs.add(m)
+
+def draw_shield_bar(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 10
+    fill = (pct / 100) * BAR_LENGTH
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
+    pygame.draw.rect(surf, GREEN, fill_rect)
+    pygame.draw.rect(surf, WHITE, outline_rect, 2)
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -49,6 +65,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
+        self.shield = 100
 
     def update(self):
         self.speedx = 0
@@ -79,7 +96,7 @@ class Mob(pygame.sprite.Sprite):
         self.radius = int(self.rect.width * .85 / 2)
         # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.x = random.randrange(WIDTH - self.rect.width)
-        self.rect.y = random.randrange(-150, -100)
+        self.rect.bottom = random.randrange(-80, -20)
         self.speedy = random.randrange(1, 8)
         self.speedx = random.randrange(-3, 3)
         self.rot = 0
@@ -101,7 +118,7 @@ class Mob(pygame.sprite.Sprite):
         self.rotate()
         self.rect.x += self.speedx
         self.rect.y += self.speedy
-        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
+        if self.rect.top > HEIGHT + 10 or self.rect.left < -100 or self.rect.right > WIDTH + 100:
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(1, 8)
@@ -147,9 +164,8 @@ bullets = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 for i in range(8):
-    m = Mob()
-    all_sprites.add(m)
-    mobs.add(m)
+    newmob()
+
 score = 0
 pygame.mixer.music.play(loops=-1)
 # Game loop
@@ -174,20 +190,22 @@ while running:
     for hit in hits:
         score += 50 - hit.radius
         random.choice(expl_sounds).play()
-        m = Mob()
-        all_sprites.add(m)
-        mobs.add(m)
+        newmob()
 
     # check to see if a mob hit the player
-    hits = pygame.sprite.spritecollide(player, mobs, False, pygame.sprite.collide_circle)
-    if hits:
-        running = False
+    hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player.shield -= hit.radius * 2
+        newmob()
+        if player.shield <= 0:
+            running = False
 
     # Draw / render
     screen.fill(BLACK)
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     draw_text(screen, str(score), 18, WIDTH / 2, 10)
+    draw_shield_bar(screen, 5, 5, player.shield)
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
