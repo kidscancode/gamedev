@@ -2,7 +2,7 @@
 # KidsCanCode 2015
 import pygame as pg
 import sys
-from random import choice, randint
+from random import choice, randint, uniform
 from os import path
 
 img_dir = path.join(path.dirname(__file__), 'img')
@@ -109,7 +109,7 @@ class Rock(pg.sprite.Sprite):
                 self.rect.x = randint(0, WIDTH)
         else:
             self.rect.center = center
-        self.vel = pg.math.Vector2(randint(-3, 3), randint(-3, 3))
+        self.vel = pg.math.Vector2(uniform(-2, 2), uniform(-2, 2))
 
     def rotate(self):
         self.rot = (self.rot + self.rot_speed) % 360
@@ -170,8 +170,9 @@ class Game:
         self.rocks = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
         self.player = Player(self, self.player_img, [self.all_sprites])
-        for i in range(5):
+        for i in range(3):
             Rock(self, 3, None, [self.all_sprites, self.rocks])
+        self.score = 0
 
     def load_data(self):
         self.player_img = pg.image.load(path.join(img_dir, 'playerShip1_red.png')).convert()
@@ -206,9 +207,15 @@ class Game:
         # collide bullets with rocks, each hit spawns two smaller rocks
         hits = pg.sprite.groupcollide(self.rocks, self.bullets, True, True)
         for hit in hits:
+            self.score += 4 - hit.size
             if hit.size > 0:
                 Rock(self, hit.size - 1, hit.rect.center, [self.all_sprites, self.rocks])
                 Rock(self, hit.size - 1, hit.rect.center, [self.all_sprites, self.rocks])
+        # collide rocks with player
+        hits = pg.sprite.spritecollide(self.player, self.rocks, True)
+        if hits:
+            # decrease shield / lives
+            pass
 
     def draw(self):
         # draw everything to the screen
