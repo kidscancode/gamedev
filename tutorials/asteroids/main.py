@@ -3,6 +3,7 @@
 import pygame as pg
 import sys
 from random import choice, randint, uniform
+from math import atan2
 from os import path
 
 img_dir = path.join(path.dirname(__file__), 'img')
@@ -32,10 +33,9 @@ class Player(pg.sprite.Sprite):
         self.pos = pg.math.Vector2(WIDTH / 2, HEIGHT / 2)
         self.vel = pg.math.Vector2(0, 0)
         self.acc = pg.math.Vector2(0, 0)
-        self.thrust = pg.math.Vector2(0, 0)
         self.thrust_power = 0.2
         self.friction = 0.02
-        self.shoot_delay = 350
+        self.shoot_delay = 250
         self.last_shot = pg.time.get_ticks()
 
     def get_keys(self):
@@ -45,7 +45,7 @@ class Player(pg.sprite.Sprite):
         if keystate[pg.K_RIGHT]:
             self.rot_speed = -2
         if keystate[pg.K_UP]:
-            self.thrust = pg.math.Vector2(0, -self.thrust_power).rotate(-self.rot)
+            self.acc = pg.math.Vector2(0, -self.thrust_power).rotate(-self.rot)
         if keystate[pg.K_SPACE]:
             self.shoot()
 
@@ -68,11 +68,9 @@ class Player(pg.sprite.Sprite):
 
     def update(self):
         self.rot_speed = 0
-        self.thrust = pg.math.Vector2(0, 0)
         self.acc = pg.math.Vector2(0, 0)
         self.get_keys()
         self.rotate()
-        self.acc += self.thrust
         self.acc += self.vel * -self.friction
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc
@@ -85,6 +83,57 @@ class Player(pg.sprite.Sprite):
         if self.pos.y < 0:
             self.pos.y = HEIGHT
         self.rect.center = self.pos
+
+class EnemyBullet(pg.sprite.Sprite):
+    def __init__(self, *groups):
+        pass
+
+    def update(self):
+        pass
+
+class Enemy(pg.sprite.Sprite):
+    def __init__(self, game, *groups):
+        pg.sprite.Sprite.__init__(self, *groups)
+        self.game = game
+        self.image = game.enemy_img
+        self.image.set_colorkey(BLACK)
+        self.image_clean = self.image.copy()
+        self.rect = self.image.get_rect()
+        x = WIDTH + 100
+        y = randint(0, HEIGHT)
+        self.rect.center = (x, y)
+        self.vx = -2
+        self.rot = 0
+        self.rot_speed = 0
+        self.rot_cache = {}
+
+    def update(self):
+        self.rotate()
+        self.rect.x += self.vx
+        if self.rect.right < 0:
+            self.kill()
+
+    def rotate(self):
+        # which way is the player?
+        dx = self.rect.x - self.game.player.pos.x
+        dy = self.rect.y - self.game.player.pos.y
+        ang = atan2(dy, dx)
+        if ang < self.rot:
+            self.rot_speed = 0.5
+        else:
+            self.rot_speed = -0.5
+        self.rot = (self.rot + self.rot_speed) % 360
+        if self.rot in self.rot_cache:
+            image = self.rot_cache[self.rot]
+        else:
+            image = pg.transform.rotate(self.image_clean, self.rot)
+            self.rot_cache[self.rot] = image
+        old_center = self.rect.center
+        self.image = image
+        self.rect = self.image.get_rect(center=old_center)
+
+    def shoot(self):
+        pass
 
 class Rock(pg.sprite.Sprite):
     # rock sizes 0-3 (3 biggest)
@@ -137,12 +186,12 @@ class Rock(pg.sprite.Sprite):
 class Bullet(pg.sprite.Sprite):
     def __init__(self, ship, *groups):
         pg.sprite.Sprite.__init__(self, *groups)
-        self.ship = ship
-        self.image = pg.transform.rotate(self.ship.game.bullet_img, self.ship.rot)
+        self.image = pg.transform.rotate(ship.game.bullet_img, ship.rot)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.pos = self.ship.pos - pg.math.Vector2(0, 20).rotate(-self.ship.rot)
-        self.vel = self.ship.vel + -pg.math.Vector2(0, 8).rotate(-self.ship.rot)
+        self.pos = ship.pos - pg.math.Vector2(0, 20).rotate(-ship.rot)
+        self.vel = ship.vel + -pg.math.Vector2(0, 8).rotate(-ship.rot)
+        self.rect.center = self.pos
         # self.vel = -pg.math.Vector2(0, 12).rotate(-self.ship.rot)
         self.spawn_time = pg.time.get_ticks()
         self.lifetime = 2000
@@ -173,6 +222,7 @@ class Game:
         for i in range(3):
             Rock(self, 3, None, [self.all_sprites, self.rocks])
         self.score = 0
+        self.last_enemy = pg.time.get_ticks()
 
     def load_data(self):
         self.player_img = pg.image.load(path.join(img_dir, 'playerShip1_red.png')).convert()
@@ -187,6 +237,8 @@ class Game:
             self.rock_images.append(images)
         self.bullet_img = pg.image.load(path.join(img_dir, 'laserBlue01.png')).convert()
         self.bullet_img = pg.transform.rotozoom(self.bullet_img, 0, 0.4)
+        self.enemy_img = pg.image.load(path.join(img_dir, 'enemyBlack2.png')).convert()
+        self.enemy_img = pg.transform.rotozoom(self.enemy_img, 0, 0.55)
 
     def run(self):
         # The Game loop - set self.running to False to end the game
@@ -216,6 +268,11 @@ class Game:
         if hits:
             # decrease shield / lives
             pass
+        # check for spawn enemy or powerup
+        now = pg.time.get_ticks()
+        if now - self.last_enemy > 10000 + randint(2, 5) * 1000:
+            self.last_enemy = now
+            Enemy(self, [self.all_sprites])
 
     def draw(self):
         # draw everything to the screen
