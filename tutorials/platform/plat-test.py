@@ -74,10 +74,12 @@ class Player(pg.sprite.Sprite):
         self.check_collisions('y')
         self.rect.x += self.vx
         self.check_collisions('x')
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
-        if self.rect.left < 0:
-            self.rect.left = 0
+        # clamp is simpler, but doesn't handle vel
+        self.rect.clamp_ip(screen_rect)
+        # if self.rect.right > WIDTH:
+        #     self.rect.right = WIDTH
+        # if self.rect.left < 0:
+        #     self.rect.left = 0
 
 class Platform(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, vx, vy):
@@ -100,6 +102,7 @@ class Platform(pg.sprite.Sprite):
 pg.init()
 pg.mixer.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
+screen_rect = screen.get_rect()
 pg.display.set_caption("My Game")
 clock = pg.time.Clock()
 

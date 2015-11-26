@@ -2,8 +2,8 @@
 # KidsCanCode 2015
 import pygame as pg
 import sys
-from random import choice, randint, uniform
-from math import atan2
+from random import choice, randint
+from math import atan2, degrees
 from os import path
 
 img_dir = path.join(path.dirname(__file__), 'img')
@@ -115,14 +115,17 @@ class Enemy(pg.sprite.Sprite):
 
     def rotate(self):
         # which way is the player?
-        dx = self.rect.x - self.game.player.pos.x
-        dy = self.rect.y - self.game.player.pos.y
-        ang = atan2(dy, dx)
+        dx = self.rect.x - self.game.player.rect.x
+        dy = self.rect.y - self.game.player.rect.y
+        ang = int(degrees(atan2(dx, dy))) % 360
+        txt = str(int(ang)) + ' : ' + str(int(self.rot))
+        pg.display.set_caption(txt)
         if ang < self.rot:
-            self.rot_speed = 0.5
-        else:
-            self.rot_speed = -0.5
+            self.rot_speed = -2
+        elif ang > self.rot:
+            self.rot_speed = 2
         self.rot = (self.rot + self.rot_speed) % 360
+        # self.rot = ang
         if self.rot in self.rot_cache:
             image = self.rot_cache[self.rot]
         else:
@@ -158,7 +161,7 @@ class Rock(pg.sprite.Sprite):
                 self.rect.x = randint(0, WIDTH)
         else:
             self.rect.center = center
-        self.vel = pg.math.Vector2(uniform(-2, 2), uniform(-2, 2))
+        self.vx, self.vy = randint(-3, 3), randint(-3, 3)
 
     def rotate(self):
         self.rot = (self.rot + self.rot_speed) % 360
@@ -172,15 +175,16 @@ class Rock(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=old_center)
 
     def update(self):
-        self.rotate()
-        self.rect.center += self.vel
-        if self.rect.left < -self.rect.width:
+        # self.rotate()
+        self.rect.x += self.vx
+        self.rect.y += self.vy
+        if self.rect.right < 0:
             self.rect.left = WIDTH
-        if self.rect.right > WIDTH + self.rect.width:
+        if self.rect.left > WIDTH:
             self.rect.right = 0
-        if self.rect.top < -self.rect.height:
+        if self.rect.bottom < 0:
             self.rect.top = HEIGHT
-        if self.rect.bottom > HEIGHT + self.rect.height:
+        if self.rect.top > HEIGHT:
             self.rect.bottom = 0
 
 class Bullet(pg.sprite.Sprite):
@@ -238,7 +242,7 @@ class Game:
         self.bullet_img = pg.image.load(path.join(img_dir, 'laserBlue01.png')).convert()
         self.bullet_img = pg.transform.rotozoom(self.bullet_img, 0, 0.4)
         self.enemy_img = pg.image.load(path.join(img_dir, 'enemyBlack2.png')).convert()
-        self.enemy_img = pg.transform.rotozoom(self.enemy_img, 0, 0.55)
+        self.enemy_img = pg.transform.rotozoom(self.enemy_img, 180, 0.55)
 
     def run(self):
         # The Game loop - set self.running to False to end the game
