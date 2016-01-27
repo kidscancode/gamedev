@@ -1,8 +1,7 @@
 # Pygame Template (advanced)
 # Use this to start a new Pygame project
-# KidsCanCode 2015
+# KidsCanCode 2016
 import pygame as pg
-import sys
 import random
 
 # define some colors (R, G, B)
@@ -46,10 +45,11 @@ class Game:
         # start the clock
         self.clock = pg.time.Clock()
         self.load_data()
+        self.running = True
 
     def new(self):
         # initialize all your variables and do all the setup for a new game
-        pass
+        self.run()
 
     def load_data(self):
         # load all your assets (sounds, images, etc.)
@@ -57,16 +57,12 @@ class Game:
 
     def run(self):
         # The Game loop - set self.running to False to end the game
-        self.running = True
-        while self.running:
+        self.playing = True
+        while self.playing:
             self.clock.tick(FPS)
             self.events()
             self.update()
             self.draw()
-
-    def quit(self):
-        pg.quit()
-        sys.exit()
 
     def update(self):
         # the update part of the game loop
@@ -82,7 +78,9 @@ class Game:
         for event in pg.event.get():
             # this one checks for the window being closed
             if event.type == pg.QUIT:
-                self.quit()
+                if self.playing:
+                    self.playing = False
+                self.running = False
             # add any other events here (keys, mouse, etc.)
 
     def show_start_screen(self):
@@ -95,8 +93,9 @@ class Game:
 
 # create the game object
 g = Game()
-while True:
-    g.show_start_screen()
+g.show_start_screen()
+while g.running:
     g.new()
-    g.run()
     g.show_go_screen()
+
+pg.quit()

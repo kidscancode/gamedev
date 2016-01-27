@@ -77,7 +77,7 @@ while running:
     # Draw / render
     screen.fill(BLACK)
     all_sprites.draw(screen)
-    #pygame.draw.rect(screen, WHITE, player.rect, 5)
+    pygame.draw.rect(screen, WHITE, player.rect, 5)
     # *after* drawing everything, flip the display
     pygame.display.flip()
 

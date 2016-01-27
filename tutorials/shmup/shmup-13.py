@@ -1,4 +1,7 @@
-# Shmup game
+# KidsCanCode - Game Development with Pygame video series
+# Shmup game - part 13
+# Video link: https://www.youtube.com/watch?v=y2w-116htIQ
+# Powerups (part 2)
 # Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3
 # Art from Kenney.nl
 import pygame
@@ -226,22 +229,6 @@ class Explosion(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.center = center
 
-def show_go_screen():
-    screen.blit(background, background_rect)
-    draw_text(screen, "SHMUP!", 64, WIDTH / 2, HEIGHT / 4)
-    draw_text(screen, "Arrow keys move, Space to fire", 22,
-              WIDTH / 2, HEIGHT / 2)
-    draw_text(screen, "Press a key to begin", 18, WIDTH / 2, HEIGHT * 3 / 4)
-    pygame.display.flip()
-    waiting = True
-    while waiting:
-        clock.tick(FPS)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            if event.type == pygame.KEYUP:
-                waiting = False
-
 # Load all game graphics
 background = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
 background_rect = background.get_rect()
@@ -287,24 +274,20 @@ player_die_sound = pygame.mixer.Sound(path.join(snd_dir, 'rumble1.ogg'))
 pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
 
+all_sprites = pygame.sprite.Group()
+mobs = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
+powerups = pygame.sprite.Group()
+player = Player()
+all_sprites.add(player)
+for i in range(8):
+    newmob()
+
+score = 0
 pygame.mixer.music.play(loops=-1)
 # Game loop
-game_over = True
 running = True
 while running:
-    if game_over:
-        show_go_screen()
-        game_over = False
-        all_sprites = pygame.sprite.Group()
-        mobs = pygame.sprite.Group()
-        bullets = pygame.sprite.Group()
-        powerups = pygame.sprite.Group()
-        player = Player()
-        all_sprites.add(player)
-        for i in range(8):
-            newmob()
-        score = 0
-
     # keep loop running at the right speed
     clock.tick(FPS)
     # Process input (events)
@@ -358,7 +341,7 @@ while running:
 
     # if the player died and the explosion has finished playing
     if player.lives == 0 and not death_explosion.alive():
-        game_over = True
+        running = False
 
     # Draw / render
     screen.fill(BLACK)
