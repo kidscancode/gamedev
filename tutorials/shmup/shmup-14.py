@@ -1,6 +1,6 @@
 # KidsCanCode - Game Development with Pygame video series
 # Shmup game - part 14
-# Video link: 
+# Video link: https://www.youtube.com/watch?v=Z2K2Yttvr5g
 # Game Over Screen
 # Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3
 # Art from Kenney.nl
