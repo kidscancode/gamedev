@@ -1,5 +1,7 @@
 # KidsCanCode - Game Development with Pygame video series
-# Jumpy! (a platform game)
+# Jumpy! (a platform game) - Part 4
+# Video link: https://youtu.be/G8pYfkIajE8
+# Jumping
 
 import pygame as pg
 import random
