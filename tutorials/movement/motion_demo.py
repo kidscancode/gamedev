@@ -1,4 +1,7 @@
-# Pygame template - skeleton for a new pygame project
+# Motion Demo - demonstrate equations of motion
+# This is a simple demo to illustrate the effects of
+# using the equations of motion - acceleration, velocity,
+# and position - for movement of a sprite.
 import pygame
 import random
 
