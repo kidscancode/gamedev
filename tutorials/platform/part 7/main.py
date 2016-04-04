@@ -1,5 +1,7 @@
 # KidsCanCode - Game Development with Pygame video series
-# Jumpy! (a platform game)
+# Jumpy! (a platform game) - Part 7
+# Video link: https://youtu.be/rLrMPg-GCqo
+# Splash & End Screens
 
 import pygame as pg
 import random
