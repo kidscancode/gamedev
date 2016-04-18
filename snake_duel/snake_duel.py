@@ -1,6 +1,7 @@
-# Tron (a 2 player snake game)
+# Snake Duel (aka Tron) (a 2 player snake game)
 # by KidsCanCode 2016
 import pygame as pg
+import sys
 
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
@@ -48,6 +49,7 @@ def wait_for_key():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
+                sys.exit()
             if event.type == pg.KEYUP:
                 waiting = False
 

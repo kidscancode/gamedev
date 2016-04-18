@@ -1,5 +1,7 @@
 # KidsCanCode - Game Development with Pygame video series
-# Jumpy! (a platform game)
+# Jumpy! (a platform game) - Part 8
+# Video link: https://youtu.be/MFv1Ew_nGG0
+# Saving High Score
 
 import pygame as pg
 import random
