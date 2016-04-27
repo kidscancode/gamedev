@@ -16,7 +16,7 @@ class Paddle(pg.sprite.Sprite):
         self.acc = vec(0, 0)
 
     def update(self):
-        self.update_abs()
+        self.update_acc()
 
     def update_abs(self):
         # absolute position - paddle follows mouse
