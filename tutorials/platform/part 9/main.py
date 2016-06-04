@@ -2,6 +2,7 @@
 # Jumpy! (a platform game) - Part 9
 # Video link: https://youtu.be/mBC5VqxnFLA
 # Using Spritesheets
+# Art from Kenney.nl
 
 import pygame as pg
 import random

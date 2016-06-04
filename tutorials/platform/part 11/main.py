@@ -2,6 +2,7 @@
 # Jumpy! (a platform game) - Part 11
 # Video link: https://youtu.be/n4TQfKt4wpQ
 # Character animation (part 2)
+# Art from Kenney.nl
 
 import pygame as pg
 import random

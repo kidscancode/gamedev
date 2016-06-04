@@ -10,6 +10,8 @@ class SpritesheetWithXML:
         self.spritesheet = pg.image.load(filename + '.png').convert()
         tree = ET.parse(filename + '.xml')
         self.map = {}
+        # read through XML and pull out image locations using the following structure:
+        # self.map['image name'] = {'x':x, 'y':y, 'w':w, 'h':h}
         for node in tree.iter():
             if node.attrib.get('name'):
                 name = node.attrib.get('name')
@@ -21,17 +23,9 @@ class SpritesheetWithXML:
 
     def get_image_by_name(self, name):
         #print("getting image {}".format(name))
-        x = self.map[name]['x']
-        y = self.map[name]['y']
-        w = self.map[name]['w']
-        h = self.map[name]['h']
-        return self.get_image(x, y, w, h)
-
-    def get_image(self, x, y, width, height):
-        # grab an image out of a larger spritesheet
-        image = pg.Surface((width, height))
-        image.blit(self.spritesheet, (0, 0), (x, y, width, height))
-        return image
+        r = pg.Rect(self.map[name]['x'], self.map[name]['y'],
+                    self.map[name]['w'], self.map[name]['h'])
+        return self.spritesheet.subsurface(r)
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, img, *groups):
