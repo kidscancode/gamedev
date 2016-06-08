@@ -1,5 +1,7 @@
 # KidsCanCode - Game Development with Pygame video series
-# Jumpy! (a platform game)
+# Jumpy! (a platform game) - Part 15
+# Video link: https://youtu.be/kCnAhasA1bs
+# Powerups
 # Art from Kenney.nl
 # Happy Tune by http://opengameart.org/users/syncopika
 # Yippee by http://opengameart.org/users/snabisch
