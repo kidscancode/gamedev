@@ -8,7 +8,7 @@
 # TODO: Convert to use ptext.py
 import pygame
 import sys
-from subprocess import Popen
+from subprocess import Popen, call
 from os import path
 
 class MenuItem(pygame.font.Font):
@@ -107,25 +107,25 @@ class GameMenu:
             sys.exit()
         elif self.items[self.cur_item].text == "Shmup":
             fname = path.join(d, 'tutorials/shmup/shmup-14.py')
-            Popen(['python3', fname])
+            call(['python3', fname])
         elif self.items[self.cur_item].text == "Snake":
             fname = path.join(d, 'snake/snake_oo.py')
-            Popen(['python3', fname])
+            call(['python3', fname])
         elif self.items[self.cur_item].text == "Jump":
             fname = path.join(d, 'tutorials/platform/working/main.py')
-            Popen(['python3', fname])
+            call(['python3', fname])
         elif self.items[self.cur_item].text == "Flappy":
             fname = path.join(d, 'flap/flap.py')
-            Popen(['python3', fname])
+            call(['python3', fname])
         elif self.items[self.cur_item].text == "Snake Duel":
             fname = path.join(d, 'snake_duel/snake_duel.py')
-            Popen(['python3', fname])
+            call(['python3', fname])
         elif self.items[self.cur_item].text == "Bricks":
             fname = path.join(d, 'brick/brick.py')
-            Popen(['python3', fname])
+            call(['python3', fname])
         elif self.items[self.cur_item].text == "Tetris":
             fname = path.join(d, 'tetris/tetris2.py')
-            Popen(['python3', fname])
+            call(['python3', fname])
 
     def run(self):
         self.running = True
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     font = pygame.font.match_font("Ubuntu Mono")
     # standard list of options and customized labels
     game_list = ["Shmup", "Snake", "Snake Duel", "Jump", "Flappy",
-                 "Bricks", "Tetris", "Quit"]
+                 "Bricks", "Tetris"]
     menu = GameMenu(g, "Pygame Launcher", game_list, font=font, font_size=32)
     menu.run()
     print("starting game")
