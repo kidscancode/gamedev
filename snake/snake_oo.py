@@ -4,6 +4,7 @@
 import pygame
 import sys
 import random
+from os import path
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -44,9 +45,10 @@ class Snake:
     # snake object - made up of a list of coordinates
     def __init__(self):
         # load the sound effects
-        self.eat_snd = pygame.mixer.Sound("snd/eat.wav")
+        snd_dir = path.join(path.dirname(__file__), 'snd')
+        self.eat_snd = pygame.mixer.Sound(path.join(snd_dir, "eat.wav"))
         self.eat_snd.set_volume(0.2)
-        self.hit_snd = pygame.mixer.Sound("snd/hit.wav")
+        self.hit_snd = pygame.mixer.Sound(path.join(snd_dir, "hit.wav"))
         self.hit_snd.set_volume(0.2)
         # pick a random spot for the snake to start (not too close to the wall)
         x = random.randrange(5, CELLWIDTH-5)
