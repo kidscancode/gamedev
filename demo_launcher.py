@@ -121,10 +121,10 @@ class GameMenu:
             fname = path.join(d, 'snake_duel/snake_duel.py')
             Popen(['python3', fname])
         elif self.items[self.cur_item].text == "Bricks":
-            fname = path.join(d, '../lbtb-thu2/brick.py')
+            fname = path.join(d, 'brick/brick.py')
             Popen(['python3', fname])
         elif self.items[self.cur_item].text == "Tetris":
-            fname = path.join(d, '../tetris2.py')
+            fname = path.join(d, 'tetris/tetris2.py')
             Popen(['python3', fname])
 
     def run(self):
@@ -157,7 +157,7 @@ class GameMenu:
                 self.game.screen.blit(self.bg_image, (0, 0))
 
             if type(self.title) is str:
-                self.game.draw_text(self.title, 40, self.game.screen.get_width()/2, 40)
+                self.game.draw_text(self.title, 40, self.game.screen.get_width() / 2, 40)
 
             if self.bg_image:
                 self.game.screen.blit(self.bg_image, self.bg_rect)
