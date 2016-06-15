@@ -34,7 +34,7 @@ SHAPES = {'S': S_SHAPE,
           'J': J_SHAPE,
           'L': L_SHAPE,
           'T': T_SHAPE}
-          
+
 font_name = pg.font.match_font('arial bold')
 def draw_text(surf, text, size, color, x, y):
     font = pg.font.Font(font_name, size)
@@ -43,7 +43,7 @@ def draw_text(surf, text, size, color, x, y):
     text_rect.x = x
     text_rect.y = y
     surf.blit(text_surface, text_rect)
-            
+
 class Piece:
     def __init__(self):
         self.shape = random.choice(list(SHAPES.keys()))
@@ -51,13 +51,13 @@ class Piece:
         self.x = int(BOARDWIDTH / 2) - int(5 / 2)
         self.y = -1
         self.color = random.randrange(1, len(TILES))
-    
+
     def rotate(self, dir):
         if dir == 'r':
             self.rotation = (self.rotation + 1) % len(SHAPES[self.shape])
         else:
             self.rotation = (self.rotation - 1) % len(SHAPES[self.shape])
-            
+
     def draw(self, dx=0, dy=0):
         for y, row in enumerate(SHAPES[self.shape][self.rotation]):
             y += self.y + dy
@@ -71,7 +71,7 @@ class Piece:
                         screen.blit(TILES[self.color], rect)
                         #pg.draw.rect(screen, COLORS[self.color], rect)
                         #pg.draw.rect(screen, BLACK, rect, 1)
-        
+
 class Board:
     def __init__(self):
         self.board = []
@@ -82,15 +82,15 @@ class Board:
         self.score = 0
         self.level = 1
         self.drop_speed = 500
-                        
+
     def draw_board(self):
         # draw board outline
         rect = pg.Rect(SIDEMARGIN, TOPMARGIN, BOARDWIDTH * BLOCKSIZE, BOARDHEIGHT * BLOCKSIZE)
         pg.draw.rect(screen, GREY, rect, 5)
         # show score
-        draw_text(screen, 'Level: '+str(self.level), 32, WHITE, 
+        draw_text(screen, 'Level: ' + str(self.level), 32, WHITE,
                   BOARDWIDTH * BLOCKSIZE + SIDEMARGIN + 10, 100)
-        draw_text(screen, 'Lines: '+str(self.score), 32, WHITE, 
+        draw_text(screen, 'Lines: ' + str(self.score), 32, WHITE,
                   BOARDWIDTH * BLOCKSIZE + SIDEMARGIN + 10, 130)
         # show next
         draw_text(screen, 'Next:', 28, WHITE, BOARDWIDTH * BLOCKSIZE + SIDEMARGIN + 10, 200)
@@ -109,8 +109,7 @@ class Board:
                     screen.blit(TILES[int(block)], rect)
                     #pg.draw.rect(screen, COLORS[int(block)], rect)
                     #pg.draw.rect(screen, BLACK, rect, 1)
-                    
-    
+
     def collide_with_board(self, dx, dy):
         # check if piece collides with board when moved dx, dy
         for y, row in enumerate(SHAPES[self.piece.shape][self.piece.rotation]):
@@ -122,38 +121,37 @@ class Board:
                         return True
                     elif y + self.piece.y + dy >= BOARDHEIGHT:
                         return True
-                    elif int(self.board[y+self.piece.y+dy][x+self.piece.x+dx]):
+                    elif int(self.board[y + self.piece.y + dy][x + self.piece.x + dx]):
                         return True
         return False
-                    
-        
+
     def drop_piece(self):
         if not self.collide_with_board(dx=0, dy=1):
             self.move_piece(dx=0, dy=1)
         else:
             self.absorb_piece()
             self.delete_lines()
-    
+
     def full_drop_piece(self):
         while not self.collide_with_board(dx=0, dy=1):
             self.drop_piece()
         self.drop_piece()
-        
+
     def game_over(self):
         if sum(self.board[0]) > 0 or sum(self.board[1]) > 0:
             return True
         return False
-        
+
     def can_move(self, dx, dy):
         if self.collide_with_board(dx=dx, dy=dy):
             return False
         return True
-        
+
     def move_piece(self, dx=0, dy=0):
         if self.can_move(dx, dy):
             self.piece.x += dx
             self.piece.y += dy
-        
+
     def absorb_piece(self):
         for y, row in enumerate(SHAPES[self.piece.shape][self.piece.rotation]):
             for x, block in enumerate(row):
@@ -161,24 +159,24 @@ class Board:
                     self.board[y + self.piece.y][x + self.piece.x] = self.piece.color
         self.piece = self.next
         self.next = Piece()
-        
+
     def try_rotate(self):
         self.piece.rotate('r')
         collide = self.collide_with_board(dx=0, dy=0)
         if collide:
             self.piece.rotate('l')
-        
+
     def delete_lines(self):
         remove = [y for y, row in enumerate(self.board) if all(row)]
         for y in remove:
-            for line in reversed(range(1, y+1)):
-                self.board[line] = list(self.board[line-1])
+            for line in reversed(range(1, y + 1)):
+                self.board[line] = list(self.board[line - 1])
             self.score += 1
             if self.score % 10 == 0:
                 self.level += 1
                 self.drop_speed -= 50
                 pg.time.set_timer(DROP_EVENT, self.drop_speed)
-                    
+
 pg.init()
 pg.mixer.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -186,7 +184,6 @@ pg.display.set_caption("Tetris")
 clock = pg.time.Clock()
 fdir = path.dirname(__file__)
 pg.mixer.music.load(path.join(fdir, 'Tetris.ogg'))
-
 
 # load assets
 file_list = ['tileBlue_27.png', 'tileGreen_27.png', 'tileGrey_27.png', 'tileOrange_27.png',
@@ -197,7 +194,7 @@ for img_name in file_list:
     img = pg.image.load(path.join(img_dir, img_name)).convert()
     img = pg.transform.scale(img, (BLOCKSIZE, BLOCKSIZE))
     TILES.append(img)
-    
+
 board = Board()
 DROP_EVENT = pg.USEREVENT
 pg.time.set_timer(DROP_EVENT, board.drop_speed)
@@ -233,5 +230,5 @@ while running:
     board.draw_board()
     board.piece.draw()
     pg.display.flip()
-    
+
 pg.quit()

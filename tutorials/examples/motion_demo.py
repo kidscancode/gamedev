@@ -9,6 +9,11 @@ WIDTH = 1000
 HEIGHT = 800
 FPS = 30
 
+PLAYER_ACC = 0.7
+PLAYER_REACT = 1
+PLAYER_MAX_VEL = 30
+FRICTION = -0.08
+
 # define colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -39,15 +44,35 @@ class Player(pygame.sprite.Sprite):
         self.acc = vec(0, 0)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            self.acc.x = -0.2
+            self.acc.x = -PLAYER_ACC
         if keys[pygame.K_RIGHT]:
-            self.acc.x = 0.2
+            self.acc.x = PLAYER_ACC
         if keys[pygame.K_UP]:
-            self.acc.y = -0.2
+            self.acc.y = -PLAYER_ACC
         if keys[pygame.K_DOWN]:
-            self.acc.y = 0.2
+            self.acc.y = PLAYER_ACC
+        if keys[pygame.K_SPACE]:
+            self.acc = vec(0, 0)
+            self.vel = vec(0, 0)
+
+        # check if acc dir is opposite vel dir
+        # if so, boost accel a little bit
+        if (self.vel.x < 0) == (self.acc.x < 0):
+            self.acc = self.acc
+        else:
+            self.acc = self.acc + self.acc * PLAYER_REACT
+
+        # friction
+        #self.acc += self.vel * FRICTION
+
+        # minimum val
+        if self.vel.length_squared() < 0.1:
+            self.vel = vec(0, 0)
 
         self.vel += self.acc
+        # terminal vel
+        if self.vel.length_squared() > PLAYER_MAX_VEL ** 2:
+            self.vel = self.vel.normalize() * PLAYER_MAX_VEL
         self.pos += self.vel + 0.5 * self.acc
         if self.pos.x > WIDTH:
             self.pos.x = 0
@@ -72,10 +97,10 @@ def draw_text(text, size, col, x, y):
 def draw_vectors(obj):
     # velocity
     # if obj.vel.x != 0:
-    draw_arrow(obj.pos, (obj.pos+obj.vel*20), GREEN, 7)
+    draw_arrow(obj.pos, (obj.pos + obj.vel * 20), GREEN, 7)
     # accel
     # if obj.acc.x != 0:
-    draw_arrow(obj.pos, (obj.pos+obj.acc*400), RED, 3)
+    draw_arrow(obj.pos, (obj.pos + obj.acc * 400), RED, 3)
 
 def draw_arrow(p1, p2, col, size):
     # line portion
@@ -90,6 +115,7 @@ def draw_arrow(p1, p2, col, size):
     #     t2 = (p2.x+10, p2.y+10)
     #     t3 = (p2.x+10, p2.y-10)
     # pygame.draw.polygon(screen, col, [t1, t2, t3])
+
 all_sprites = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)

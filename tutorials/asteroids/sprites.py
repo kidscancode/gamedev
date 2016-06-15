@@ -1,13 +1,15 @@
 import pygame as pg
-from random import choice, randint
+from random import choice, randint, uniform
 from settings import *
 import xml.etree.ElementTree as ET
+vec = pg.math.Vector2
 
 class SpritesheetWithXML:
     # utility class for loading and parsing spritesheets
     # xml filename should match png filename
     def __init__(self, filename):
-        self.spritesheet = pg.image.load(filename + '.png').convert()
+        self.spritesheet = pg.image.load(filename + '.png').convert_alpha()
+        # self.spritesheet.set_colorkey(BLACK)
         tree = ET.parse(filename + '.xml')
         self.map = {}
         # read through XML and pull out image locations using the following structure:
@@ -27,41 +29,104 @@ class SpritesheetWithXML:
                     self.map[name]['w'], self.map[name]['h'])
         return self.spritesheet.subsurface(r)
 
+class Shield(pg.sprite.Sprite):
+    def __init__(self, game, ship):
+        self.groups = game.all_sprites
+        self._layer = ship._layer + 1
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.ship = ship
+        self.level = 2
+        self.image = pg.transform.rotate(self.game.shield_images[0], self.ship.rot)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.ship.pos
+        self.ship.shield = self
+
+    def update(self):
+        self.image = pg.transform.rotate(self.game.shield_images[self.level], self.ship.rot)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.ship.pos
+
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, img, *groups):
-        pg.sprite.Sprite.__init__(self, *groups)
+    def __init__(self, game, img):
+        self.groups = game.all_sprites
+        self._layer = PLAYER_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = self.game.spritesheet.get_image_by_name(img)
         self.image = pg.transform.rotozoom(self.image, 0, PLAYER_SCALE)
-        self.image.set_colorkey(BLACK)
         self.image_clean = self.image.copy()
         self.rect = self.image.get_rect(center=(WIDTH / 2, HEIGHT / 2))
         self.rot = 0
         self.rot_cache = {}
-        self.pos = pg.math.Vector2(WIDTH / 2, HEIGHT / 2)
-        self.vel = pg.math.Vector2(0, 0)
-        self.acc = pg.math.Vector2(0, 0)
-        self.thrust_power = 0.2
-        self.friction = 0.02
-        self.shoot_delay = 250
+        self.pos = vec(WIDTH / 2, HEIGHT / 2)
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.thrust_power = PLAYER_THRUST
+        self.friction = PLAYER_FRICTION
+        self.shoot_delay = BULLET_RATE
         self.last_shot = pg.time.get_ticks()
+        self.hyper_charge = True
+        self.last_hyper = 0
+        self.bombs = 5
+        self.last_bomb = 0
+        self.gun_level = 4
+        self.shield = None
 
     def get_keys(self):
         keystate = pg.key.get_pressed()
         if keystate[pg.K_LEFT]:
-            self.rot_speed = 2
+            self.rot_speed = PLAYER_ROT_SPEED
         if keystate[pg.K_RIGHT]:
-            self.rot_speed = -2
+            self.rot_speed = -PLAYER_ROT_SPEED
         if keystate[pg.K_UP]:
-            self.acc = pg.math.Vector2(0, -self.thrust_power).rotate(-self.rot)
+            self.acc = vec(0, -self.thrust_power).rotate(-self.rot)
         if keystate[pg.K_SPACE]:
             self.shoot()
+        if keystate[pg.K_z]:
+            self.hyper()
+        if keystate[pg.K_x]:
+            self.drop_bomb()
+
+    def drop_bomb(self):
+        now = pg.time.get_ticks()
+        if now - self.last_bomb > BOMB_RATE:
+            if self.bombs > 0:
+                self.last_bomb = now
+                Bomb(self, 0, -40)
+                self.bombs -= 1
+
+    def hyper(self):
+        if self.hyper_charge:
+            self.game.hyper_sound.play()
+            self.vel = vec(0, 0)
+            self.pos = vec(randint(0, WIDTH - self.rect.width),
+                           randint(0, HEIGHT - self.rect.height))
+            self.hyper_charge = False
 
     def shoot(self):
         now = pg.time.get_ticks()
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
-            Bullet(BULLET_IMG, self, [self.game.all_sprites, self.game.bullets])
+            if self.gun_level == 1:
+                self.shoot_delay = BULLET_RATE
+                Bullet(BULLET_IMG, self, 0, 30)
+            if self.gun_level == 2:
+                self.shoot_delay = BULLET_RATE
+                Bullet(BULLET_IMG, self, 32, 20)
+                Bullet(BULLET_IMG, self, -32, 20)
+            if self.gun_level == 3:
+                self.shoot_delay = BULLET_RATE
+                Bullet(BULLET_IMG, self, 0, 30)
+                Bullet(BULLET_IMG, self, 5, 30, rot=15)
+                Bullet(BULLET_IMG, self, -5, 30, rot=-15)
+            if self.gun_level == 4:
+                self.shoot_delay = BULLET_RATE - 100
+                Bullet(BULLET_IMG, self, 0, 30)
+                Bullet(BULLET_IMG, self, 5, 30, rot=15)
+                Bullet(BULLET_IMG, self, -5, 30, rot=-15)
+                Bullet(BULLET_IMG, self, 8, 30, rot=25)
+                Bullet(BULLET_IMG, self, -8, 30, rot=-25)
 
     def rotate(self):
         self.rot = (self.rot + self.rot_speed) % 360
@@ -72,15 +137,25 @@ class Player(pg.sprite.Sprite):
             self.rot_cache[self.rot] = image
         old_center = self.rect.center
         self.image = image
+        self.mask = pg.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=old_center)
 
     def update(self):
+        # recharge hyperspace if not charged
+        if not self.hyper_charge:
+            now = pg.time.get_ticks()
+            if now - self.last_hyper > HYPER_CHARGE_TIME:
+                self.last_hyper = now
+                self.hyper_charge = True
+
         self.rot_speed = 0
-        self.acc = pg.math.Vector2(0, 0)
+        self.acc = vec(0, 0)
         self.get_keys()
         self.rotate()
         self.acc += self.vel * -self.friction
         self.vel += self.acc
+        if self.vel.length_squared() > PLAYER_MAX_SPEED ** 2:
+            self.vel = self.vel.normalize() * PLAYER_MAX_SPEED
         self.pos += self.vel + 0.5 * self.acc
         if self.pos.x > WIDTH:
             self.pos.x = 0
@@ -92,71 +167,95 @@ class Player(pg.sprite.Sprite):
             self.pos.y = HEIGHT
         self.rect.center = self.pos
 
-class Pow(pg.sprite.Sprite):
-    def __init__(self, center):
-        pg.sprite.Sprite.__init__(self)
-        self.type = random.choice(['shield', 'gun'])
-        self.image = powerup_images[self.type]
-        self.image.set_colorkey(BLACK)
-        self.rect = self.image.get_rect()
-        self.rect.center = center
-        self.speedy = 5
-
-    def update(self):
-        self.rect.y += self.speedy
-        # kill if it moves off the top of the screen
-        if self.rect.top > HEIGHT:
-            self.kill()
-
 class Explosion(pg.sprite.Sprite):
-    def __init__(self, center, size):
-        pg.sprite.Sprite.__init__(self)
+    def __init__(self, game, center, size):
+        self.groups = game.all_sprites
+        self._layer = EXPLOSION_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
         self.size = size
-        # if size ==
-        self.image = explosion_anim[self.size][0]
+        if self.size == 'sonic':
+            self.game.bomb_explosions.add(self)
+            self.frame_rate = 75
+            choice(self.game.bomb_exp_sounds).play()
+        else:
+            self.frame_rate = 55
+            choice(self.game.rock_exp_sounds).play()
+        self.image = self.game.expl_frames[self.size][0]
         self.rect = self.image.get_rect()
         self.rect.center = center
         self.frame = 0
         self.last_update = pg.time.get_ticks()
-        self.frame_rate = 75
 
     def update(self):
         now = pg.time.get_ticks()
         if now - self.last_update > self.frame_rate:
             self.last_update = now
             self.frame += 1
-            if self.frame == len(explosion_anim[self.size]):
+            if self.frame == len(self.game.expl_frames[self.size]):
                 self.kill()
             else:
                 center = self.rect.center
-                self.image = explosion_anim[self.size][self.frame]
+                self.image = self.game.expl_frames[self.size][self.frame]
                 self.rect = self.image.get_rect()
                 self.rect.center = center
 
+class Pow(pg.sprite.Sprite):
+    def __init__(self, game, pos):
+        self.groups = game.all_sprites, game.powerups
+        self._layer = POW_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.type = choice(['shield'])
+        self.game = game
+        self.image = game.spritesheet.get_image_by_name(POW_IMAGES[self.type])
+        self.rect = self.image.get_rect()
+        self.pos = pos
+        self.vel = vec(uniform(0.5, 1.5), 0).rotate(uniform(0, 360))
+        self.rect.center = self.pos
+        self.spawn_time = pg.time.get_ticks()
+
+    def update(self):
+        if pg.time.get_ticks() - self.spawn_time > POW_LIFETIME:
+            self.kill()
+        self.pos += self.vel
+        self.rect.center = self.pos
+        if self.rect.right < 0:
+            self.pos.x = WIDTH + self.rect.width / 2
+        if self.rect.left > WIDTH:
+            self.pos.x = -self.rect.width / 2
+        if self.rect.bottom < 0:
+            self.pos.y = HEIGHT + self.rect.height / 2
+        if self.rect.top > HEIGHT:
+            self.pos.y = -self.rect.height / 2
+
 class Rock(pg.sprite.Sprite):
     # rock sizes 0-3 (3 biggest)
-    def __init__(self, game, size, center, *groups):
-        pg.sprite.Sprite.__init__(self, *groups)
+    def __init__(self, game, size, center):
+        self.groups = game.all_sprites, game.rocks
+        self._layer = ROCK_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
         self.size = size
         self.game = game
         self.image = game.spritesheet.get_image_by_name(choice(game.rock_images[size]))
-        self.image.set_colorkey(BLACK)
+        # self.image.set_colorkey(BLACK)
         self.image_clean = self.image.copy()
         self.rect = self.image.get_rect()
+        self.pos = vec(0, 0)
+        self.vel = vec(uniform(ROCK_SPEED_MIN, ROCK_SPEED_MAX), 0).rotate(uniform(0, 360))
         self.rot_cache = {}
         self.rot = 0
         self.rot_speed = choice([-1.5, -1, -0.5, 0.5, 1, 1.5])
-        if self.size == 3:
+        if center is None:
             edge = choice(['h', 'v'])
             if edge == 'h':
-                self.rect.x = -self.rect.width
-                self.rect.y = randint(0, HEIGHT)
+                self.pos.x = -self.rect.width
+                self.pos.y = randint(0, HEIGHT)
             elif edge == 'v':
-                self.rect.y = -self.rect.height
-                self.rect.x = randint(0, WIDTH)
+                self.pos.y = -self.rect.height
+                self.pos.x = randint(0, WIDTH)
         else:
-            self.rect.center = center
-        self.vx, self.vy = randint(-3, 3), randint(-3, 3)
+            self.pos = center
+        self.rect.center = self.pos
 
     def rotate(self):
         self.rot = (self.rot + self.rot_speed) % 360
@@ -167,39 +266,98 @@ class Rock(pg.sprite.Sprite):
             self.rot_cache[self.rot] = image
         old_center = self.rect.center
         self.image = image
+        self.mask = pg.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=old_center)
 
     def update(self):
-        # self.rotate()
-        self.rect.x += self.vx
-        self.rect.y += self.vy
+        self.rotate()
+        self.pos += self.vel
+        self.rect.center = self.pos
         if self.rect.right < 0:
-            self.rect.left = WIDTH
+            self.pos.x = WIDTH + self.rect.width / 2
         if self.rect.left > WIDTH:
-            self.rect.right = 0
+            self.pos.x = -self.rect.width / 2
         if self.rect.bottom < 0:
-            self.rect.top = HEIGHT
+            self.pos.y = HEIGHT + self.rect.height / 2
         if self.rect.top > HEIGHT:
-            self.rect.bottom = 0
+            self.pos.y = -self.rect.height / 2
+
+class Bomb(pg.sprite.Sprite):
+    def __init__(self, ship, dx, dy):
+        self.groups = ship.game.all_sprites, ship.game.bullets
+        self._layer = BULLET_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = ship.game
+        self.frames = []
+        for img in BOMB_IMAGES:
+            img = ship.game.spritesheet.get_image_by_name(img)
+            img = pg.transform.rotozoom(img, 0, BOMB_SCALE)
+            self.frames.append(img)
+        self.pos = ship.pos - vec(dx, dy).rotate(-ship.rot)
+        self.vel = -vec(0, BOMB_SPEED).rotate(-ship.rot)
+        self.image = self.frames[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
+        self.frame = 0
+        self.frame_rate = 500
+        self.rot = 0
+        self.rot_speed = 1
+        self.rot_cache = {}
+        self.spawn_time = pg.time.get_ticks()
+        self.last_update = pg.time.get_ticks()
+        self.game.bomb_launch_sound.play()
+
+    def animate(self):
+        now = pg.time.get_ticks()
+        if now - self.spawn_time > BOMB_LIFETIME * 2 / 3:
+            self.frame_rate = 200
+        if now - self.last_update > self.frame_rate:
+            self.last_update = now
+            self.frame = (self.frame + 1) % len(self.frames)
+            self.image = self.frames[self.frame]
+        self.rot = (self.rot + self.rot_speed) % 360
+        if self.rot in self.rot_cache:
+            image = self.rot_cache[self.rot]
+        else:
+            image = pg.transform.rotate(self.frames[self.frame], self.rot)
+            self.rot_cache[self.rot] = image
+        old_center = self.rect.center
+        self.image = image
+        self.mask = pg.mask.from_surface(self.image)
+        self.rect = self.image.get_rect(center=old_center)
+
+    def explode(self):
+        Explosion(self.game, self.rect.center, 'sonic')
+        self.kill()
+
+    def update(self):
+        self.animate()
+        now = pg.time.get_ticks()
+        if now - self.spawn_time > BOMB_LIFETIME:
+            self.explode()
+        self.pos += self.vel
+        self.rect.center = self.pos
 
 class Bullet(pg.sprite.Sprite):
-    def __init__(self, img, ship, *groups):
-        pg.sprite.Sprite.__init__(self, *groups)
+    def __init__(self, img, ship, dx, dy, rot=0):
+        self.groups = ship.game.all_sprites, ship.game.bullets
+        self._layer = BULLET_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
         self.image = ship.game.spritesheet.get_image_by_name(img)
         self.image = pg.transform.rotozoom(self.image, 0, BULLET_SCALE)
-        self.image = pg.transform.rotate(self.image, ship.rot)
-        self.image.set_colorkey(BLACK)
+        self.image = pg.transform.rotate(self.image, ship.rot + rot)
+        # self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.pos = ship.pos - pg.math.Vector2(0, 20).rotate(-ship.rot)
-        self.vel = ship.vel + -pg.math.Vector2(0, 8).rotate(-ship.rot)
+        self.pos = ship.pos - vec(dx, dy).rotate(-ship.rot)
+        self.vel = ship.vel + -vec(0, BULLET_SPEED).rotate(-ship.rot - rot)
         self.rect.center = self.pos
         # self.vel = -pg.math.Vector2(0, 12).rotate(-self.ship.rot)
         self.spawn_time = pg.time.get_ticks()
-        self.lifetime = 2000
+        choice(ship.game.bullet_sounds).play()
 
     def update(self):
         now = pg.time.get_ticks()
-        if now - self.spawn_time > self.lifetime:
+        if now - self.spawn_time > BULLET_LIFETIME:
             self.kill()
         self.pos += self.vel
         self.rect.center = self.pos
