@@ -1,5 +1,6 @@
 import pygame as pg
 from random import choice, randint, uniform
+from math import atan2, degrees
 from settings import *
 import xml.etree.ElementTree as ET
 vec = pg.math.Vector2
@@ -58,7 +59,6 @@ class Player(pg.sprite.Sprite):
         self.image_clean = self.image.copy()
         self.rect = self.image.get_rect(center=(WIDTH / 2, HEIGHT / 2))
         self.rot = 0
-        self.rot_cache = {}
         self.pos = vec(WIDTH / 2, HEIGHT / 2)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
@@ -70,7 +70,7 @@ class Player(pg.sprite.Sprite):
         self.last_hyper = 0
         self.bombs = 5
         self.last_bomb = 0
-        self.gun_level = 4
+        self.gun_level = 1
         self.shield = None
 
     def get_keys(self):
@@ -113,8 +113,8 @@ class Player(pg.sprite.Sprite):
                 Bullet(BULLET_IMG, self, 0, 30)
             if self.gun_level == 2:
                 self.shoot_delay = BULLET_RATE
-                Bullet(BULLET_IMG, self, 32, 20)
-                Bullet(BULLET_IMG, self, -32, 20)
+                Bullet(BULLET_IMG, self, 23, 18)
+                Bullet(BULLET_IMG, self, -23, 18)
             if self.gun_level == 3:
                 self.shoot_delay = BULLET_RATE
                 Bullet(BULLET_IMG, self, 0, 30)
@@ -130,11 +130,11 @@ class Player(pg.sprite.Sprite):
 
     def rotate(self):
         self.rot = (self.rot + self.rot_speed) % 360
-        if self.rot in self.rot_cache:
-            image = self.rot_cache[self.rot]
+        if self.rot in self.game.rot_cache['player']:
+            image = self.game.rot_cache['player'][self.rot]
         else:
             image = pg.transform.rotate(self.image_clean, self.rot)
-            self.rot_cache[self.rot] = image
+            self.game.rot_cache['player'][self.rot] = image
         old_center = self.rect.center
         self.image = image
         self.mask = pg.mask.from_surface(self.image)
@@ -178,9 +178,12 @@ class Explosion(pg.sprite.Sprite):
             self.game.bomb_explosions.add(self)
             self.frame_rate = 75
             choice(self.game.bomb_exp_sounds).play()
+            self.game.offset = self.game.shake(amount=12, times=2)
+
         else:
             self.frame_rate = 55
             choice(self.game.rock_exp_sounds).play()
+            self.game.offset = self.game.shake(amount=8, times=2)
         self.image = self.game.expl_frames[self.size][0]
         self.rect = self.image.get_rect()
         self.rect.center = center
@@ -205,7 +208,7 @@ class Pow(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.powerups
         self._layer = POW_LAYER
         pg.sprite.Sprite.__init__(self, self.groups)
-        self.type = choice(['shield'])
+        self.type = choice(list(POW_IMAGES.keys()))
         self.game = game
         self.image = game.spritesheet.get_image_by_name(POW_IMAGES[self.type])
         self.rect = self.image.get_rect()
@@ -228,6 +231,32 @@ class Pow(pg.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.pos.y = -self.rect.height / 2
 
+class Alien(pg.sprite.Sprite):
+    def __init__(self, game):
+        self.groups = game.all_sprites, game.aliens
+        self._layer = PLAYER_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = game.spritesheet.get_image_by_name(ALIEN_IMAGE)
+        self.image = pg.transform.rotozoom(self.image, 0, ALIEN_SCALE)
+        self.rect = self.image.get_rect()
+        self.mask = pg.mask.from_surface(self.image)
+        self.pos = vec(-self.rect.width * 2, randint(50, HEIGHT - 50))
+        self.vel = vec(uniform(ALIEN_SPEED_MIN, ALIEN_SPEED_MAX), 0).rotate(uniform(-10, 10))
+        self.rect.center = self.pos
+        self.last_shot = pg.time.get_ticks()
+
+    def update(self):
+        now = pg.time.get_ticks()
+        if now - self.last_shot > ALIEN_FIRE_RATE:
+            self.last_shot = now
+            ABullet(self.game, self)
+        self.pos += self.vel
+        self.rect.center = self.pos
+        if self.rect.left > WIDTH:
+            self.game.last_alien = pg.time.get_ticks()
+            self.kill()
+
 class Rock(pg.sprite.Sprite):
     # rock sizes 0-3 (3 biggest)
     def __init__(self, game, size, center):
@@ -236,13 +265,12 @@ class Rock(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.size = size
         self.game = game
-        self.image = game.spritesheet.get_image_by_name(choice(game.rock_images[size]))
-        # self.image.set_colorkey(BLACK)
+        self.img_name = choice(ROCK_IMAGES[size])
+        self.image = game.spritesheet.get_image_by_name(self.img_name)
         self.image_clean = self.image.copy()
         self.rect = self.image.get_rect()
         self.pos = vec(0, 0)
         self.vel = vec(uniform(ROCK_SPEED_MIN, ROCK_SPEED_MAX), 0).rotate(uniform(0, 360))
-        self.rot_cache = {}
         self.rot = 0
         self.rot_speed = choice([-1.5, -1, -0.5, 0.5, 1, 1.5])
         if center is None:
@@ -259,11 +287,11 @@ class Rock(pg.sprite.Sprite):
 
     def rotate(self):
         self.rot = (self.rot + self.rot_speed) % 360
-        if self.rot in self.rot_cache:
-            image = self.rot_cache[self.rot]
+        if self.rot in self.game.rot_cache['rock'][self.img_name]:
+            image = self.game.rot_cache['rock'][self.img_name][self.rot]
         else:
             image = pg.transform.rotate(self.image_clean, self.rot)
-            self.rot_cache[self.rot] = image
+            self.game.rot_cache['rock'][self.img_name][self.rot] = image
         old_center = self.rect.center
         self.image = image
         self.mask = pg.mask.from_surface(self.image)
@@ -299,7 +327,7 @@ class Bomb(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
         self.frame = 0
-        self.frame_rate = 500
+        self.frame_rate = 1000
         self.rot = 0
         self.rot_speed = 1
         self.rot_cache = {}
@@ -313,6 +341,7 @@ class Bomb(pg.sprite.Sprite):
             self.frame_rate = 200
         if now - self.last_update > self.frame_rate:
             self.last_update = now
+            self.game.bomb_tick_sound.play()
             self.frame = (self.frame + 1) % len(self.frames)
             self.image = self.frames[self.frame]
         self.rot = (self.rot + self.rot_speed) % 360
@@ -361,4 +390,27 @@ class Bullet(pg.sprite.Sprite):
             self.kill()
         self.pos += self.vel
         self.rect.center = self.pos
-        # wrap around?
+
+class ABullet(pg.sprite.Sprite):
+    def __init__(self, game, ship):
+        self.groups = game.all_sprites, game.alien_bullets
+        self._layer = ROCK_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.pos = ship.pos + vec(0, 0)
+        self.image = self.game.spritesheet.get_image_by_name(ALIEN_BULLET_IMAGE)
+        self.image = pg.transform.rotozoom(self.image, 0, BULLET_SCALE)
+        self.dir = degrees(atan2(self.game.player.pos.y - self.pos.y, self.game.player.pos.x - self.pos.x)) + 90
+        # self.dir = 0
+        self.image = pg.transform.rotate(self.image, -self.dir)
+        self.vel = ship.vel + -vec(0, ALIEN_BULLET_SPEED).rotate(self.dir)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
+        self.spawn_time = pg.time.get_ticks()
+
+    def update(self):
+        now = pg.time.get_ticks()
+        if now - self.spawn_time > ALIEN_BULLET_LIFETIME:
+            self.kill()
+        self.pos += self.vel
+        self.rect.center = self.pos

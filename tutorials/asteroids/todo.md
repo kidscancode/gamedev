@@ -1,3 +1,5 @@
+delta-t ?
+level change pause/announce
 hyperspace
     safe landing
 alien ship
@@ -9,20 +11,18 @@ sounds (variations)
     explode (big/sm/sonic)
     thrust
     hyper
-    bomb launch
-    bomb tick
+    shield up
+    gun up (gun max)
+screen shake
 explosion animations
     player death
 thrust particles/appearance
 powerups
-    gun upgrade (1 shot -> 2 shot -> 3 shot spread)
+    gun upgrade (1 shot -> 2 shot -> 3 shot spread -> 5 shot spread)
         rate
     BEAM weapon
     BOMB weapon (mine style - ticks, then boom)
-    temp invuln
-gun levels (2?)
-title screen
-game over screen
+    shield - %
 high score
 game font
 bg stars (twinkles)
@@ -33,3 +33,4 @@ displays - game font
     lives
     hyperspace charge
     bombs
+    shield indicator (red/flash when empty)
