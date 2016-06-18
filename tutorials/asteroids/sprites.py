@@ -1,6 +1,5 @@
 import pygame as pg
 from random import choice, randint, uniform
-from math import atan2, degrees
 from settings import *
 import xml.etree.ElementTree as ET
 vec = pg.math.Vector2
@@ -245,6 +244,7 @@ class Alien(pg.sprite.Sprite):
         self.vel = vec(uniform(ALIEN_SPEED_MIN, ALIEN_SPEED_MAX), 0).rotate(uniform(-10, 10))
         self.rect.center = self.pos
         self.last_shot = pg.time.get_ticks()
+        self.health = ALIEN_HITS
 
     def update(self):
         now = pg.time.get_ticks()
@@ -400,11 +400,13 @@ class ABullet(pg.sprite.Sprite):
         self.pos = ship.pos + vec(0, 0)
         self.image = self.game.spritesheet.get_image_by_name(ALIEN_BULLET_IMAGE)
         self.image = pg.transform.rotozoom(self.image, 0, BULLET_SCALE)
-        self.dir = degrees(atan2(self.game.player.pos.y - self.pos.y, self.game.player.pos.x - self.pos.x)) + 90
-        # self.dir = 0
+        # self.dir = degrees(atan2(self.game.player.pos.y - self.pos.y, self.game.player.pos.x - self.pos.x)) + 90
+        # self.dir = 90
+        self.dir = vec(self.game.player.pos.x - self.pos.x, self.game.player.pos.y - self.pos.y).as_polar()[1] + 90
         self.image = pg.transform.rotate(self.image, -self.dir)
         self.vel = ship.vel + -vec(0, ALIEN_BULLET_SPEED).rotate(self.dir)
         self.rect = self.image.get_rect()
+        self.mask = pg.mask.from_surface(self.image)
         self.rect.center = self.pos
         self.spawn_time = pg.time.get_ticks()
 

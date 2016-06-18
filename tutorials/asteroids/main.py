@@ -61,6 +61,8 @@ class Game:
         self.aliens = pg.sprite.Group()
         self.alien_bullets = pg.sprite.Group()
         self.player = Player(self, PLAYER_IMG)
+        if SHIELD_AT_START:
+            Shield(self, self.player)
         for i in range(2):
             Rock(self, 3, None)
         self.score = 0
@@ -151,6 +153,7 @@ class Game:
         if now - self.last_alien > ALIEN_SPAWN_TIME + randint(1000, 5000):
             self.last_alien = now
             Alien(self)
+
         # bomb explosions take out rocks (player too?)
         hits = pg.sprite.groupcollide(self.rocks, self.bomb_explosions, True, False)
         for hit in hits:
@@ -162,6 +165,18 @@ class Game:
             if hit.size > 0:
                 Rock(self, hit.size - 1, hit.rect.center)
                 Rock(self, hit.size - 1, hit.rect.center)
+
+        # collide bullets with aliens
+        hits = pg.sprite.groupcollide(self.aliens, self.bullets, False, True)
+        for hit in hits.keys():
+            for bullet in hits[hit]:
+                hit.health -= 1
+                if hit.health <= 0:
+                    Explosion(self, hit.rect.center, 'sonic')
+                    hit.kill()
+                else:
+                    Explosion(self, bullet.rect.center, 'sm')
+
         # collide bullets with rocks, each hit spawns two smaller rocks
         hits = pg.sprite.groupcollide(self.rocks, self.bullets, True, True,
                                       pg.sprite.collide_rect_ratio(0.75))
@@ -179,6 +194,23 @@ class Game:
             if hit.size > 0:
                 Rock(self, hit.size - 1, hit.rect.center)
                 Rock(self, hit.size - 1, hit.rect.center)
+
+        # collide alien bullets with player
+        hits = pg.sprite.spritecollide(self.player, self.alien_bullets, True,
+                                       pg.sprite.collide_mask)
+        for hit in hits:
+            # decrease shield / lives
+            if self.player.shield:
+                if self.player.shield.level > 0:
+                    self.player.shield.level -= 1
+                else:
+                    self.shield_down_sound.play()
+                    self.player.shield.kill()
+                    self.player.shield = None
+                Explosion(self, hit.rect.center, 'sm')
+            else:
+                self.playing = False
+
         # collide rocks with player
         hits = pg.sprite.spritecollide(self.player, self.rocks, True,
                                        pg.sprite.collide_mask)
@@ -199,6 +231,7 @@ class Game:
             self.level += 1
             for i in range(self.level + 2):
                 Rock(self, choice([3, 2]), None)
+
         # pick up powerups
         hits = pg.sprite.spritecollide(self.player, self.powerups, True)
         for hit in hits:
