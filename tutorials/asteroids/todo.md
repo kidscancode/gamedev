@@ -1,13 +1,15 @@
+MOVE SPRITES TO INDIVIDUAL FILES
 IMPROVE COLLISION CHECKS (more groups, organize)
-    - stuff that hits player (rocks, aliens, alien bullets, pows)
-    - stuff that player shoots (bullets, bombs)
-    - stuff that player shots hit (rocks, aliens)
+    x stuff that hits player (rocks, aliens, alien bullets, pows) - mobs
+    - stuff that player shoots (bullets, bombs) - bullets
+    x stuff that player bullets hit (rocks, aliens) - mobs
 
 level change pause/announce
 hyperspace
     safe landing
 alien ship
     shoots at player
+    upgraded shooting (spread)
 lives and/or shield
 sounds (variations)
     alien shoot
@@ -36,11 +38,10 @@ powerups
 high score
 game font
 bg stars (twinkles)
-move rot caches to game (not per sprite)
 animated gameover screen (floating rocks)
 displays / indicators
     floating score text
-    level
+    x level
     lives
     hyperspace charge
     bombs (cooldown)

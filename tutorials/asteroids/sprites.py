@@ -204,15 +204,16 @@ class Explosion(pg.sprite.Sprite):
 
 class Pow(pg.sprite.Sprite):
     def __init__(self, game, pos):
-        self.groups = game.all_sprites, game.powerups
+        self.groups = game.all_sprites, game.powerups, game.mobs
         self._layer = POW_LAYER
         pg.sprite.Sprite.__init__(self, self.groups)
         self.type = choice(list(POW_IMAGES.keys()))
         self.game = game
         self.image = game.spritesheet.get_image_by_name(POW_IMAGES[self.type])
         self.rect = self.image.get_rect()
+        self.mask = pg.mask.from_surface(self.image)
         self.pos = pos
-        self.vel = vec(uniform(0.5, 1.5), 0).rotate(uniform(0, 360))
+        self.vel = vec(uniform(0.2, 1.0), 0).rotate(uniform(0, 360))
         self.rect.center = self.pos
         self.spawn_time = pg.time.get_ticks()
 
@@ -232,7 +233,7 @@ class Pow(pg.sprite.Sprite):
 
 class Alien(pg.sprite.Sprite):
     def __init__(self, game):
-        self.groups = game.all_sprites, game.aliens
+        self.groups = game.all_sprites, game.aliens, game.mobs
         self._layer = PLAYER_LAYER
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -251,6 +252,7 @@ class Alien(pg.sprite.Sprite):
         if now - self.last_shot > ALIEN_FIRE_RATE:
             self.last_shot = now
             ABullet(self.game, self)
+            self.game.alien_fire_sound.play()
         self.pos += self.vel
         self.rect.center = self.pos
         if self.rect.left > WIDTH:
@@ -260,7 +262,7 @@ class Alien(pg.sprite.Sprite):
 class Rock(pg.sprite.Sprite):
     # rock sizes 0-3 (3 biggest)
     def __init__(self, game, size, center):
-        self.groups = game.all_sprites, game.rocks
+        self.groups = game.all_sprites, game.rocks, game.mobs
         self._layer = ROCK_LAYER
         pg.sprite.Sprite.__init__(self, self.groups)
         self.size = size
@@ -393,7 +395,7 @@ class Bullet(pg.sprite.Sprite):
 
 class ABullet(pg.sprite.Sprite):
     def __init__(self, game, ship):
-        self.groups = game.all_sprites, game.alien_bullets
+        self.groups = game.all_sprites, game.mobs
         self._layer = ROCK_LAYER
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game

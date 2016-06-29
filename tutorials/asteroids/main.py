@@ -59,7 +59,7 @@ class Game:
         self.bomb_explosions = pg.sprite.Group()
         self.powerups = pg.sprite.Group()
         self.aliens = pg.sprite.Group()
-        self.alien_bullets = pg.sprite.Group()
+        self.mobs = pg.sprite.Group()
         self.player = Player(self, PLAYER_IMG)
         if SHIELD_AT_START:
             Shield(self, self.player)
@@ -113,6 +113,8 @@ class Game:
         # sounds
         self.shield_down_sound = pg.mixer.Sound(path.join(snd_dir, SHIELD_DOWN_SOUND))
         self.shield_down_sound.set_volume(1.0)
+        self.alien_fire_sound = pg.mixer.Sound(path.join(snd_dir, ALIEN_BULLET_SOUND))
+        self.alien_fire_sound.set_volume(1.0)
         self.hyper_sound = pg.mixer.Sound(path.join(snd_dir, HYPER_SOUND))
         self.bomb_tick_sound = pg.mixer.Sound(path.join(snd_dir, BOMB_TICK_SOUND))
         self.bomb_tick_sound.set_volume(0.5)
@@ -166,85 +168,81 @@ class Game:
                 Rock(self, hit.size - 1, hit.rect.center)
                 Rock(self, hit.size - 1, hit.rect.center)
 
+        # check for bullet hits
+        # 1) with rocks 2) with aliens
         # collide bullets with aliens
-        hits = pg.sprite.groupcollide(self.aliens, self.bullets, False, True)
+        hits = pg.sprite.groupcollide(self.mobs, self.bullets, False, True)
         for hit in hits.keys():
             for bullet in hits[hit]:
-                hit.health -= 1
-                if hit.health <= 0:
-                    Explosion(self, hit.rect.center, 'sonic')
-                    hit.kill()
-                else:
-                    Explosion(self, bullet.rect.center, 'sm')
-
-        # collide bullets with rocks, each hit spawns two smaller rocks
-        hits = pg.sprite.groupcollide(self.rocks, self.bullets, True, True,
-                                      pg.sprite.collide_rect_ratio(0.75))
-        for hit in hits.keys():
-            if randrange(100) < POW_SPAWN_PCT and len(self.powerups) <= 2:
-                Pow(self, hit.pos)
-            for bullet in hits[hit]:
-                if type(bullet) is Bomb:
+                if isinstance(bullet, Bomb):
                     bullet.explode()
-            self.score += 4 - hit.size
-            if hit.size > 1:
-                Explosion(self, hit.rect.center, 'lg')
-            else:
-                Explosion(self, hit.rect.center, 'sm')
-            if hit.size > 0:
-                Rock(self, hit.size - 1, hit.rect.center)
-                Rock(self, hit.size - 1, hit.rect.center)
+                if isinstance(hit, Alien):
+                    hit.health -= 1
+                    if hit.health <= 0:
+                        Explosion(self, hit.rect.center, 'sonic')
+                        Pow(self, hit.pos)
+                        hit.kill()
+                    else:
+                        Explosion(self, bullet.rect.center, 'sm')
+            if isinstance(hit, Rock):
+                if randrange(100) < POW_SPAWN_PCT and len(self.powerups) <= 2:
+                    Pow(self, hit.pos)
+                self.score += 4 - hit.size
+                if hit.size > 1:
+                    Explosion(self, hit.rect.center, 'lg')
+                else:
+                    Explosion(self, hit.rect.center, 'sm')
+                if hit.size > 0:
+                    Rock(self, hit.size - 1, hit.rect.center)
+                    Rock(self, hit.size - 1, hit.rect.center)
+                hit.kill()
 
-        # collide alien bullets with player
-        hits = pg.sprite.spritecollide(self.player, self.alien_bullets, True,
-                                       pg.sprite.collide_mask)
+        # check for collisions with player
+        hits = pg.sprite.spritecollide(self.player, self.mobs, True, pg.sprite.collide_mask)
         for hit in hits:
-            # decrease shield / lives
-            if self.player.shield:
-                if self.player.shield.level > 0:
-                    self.player.shield.level -= 1
+            # type of object
+            if isinstance(hit, Rock):
+                # decrease shield / lives
+                if self.player.shield:
+                    if self.player.shield.level > 0:
+                        self.player.shield.level -= 1
+                    else:
+                        self.shield_down_sound.play()
+                        self.player.shield.kill()
+                        self.player.shield = None
+                    Explosion(self, self.player.rect.center, 'sonic')
                 else:
-                    self.shield_down_sound.play()
-                    self.player.shield.kill()
-                    self.player.shield = None
-                Explosion(self, hit.rect.center, 'sm')
-            else:
-                self.playing = False
-
-        # collide rocks with player
-        hits = pg.sprite.spritecollide(self.player, self.rocks, True,
-                                       pg.sprite.collide_mask)
-        if hits:
-            # decrease shield / lives
-            if self.player.shield:
-                if self.player.shield.level > 0:
-                    self.player.shield.level -= 1
+                    self.playing = False
+            elif isinstance(hit, ABullet):
+                # decrease shield / lives
+                if self.player.shield:
+                    if self.player.shield.level > 0:
+                        self.player.shield.level -= 1
+                    else:
+                        self.shield_down_sound.play()
+                        self.player.shield.kill()
+                        self.player.shield = None
+                    Explosion(self, hit.rect.center, 'sm')
                 else:
-                    self.shield_down_sound.play()
-                    self.player.shield.kill()
-                    self.player.shield = None
-                Explosion(self, self.player.rect.center, 'sonic')
-            else:
-                self.playing = False
+                    self.playing = False
+            elif isinstance(hit, Pow):
+                if hit.type == 'shield':
+                    if not self.player.shield:
+                        Shield(self, self.player)
+                    else:
+                        self.player.shield.level = 2
+                    self.pow_sounds[hit.type].play()
+                elif hit.type == 'gun':
+                    if self.player.gun_level < 4:
+                        self.player.gun_level += 1
+                        self.pow_sounds[hit.type].play()
+            elif isinstance(hit, Alien):
+                pass
 
         if len(self.rocks) == 0:
             self.level += 1
             for i in range(self.level + 2):
                 Rock(self, choice([3, 2]), None)
-
-        # pick up powerups
-        hits = pg.sprite.spritecollide(self.player, self.powerups, True)
-        for hit in hits:
-            if hit.type == 'shield':
-                if not self.player.shield:
-                    Shield(self, self.player)
-                else:
-                    self.player.shield.level = 2
-                self.pow_sounds[hit.type].play()
-            elif hit.type == 'gun':
-                if self.player.gun_level < 4:
-                    self.player.gun_level += 1
-                    self.pow_sounds[hit.type].play()
 
     def shake(self, amount=20, times=2):
         d = -1
@@ -264,6 +262,7 @@ class Game:
         self.game_surface.blit(self.background, self.background_rect)
         self.all_sprites.draw(self.game_surface)
         self.draw_text(str(self.score), 28, WHITE, WIDTH / 2, 15, align='m')
+        self.draw_text("Level: " + str(self.level), 22, WHITE, 5, 15, align='l')
         # self.draw_score(WIDTH / 2, 15)
         self.screen.blit(self.game_surface, next(self.offset))
         pg.display.flip()
