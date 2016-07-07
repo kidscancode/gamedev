@@ -1,7 +1,7 @@
 # Sprite classes for platform game
 import pygame as pg
 from settings import *
-from random import choice, randrange, uniform
+from random import choice, randrange
 vec = pg.math.Vector2
 
 class Spritesheet:

@@ -1,6 +1,8 @@
 import pygame as pg
+from os import path
 from random import choice, randint, uniform
 from settings import *
+from particles import *
 import xml.etree.ElementTree as ET
 vec = pg.math.Vector2
 
@@ -10,24 +12,37 @@ class SpritesheetWithXML:
     def __init__(self, filename):
         self.spritesheet = pg.image.load(filename + '.png').convert_alpha()
         # self.spritesheet.set_colorkey(BLACK)
-        tree = ET.parse(filename + '.xml')
-        self.map = {}
-        # read through XML and pull out image locations using the following structure:
-        # self.map['image name'] = {'x':x, 'y':y, 'w':w, 'h':h}
-        for node in tree.iter():
-            if node.attrib.get('name'):
-                name = node.attrib.get('name')
-                self.map[name] = {}
-                self.map[name]['x'] = int(node.attrib.get('x'))
-                self.map[name]['y'] = int(node.attrib.get('y'))
-                self.map[name]['w'] = int(node.attrib.get('width'))
-                self.map[name]['h'] = int(node.attrib.get('height'))
+        if path.isfile(filename + '.xml'):
+            tree = ET.parse(filename + '.xml')
+            self.map = {}
+            # read through XML and pull out image locations using the following structure:
+            # self.map['image name'] = {'x':x, 'y':y, 'w':w, 'h':h}
+            for node in tree.iter():
+                if node.attrib.get('name'):
+                    name = node.attrib.get('name')
+                    self.map[name] = {}
+                    self.map[name]['x'] = int(node.attrib.get('x'))
+                    self.map[name]['y'] = int(node.attrib.get('y'))
+                    self.map[name]['w'] = int(node.attrib.get('width'))
+                    self.map[name]['h'] = int(node.attrib.get('height'))
+
+    def get_image_by_rect(self, x, y, w, h):
+        r = pg.Rect(x, y, w, h)
+        return self.spritesheet.subsurface(r)
 
     def get_image_by_name(self, name):
-        #print("getting image {}".format(name))
         r = pg.Rect(self.map[name]['x'], self.map[name]['y'],
                     self.map[name]['w'], self.map[name]['h'])
         return self.spritesheet.subsurface(r)
+
+class EmptySprite(pg.sprite.Sprite):
+    def __init__(self, x, y, w, h):
+        # groups = group
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((w, h))
+        # self.image.fill((128, 128, 0))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
 
 class Shield(pg.sprite.Sprite):
     def __init__(self, game, ship):
@@ -56,6 +71,7 @@ class Player(pg.sprite.Sprite):
         self.image = self.game.spritesheet.get_image_by_name(img)
         self.image = pg.transform.rotozoom(self.image, 0, PLAYER_SCALE)
         self.image_clean = self.image.copy()
+        self.life_image = self.game.spritesheet.get_image_by_name(PLAYER_LIFE_IMG)
         self.rect = self.image.get_rect(center=(WIDTH / 2, HEIGHT / 2))
         self.rot = 0
         self.pos = vec(WIDTH / 2, HEIGHT / 2)
@@ -66,42 +82,99 @@ class Player(pg.sprite.Sprite):
         self.shoot_delay = BULLET_RATE
         self.last_shot = pg.time.get_ticks()
         self.hyper_charge = True
-        self.last_hyper = 0
+        self.last_hyper = pg.time.get_ticks()
+        self.wpn2_type = 'beam'
         self.bombs = 5
         self.last_bomb = 0
         self.gun_level = 1
-        self.shield = None
+        if SHIELD_AT_SPAWN:
+            Shield(self.game, self)
+        else:
+            self.shield = None
+        self.lives = 3
+        self.hidden = False
+        self.hide_timer = 0
+        self.beam_firing = False
+        self.engine_emitter = ParticleEmitter(self.game, self, PLAYER_THRUST_OFFSET, PLAYER_THRUST_VEL,
+                                              game.ship_particle_img, PLAYER_THRUST_COUNT, PLAYER_THRUST_LIFETIME,
+                                              PLAYER_THRUST_FADE, PLAYER_THRUST_SIZE, PLAYER_THRUST_ANGLE)
+
+    def unhide(self):
+        # spawn safely (no obstacles at desired pos)
+        self.placeholder = EmptySprite(self.dest.x, self.dest.y, self.rect.width * 2, self.rect.height * 2)
+
+        hits = pg.sprite.spritecollideany(self.placeholder, self.game.mobs, False)
+        if not hits:
+            self.hidden = False
+            self.pos = self.dest
+            self.vel = vec(0, 0)
+
+    def hide(self):
+        # hide player temporarily (between deaths or when using hyper)
+        self.hidden = True
+        self.hide_timer = pg.time.get_ticks()
+        self.pos = vec(WIDTH + 1000, HEIGHT + 1000)
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
 
     def get_keys(self):
         keystate = pg.key.get_pressed()
         if keystate[pg.K_LEFT]:
-            self.rot_speed = PLAYER_ROT_SPEED
+            if not self.beam_firing:
+                self.rot_speed = PLAYER_ROT_SPEED
         if keystate[pg.K_RIGHT]:
-            self.rot_speed = -PLAYER_ROT_SPEED
+            if not self.beam_firing:
+                self.rot_speed = -PLAYER_ROT_SPEED
         if keystate[pg.K_UP]:
             self.acc = vec(0, -self.thrust_power).rotate(-self.rot)
+            self.engine_emitter.count = 50
         if keystate[pg.K_SPACE]:
             self.shoot()
         if keystate[pg.K_z]:
             self.hyper()
         if keystate[pg.K_x]:
+            self.shoot_wpn2()
+
+    def shoot_wpn2(self):
+        if self.wpn2_type == 'bomb':
             self.drop_bomb()
+        elif self.wpn2_type == 'beam':
+            self.fire_beam()
+        elif self.wpn2_type is None:
+            pass
+            # play "click" sound
+
+    def fire_beam(self):
+        now = pg.time.get_ticks()
+        if now - self.last_bomb > BEAM_RATE:
+            self.last_bomb = now
+            Beam(self, 0, 120)
+            self.beam_firing = True
 
     def drop_bomb(self):
         now = pg.time.get_ticks()
         if now - self.last_bomb > BOMB_RATE:
-            if self.bombs > 0:
-                self.last_bomb = now
-                Bomb(self, 0, -40)
-                self.bombs -= 1
+            # if self.bombs > 0:
+            self.last_bomb = now
+            Bomb(self, 0, -40)
+            # self.bombs -= 1
+
+    def die(self):
+        self.lives -= 1
+        self.hide()
+        self.dest = vec(WIDTH / 2, HEIGHT / 2)
+        self.gun_level = 1
+        if SHIELD_AT_SPAWN:
+            Shield(self.game, self)
 
     def hyper(self):
         if self.hyper_charge:
             self.game.hyper_sound.play()
-            self.vel = vec(0, 0)
-            self.pos = vec(randint(0, WIDTH - self.rect.width),
-                           randint(0, HEIGHT - self.rect.height))
+            self.hide()
+            self.dest = vec(randint(30, WIDTH - self.rect.width - 30),
+                            randint(30, HEIGHT - self.rect.height - 30))
             self.hyper_charge = False
+            self.last_hyper = pg.time.get_ticks()
 
     def shoot(self):
         now = pg.time.get_ticks()
@@ -140,6 +213,10 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=old_center)
 
     def update(self):
+        # unhide if hidden
+        if self.hidden and pg.time.get_ticks() - self.hide_timer > 1000:
+            self.unhide()
+
         # recharge hyperspace if not charged
         if not self.hyper_charge:
             now = pg.time.get_ticks()
@@ -149,21 +226,25 @@ class Player(pg.sprite.Sprite):
 
         self.rot_speed = 0
         self.acc = vec(0, 0)
-        self.get_keys()
+        self.engine_emitter.count = 0
+        if not self.hidden:
+            self.get_keys()
         self.rotate()
+        self.engine_emitter.update()
         self.acc += self.vel * -self.friction
-        self.vel += self.acc
+        self.vel += self.acc * self.game.dt
         if self.vel.length_squared() > PLAYER_MAX_SPEED ** 2:
             self.vel = self.vel.normalize() * PLAYER_MAX_SPEED
-        self.pos += self.vel + 0.5 * self.acc
-        if self.pos.x > WIDTH:
-            self.pos.x = 0
-        if self.pos.x < 0:
-            self.pos.x = WIDTH
-        if self.pos.y > HEIGHT:
-            self.pos.y = 0
-        if self.pos.y < 0:
-            self.pos.y = HEIGHT
+        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+        if not self.hidden:
+            if self.pos.x > WIDTH:
+                self.pos.x = 0
+            if self.pos.x < 0:
+                self.pos.x = WIDTH
+            if self.pos.y > HEIGHT:
+                self.pos.y = 0
+            if self.pos.y < 0:
+                self.pos.y = HEIGHT
         self.rect.center = self.pos
 
 class Explosion(pg.sprite.Sprite):
@@ -213,14 +294,14 @@ class Pow(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.mask = pg.mask.from_surface(self.image)
         self.pos = pos
-        self.vel = vec(uniform(0.2, 1.0), 0).rotate(uniform(0, 360))
+        self.vel = vec(uniform(POW_MIN_SPEED, POW_MAX_SPEED), 0).rotate(uniform(0, 360))
         self.rect.center = self.pos
         self.spawn_time = pg.time.get_ticks()
 
     def update(self):
         if pg.time.get_ticks() - self.spawn_time > POW_LIFETIME:
             self.kill()
-        self.pos += self.vel
+        self.pos += self.vel * self.game.dt
         self.rect.center = self.pos
         if self.rect.right < 0:
             self.pos.x = WIDTH + self.rect.width / 2
@@ -239,21 +320,49 @@ class Alien(pg.sprite.Sprite):
         self.game = game
         self.image = game.spritesheet.get_image_by_name(ALIEN_IMAGE)
         self.image = pg.transform.rotozoom(self.image, 0, ALIEN_SCALE)
+        self.image_orig = self.image.copy()
         self.rect = self.image.get_rect()
         self.mask = pg.mask.from_surface(self.image)
+        # create a white image from mask for damage flash
+        self.dmg_flash = self.image.copy()
+        for x in range(self.rect.width):
+            for y in range(self.rect.height):
+                if self.mask.get_at((x, y)):
+                    pg.draw.circle(self.dmg_flash, WHITE, (x, y), 1)
         self.pos = vec(-self.rect.width * 2, randint(50, HEIGHT - 50))
         self.vel = vec(uniform(ALIEN_SPEED_MIN, ALIEN_SPEED_MAX), 0).rotate(uniform(-10, 10))
         self.rect.center = self.pos
         self.last_shot = pg.time.get_ticks()
         self.health = ALIEN_HITS
+        self.size = 0
+        self.fire_rate = max(500, ALIEN_FIRE_RATE - 500 * game.level // 3)
+        self.hit_time = 0
+
+    def hit(self):
+        self.hit_time = pg.time.get_ticks()
+        self.image = self.dmg_flash
 
     def update(self):
         now = pg.time.get_ticks()
-        if now - self.last_shot > ALIEN_FIRE_RATE:
+        if now - self.hit_time > 100:
+            self.image = self.image_orig
+        if now - self.last_shot > self.fire_rate:
             self.last_shot = now
-            ABullet(self.game, self)
             self.game.alien_fire_sound.play()
-        self.pos += self.vel
+            if self.game.level < 5:
+                ABullet(self.game, self)
+            elif self.game.level < 10:
+                ABullet(self.game, self, 25)
+                ABullet(self.game, self)
+                ABullet(self.game, self, -25)
+            else:
+                ABullet(self.game, self, 30)
+                ABullet(self.game, self, 15)
+                ABullet(self.game, self)
+                ABullet(self.game, self, -15)
+                ABullet(self.game, self, -30)
+
+        self.pos += self.vel * self.game.dt
         self.rect.center = self.pos
         if self.rect.left > WIDTH:
             self.game.last_alien = pg.time.get_ticks()
@@ -301,7 +410,7 @@ class Rock(pg.sprite.Sprite):
 
     def update(self):
         self.rotate()
-        self.pos += self.vel
+        self.pos += self.vel * self.game.dt
         self.rect.center = self.pos
         if self.rect.right < 0:
             self.pos.x = WIDTH + self.rect.width / 2
@@ -324,7 +433,7 @@ class Bomb(pg.sprite.Sprite):
             img = pg.transform.rotozoom(img, 0, BOMB_SCALE)
             self.frames.append(img)
         self.pos = ship.pos - vec(dx, dy).rotate(-ship.rot)
-        self.vel = -vec(0, BOMB_SPEED).rotate(-ship.rot)
+        self.vel = vec(0, BOMB_SPEED).rotate(-ship.rot)
         self.image = self.frames[0]
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
@@ -366,18 +475,50 @@ class Bomb(pg.sprite.Sprite):
         now = pg.time.get_ticks()
         if now - self.spawn_time > BOMB_LIFETIME:
             self.explode()
-        self.pos += self.vel
+        self.pos += self.vel * self.game.dt
         self.rect.center = self.pos
+
+class Beam(pg.sprite.Sprite):
+    def __init__(self, ship, dx, dy):
+        self.groups = ship.game.all_sprites, ship.game.bullets
+        self._layer = BULLET_LAYER
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.ship = ship
+        self.offset = vec(dx, dy)
+        self.images = [pg.transform.scale(ship.game.spritesheet.get_image_by_name('laserRed14.png'), (13, 200)),
+                       pg.transform.scale(ship.game.spritesheet.get_image_by_name('laserRed15.png'), (13, 200))]
+        self.image = pg.transform.rotate(self.images[0], self.ship.rot)
+        self.mask = pg.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.ship.pos - self.offset.rotate(-self.ship.rot)
+        self.spawn_time = pg.time.get_ticks()
+        choice(ship.game.bullet_sounds).play()
+
+    def update(self):
+        now = pg.time.get_ticks()
+        if now - self.spawn_time > BEAM_LIFETIME:
+            self.ship.beam_firing = False
+            self.kill()
+        self.image = pg.transform.rotate(self.images[0], self.ship.rot)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.ship.pos - self.offset.rotate(-self.ship.rot)
 
 class Bullet(pg.sprite.Sprite):
     def __init__(self, img, ship, dx, dy, rot=0):
         self.groups = ship.game.all_sprites, ship.game.bullets
         self._layer = BULLET_LAYER
         pg.sprite.Sprite.__init__(self, self.groups)
-        self.image = ship.game.spritesheet.get_image_by_name(img)
+        self.game = ship.game
+        # self.image = ship.game.spritesheet.get_image_by_name(img)
+        self.image = pg.transform.scale(ship.game.beam_sheet.get_image_by_rect(135, 309, 54, 97), (41, 73))  # lt blue
+        # self.image = ship.game.beam_sheet.get_image_by_rect(227, 210, 48, 85)  # purple
+        # self.image = ship.game.beam_sheet.get_image_by_rect(294, 26, 71, 120)  # dk blue
+        # self.image = ship.game.beam_sheet.get_image_by_rect(38, 168, 17, 33)  # sm red
+        # self.image = ship.game.beam_sheet.get_image_by_rect(39, 53, 17, 33)  # sm green
+        # self.image = ship.game.beam_sheet.get_image_by_rect(118, 58, 17, 33)  # sm purple
         self.image = pg.transform.rotozoom(self.image, 0, BULLET_SCALE)
         self.image = pg.transform.rotate(self.image, ship.rot + rot)
-        # self.image.set_colorkey(BLACK)
+        self.mask = pg.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.pos = ship.pos - vec(dx, dy).rotate(-ship.rot)
         self.vel = ship.vel + -vec(0, BULLET_SPEED).rotate(-ship.rot - rot)
@@ -390,21 +531,23 @@ class Bullet(pg.sprite.Sprite):
         now = pg.time.get_ticks()
         if now - self.spawn_time > BULLET_LIFETIME:
             self.kill()
-        self.pos += self.vel
+        self.pos += self.vel * self.game.dt
         self.rect.center = self.pos
 
 class ABullet(pg.sprite.Sprite):
-    def __init__(self, game, ship):
+    def __init__(self, game, ship, angle=0):
         self.groups = game.all_sprites, game.mobs
         self._layer = ROCK_LAYER
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.pos = ship.pos + vec(0, 0)
         self.image = self.game.spritesheet.get_image_by_name(ALIEN_BULLET_IMAGE)
+        self.image = self.game.beam_sheet.get_image_by_rect(236, 6, 49, 83)
         self.image = pg.transform.rotozoom(self.image, 0, BULLET_SCALE)
         # self.dir = degrees(atan2(self.game.player.pos.y - self.pos.y, self.game.player.pos.x - self.pos.x)) + 90
         # self.dir = 90
         self.dir = vec(self.game.player.pos.x - self.pos.x, self.game.player.pos.y - self.pos.y).as_polar()[1] + 90
+        self.dir += angle
         self.image = pg.transform.rotate(self.image, -self.dir)
         self.vel = ship.vel + -vec(0, ALIEN_BULLET_SPEED).rotate(self.dir)
         self.rect = self.image.get_rect()
@@ -416,5 +559,5 @@ class ABullet(pg.sprite.Sprite):
         now = pg.time.get_ticks()
         if now - self.spawn_time > ALIEN_BULLET_LIFETIME:
             self.kill()
-        self.pos += self.vel
+        self.pos += self.vel * self.game.dt
         self.rect.center = self.pos

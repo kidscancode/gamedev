@@ -1,25 +1,29 @@
-MOVE SPRITES TO INDIVIDUAL FILES
-IMPROVE COLLISION CHECKS (more groups, organize)
-    x stuff that hits player (rocks, aliens, alien bullets, pows) - mobs
+DIRTY RECT UPDATES
+IMPROVE COLLISION CHECKS (more groups, fewer calls, organize)
+    x stuff that hits player (rocks, aliens, alien bullets, pows) - mobs -> player
     - stuff that player shoots (bullets, bombs) - bullets
-    x stuff that player bullets hit (rocks, aliens) - mobs
+    x stuff that player bullets hit (rocks, aliens) - mobs -> bullets
+
+PLAYER DEATH
 
 level change pause/announce
-hyperspace
-    safe landing
 alien ship
-    shoots at player
-    upgraded shooting (spread)
-lives and/or shield
+    different movement patterns
+    x flash white on hit
+    x upgraded shooting (spread / speed)
+
 sounds (variations)
-    alien shoot
+x    alien shoot
     alien die
-    shoot
-    explode (big/sm/sonic)
+x    shoot
+x    explode (big/sm/sonic)
     thrust
-    hyper
-    shield up
-    gun up (gun max)
+x    hyper out
+    hyper in / spawn
+x    shield up
+x    shield down
+x    gun up (gun max)
+
 explosion animations
     rock (big)          regular (lg)
     rock (sm)           regular (sm)
@@ -28,13 +32,22 @@ explosion animations
     alien death         sonic (sm)
     bomb                sonic (lg)
     player death        sonic (slow mo?)
-thrust particles/appearance
+
+x thrust particles/appearance
+
+Weapons
+    space: laser (upgrades, etc)
+    x: secondary weapon
+        BOMB
+        MISSILE
+        BEAM
+
 powerups
-    gun upgrade (1 shot -> 2 shot -> 3 shot spread -> 5 shot spread)
+x    gun upgrade (1 shot -> 2 shot -> 3 shot spread -> 5 shot spread)
         rate
-    BEAM weapon
-    BOMB weapon (mine style - ticks, then boom)
-    shield - %
+    BEAM weapon (duration?)
+    BOMB weapon (quantity)
+
 high score
 game font
 bg stars (twinkles)
@@ -42,7 +55,7 @@ animated gameover screen (floating rocks)
 displays / indicators
     floating score text
     x level
-    lives
-    hyperspace charge
-    bombs (cooldown)
-    shield indicator (red/flash when empty)
+    x lives
+    x hyperspace charge
+    secondary weapon cooldown
+    x shield indicator (red/flash when empty)
