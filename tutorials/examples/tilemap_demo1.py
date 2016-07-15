@@ -1,7 +1,5 @@
-# quick demo to help explain masks and pixel perfect collisions
 # demo1 - simple grid-based movement (4 directional), tile-based collisions
 import pygame as pg
-import random
 
 WIDTH = 800
 HEIGHT = 640

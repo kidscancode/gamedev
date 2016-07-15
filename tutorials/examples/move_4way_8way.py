@@ -16,7 +16,7 @@ BLUE = (0, 0, 255)
 pg.init()
 pg.mixer.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
-pg.display.set_caption("My Game")
+pg.display.set_caption("4-way vs. 8-way Movement")
 clock = pg.time.Clock()
 
 class Player(pg.sprite.Sprite):
@@ -33,6 +33,7 @@ class Player(pg.sprite.Sprite):
         self.move_8way_fixdiag()
         self.rect.x += self.vx
         self.rect.y += self.vy
+        # prevent sprite from moving off screen
         if self.rect.left < 0:
             self.rect.left = 0
         if self.rect.right > WIDTH:
@@ -56,13 +57,13 @@ class Player(pg.sprite.Sprite):
     def move_8way(self):
         keystate = pg.key.get_pressed()
         if keystate[pg.K_UP]:
-            self.vy = -5
+            self.vy = -1
         if keystate[pg.K_DOWN]:
-            self.vy = 5
+            self.vy = 1
         if keystate[pg.K_LEFT]:
-            self.vx = -5
+            self.vx = -1
         if keystate[pg.K_RIGHT]:
-            self.vx = 5
+            self.vx = 1.9
 
     def move_8way_fixdiag(self):
         self.move_8way()
@@ -84,7 +85,8 @@ while running:
         # check for closing window
         if event.type == pg.QUIT:
             running = False
-
+        if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+            running = False
     # Update
     all_sprites.update()
 

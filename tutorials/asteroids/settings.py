@@ -21,7 +21,7 @@ FONT_NAME = 'KenVector Future.ttf'
 # player settings
 PLAYER_IMG = 'playerShip1_red.png'
 PLAYER_LIFE_IMG = 'playerLife1_red.png'
-PLAYER_SCALE = 0.5
+PLAYER_SCALE = 0.4
 PLAYER_THRUST = 500
 PLAYER_ROT_SPEED = 3.5
 PLAYER_MAX_SPEED = 300

@@ -46,7 +46,9 @@ class Particle(pg.sprite.Sprite):
         self.rect.centery = self.pos.y
 
     def blit(self):
-        return self.game.game_surface.blit(self.image, self.rect, special_flags=pg.BLEND_ADD)
+        flags = pg.BLEND_ADD
+        flags = pg.BLEND_RGBA_ADD
+        return self.game.game_surface.blit(self.image, self.rect, special_flags=flags)
 
     def fade(self):
         if self.life > self.fade_start:

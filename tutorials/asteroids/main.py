@@ -237,13 +237,13 @@ class Game:
                 if isinstance(bullet, Bomb):
                     bullet.explode()
                 if isinstance(hit, Alien):
-                    hit.health -= 1
                     hit.hit()
                     bullet.kill()
                     if hit.health <= 0:
                         Explosion(self, hit.rect.center, 'sonic')
                         Pow(self, hit.pos)
                         hit.kill()
+                        self.score += 10
                     else:
                         Explosion(self, bullet.rect.center, 'sm')
                 if isinstance(hit, Rock):

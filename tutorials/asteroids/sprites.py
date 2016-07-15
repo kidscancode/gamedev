@@ -1,5 +1,6 @@
 import pygame as pg
 from os import path
+import math
 from random import choice, randint, uniform
 from settings import *
 from particles import *
@@ -36,11 +37,10 @@ class SpritesheetWithXML:
         return self.spritesheet.subsurface(r)
 
 class EmptySprite(pg.sprite.Sprite):
+    # invisible placeholder, for testing safe teleport locations
     def __init__(self, x, y, w, h):
-        # groups = group
         pg.sprite.Sprite.__init__(self)
         self.image = pg.Surface((w, h))
-        # self.image.fill((128, 128, 0))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
@@ -55,11 +55,13 @@ class Shield(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.game.shield_images[0], self.ship.rot)
         self.rect = self.image.get_rect()
         self.rect.center = self.ship.pos
+        self.pos = self.ship.pos
         self.ship.shield = self
 
     def update(self):
         self.image = pg.transform.rotate(self.game.shield_images[self.level], self.ship.rot)
         self.rect = self.image.get_rect()
+        self.pos = self.ship.pos
         self.rect.center = self.ship.pos
 
 class Player(pg.sprite.Sprite):
@@ -257,7 +259,9 @@ class Explosion(pg.sprite.Sprite):
         if self.size == 'sonic':
             self.game.bomb_explosions.add(self)
             self.frame_rate = 75
-            choice(self.game.bomb_exp_sounds).play()
+            sound = choice(self.game.bomb_exp_sounds)
+            if sound.get_num_channels() < 2:
+                sound.play()
             self.game.offset = self.game.shake(amount=12, times=2)
 
         else:
@@ -330,10 +334,11 @@ class Alien(pg.sprite.Sprite):
                 if self.mask.get_at((x, y)):
                     pg.draw.circle(self.dmg_flash, WHITE, (x, y), 1)
         self.pos = vec(-self.rect.width * 2, randint(50, HEIGHT - 50))
-        self.vel = vec(uniform(ALIEN_SPEED_MIN, ALIEN_SPEED_MAX), 0).rotate(uniform(-10, 10))
+        self.vel = vec(uniform(ALIEN_SPEED_MIN, ALIEN_SPEED_MAX), 0).rotate(uniform(-15, 15))
         self.rect.center = self.pos
         self.last_shot = pg.time.get_ticks()
         self.health = ALIEN_HITS
+        self.spawn_time = pg.time.get_ticks()
         self.size = 0
         self.fire_rate = max(500, ALIEN_FIRE_RATE - 500 * game.level // 3)
         self.hit_time = 0
@@ -341,6 +346,7 @@ class Alien(pg.sprite.Sprite):
     def hit(self):
         self.hit_time = pg.time.get_ticks()
         self.image = self.dmg_flash
+        self.health -= 1
 
     def update(self):
         now = pg.time.get_ticks()
@@ -363,6 +369,7 @@ class Alien(pg.sprite.Sprite):
                 ABullet(self.game, self, -30)
 
         self.pos += self.vel * self.game.dt
+        # self.pos.y = 50 * math.sin((pg.time.get_ticks() - self.spawn_time) / 1000 * 0.5 * math.pi)
         self.rect.center = self.pos
         if self.rect.left > WIDTH:
             self.game.last_alien = pg.time.get_ticks()

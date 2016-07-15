@@ -4,11 +4,13 @@ IMPROVE COLLISION CHECKS (more groups, fewer calls, organize)
     - stuff that player shoots (bullets, bombs) - bullets
     x stuff that player bullets hit (rocks, aliens) - mobs -> bullets
 
+ENTITY CLASS (simplify sprites, consolidate properties)
 PLAYER DEATH
+PAUSE
 
-level change pause/announce
+level change delay/announce
 alien ship
-    different movement patterns
+    different movement patterns - EASING FUNCTIONS
     x flash white on hit
     x upgraded shooting (spread / speed)
 

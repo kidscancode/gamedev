@@ -1,7 +1,5 @@
-# quick demo to help explain masks and pixel perfect collisions
 # demo2 -
 import pygame as pg
-import random
 
 WIDTH = 800
 HEIGHT = 640
@@ -53,7 +51,7 @@ class Wall(pg.sprite.Sprite):
         pg.draw.polygon(self.image, MAGENTA, [(640, 160), (640, 320), (0, 320)])
         self.mask = pg.mask.from_surface(self.image)
         self.rect.right = WIDTH - 64
-        self.rect.bottom = HEIGHT -64
+        self.rect.bottom = HEIGHT - 64
 
 class Player(pg.sprite.Sprite):
     def __init__(self, x, y):
