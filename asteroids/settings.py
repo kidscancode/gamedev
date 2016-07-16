@@ -26,7 +26,11 @@ PLAYER_THRUST = 500
 PLAYER_ROT_SPEED = 3.5
 PLAYER_MAX_SPEED = 300
 PLAYER_FRICTION = 0.75
+LIVES_AT_SPAWN = 3
+GUN_LEVEL_AT_SPAWN = 1
 SHIELD_AT_SPAWN = True
+# TODO: set to None
+WEAPON2_AT_SPAWN = 'beam'
 HYPER_CHARGE_TIME = 8000
 SHIELD_IMAGES = ['shield1.png', 'shield2.png', 'shield3.png']
 # thrust particles
@@ -64,6 +68,7 @@ BOMB_EXPL_SOUNDS = ['sfx_exp_medium5.wav', 'sfx_exp_medium6.wav']
 BOMB_TICK_SOUND = 'sfx_sounds_Blip10.wav'
 
 # rock settings
+START_ROCKS = 3
 ROCK_IMAGES = {}
 ROCK_IMAGES[0] = ['meteorGrey_tiny1.png', 'meteorGrey_tiny2.png']
 ROCK_IMAGES[1] = ['meteorGrey_small1.png', 'meteorGrey_small2.png']

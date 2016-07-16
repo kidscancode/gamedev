@@ -1,4 +1,5 @@
 DIRTY RECT UPDATES
+CLEAN UP/COMMENT (TODOs in code)
 IMPROVE COLLISION CHECKS (more groups, fewer calls, organize)
     x stuff that hits player (rocks, aliens, alien bullets, pows) - mobs -> player
     - stuff that player shoots (bullets, bombs) - bullets
@@ -11,20 +12,15 @@ PAUSE
 level change delay/announce
 alien ship
     different movement patterns - EASING FUNCTIONS
-    x flash white on hit
-    x upgraded shooting (spread / speed)
+    more enemy types
+    other weapons:
+        spray (bullets)
+        missiles (guided?)
 
 sounds (variations)
-x    alien shoot
     alien die
-x    shoot
-x    explode (big/sm/sonic)
     thrust
-x    hyper out
     hyper in / spawn
-x    shield up
-x    shield down
-x    gun up (gun max)
 
 explosion animations
     rock (big)          regular (lg)
@@ -35,7 +31,6 @@ explosion animations
     bomb                sonic (lg)
     player death        sonic (slow mo?)
 
-x thrust particles/appearance
 
 Weapons
     space: laser (upgrades, etc)
@@ -56,8 +51,4 @@ bg stars (twinkles)
 animated gameover screen (floating rocks)
 displays / indicators
     floating score text
-    x level
-    x lives
-    x hyperspace charge
     secondary weapon cooldown
-    x shield indicator (red/flash when empty)

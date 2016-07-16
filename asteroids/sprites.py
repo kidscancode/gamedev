@@ -1,18 +1,21 @@
 import pygame as pg
 from os import path
-import math
 from random import choice, randint, uniform
 from settings import *
 from particles import *
 import xml.etree.ElementTree as ET
 vec = pg.math.Vector2
+# TODO: organize (separate files?)
+# TODO: consolidate common sprite parameters (base class?)
 
 class SpritesheetWithXML:
     # utility class for loading and parsing spritesheets
-    # xml filename should match png filename
+    # xml filename should match png filename (Kenney format)
+    # TODO: improve to work with other data formats
     def __init__(self, filename):
         self.spritesheet = pg.image.load(filename + '.png').convert_alpha()
         # self.spritesheet.set_colorkey(BLACK)
+        # load XML (kenney format) if it exists
         if path.isfile(filename + '.xml'):
             tree = ET.parse(filename + '.xml')
             self.map = {}
@@ -32,6 +35,7 @@ class SpritesheetWithXML:
         return self.spritesheet.subsurface(r)
 
     def get_image_by_name(self, name):
+        # TODO: error message if no xml exists
         r = pg.Rect(self.map[name]['x'], self.map[name]['y'],
                     self.map[name]['w'], self.map[name]['h'])
         return self.spritesheet.subsurface(r)
@@ -45,6 +49,7 @@ class EmptySprite(pg.sprite.Sprite):
         self.rect.center = (x, y)
 
 class Shield(pg.sprite.Sprite):
+    # TODO: make generic for use with non-player sprites
     def __init__(self, game, ship):
         self.groups = game.all_sprites
         self._layer = ship._layer + 1
@@ -85,15 +90,15 @@ class Player(pg.sprite.Sprite):
         self.last_shot = pg.time.get_ticks()
         self.hyper_charge = True
         self.last_hyper = pg.time.get_ticks()
-        self.wpn2_type = 'beam'
+        self.wpn2_type = WEAPON2_AT_SPAWN
+        # TODO: remove
         self.bombs = 5
         self.last_bomb = 0
-        self.gun_level = 1
+        self.gun_level = GUN_LEVEL_AT_SPAWN
+        self.shield = None
         if SHIELD_AT_SPAWN:
             Shield(self.game, self)
-        else:
-            self.shield = None
-        self.lives = 3
+        self.lives = LIVES_AT_SPAWN
         self.hidden = False
         self.hide_timer = 0
         self.beam_firing = False
@@ -120,6 +125,7 @@ class Player(pg.sprite.Sprite):
         self.acc = vec(0, 0)
 
     def get_keys(self):
+        # TODO: add WASD?
         keystate = pg.key.get_pressed()
         if keystate[pg.K_LEFT]:
             if not self.beam_firing:
@@ -144,7 +150,7 @@ class Player(pg.sprite.Sprite):
             self.fire_beam()
         elif self.wpn2_type is None:
             pass
-            # play "click" sound
+            # TODO: play "click" sound
 
     def fire_beam(self):
         now = pg.time.get_ticks()
@@ -154,6 +160,7 @@ class Player(pg.sprite.Sprite):
             self.beam_firing = True
 
     def drop_bomb(self):
+        # TODO: final decision on bomb ammo
         now = pg.time.get_ticks()
         if now - self.last_bomb > BOMB_RATE:
             # if self.bombs > 0:
@@ -179,6 +186,7 @@ class Player(pg.sprite.Sprite):
             self.last_hyper = pg.time.get_ticks()
 
     def shoot(self):
+        # TODO: ugly - improve this
         now = pg.time.get_ticks()
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
@@ -219,7 +227,7 @@ class Player(pg.sprite.Sprite):
         if self.hidden and pg.time.get_ticks() - self.hide_timer > 1000:
             self.unhide()
 
-        # recharge hyperspace if not charged
+        # recharge hyperspace if not fully charged
         if not self.hyper_charge:
             now = pg.time.get_ticks()
             if now - self.last_hyper > HYPER_CHARGE_TIME:
@@ -317,6 +325,8 @@ class Pow(pg.sprite.Sprite):
             self.pos.y = -self.rect.height / 2
 
 class Alien(pg.sprite.Sprite):
+    # TODO: different types
+    # TODO: different movement patterns
     def __init__(self, game):
         self.groups = game.all_sprites, game.aliens, game.mobs
         self._layer = PLAYER_LAYER
@@ -353,6 +363,7 @@ class Alien(pg.sprite.Sprite):
         if now - self.hit_time > 100:
             self.image = self.image_orig
         if now - self.last_shot > self.fire_rate:
+            # TODO: ugly - clean this up
             self.last_shot = now
             self.game.alien_fire_sound.play()
             if self.game.level < 5:
@@ -369,6 +380,7 @@ class Alien(pg.sprite.Sprite):
                 ABullet(self.game, self, -30)
 
         self.pos += self.vel * self.game.dt
+        # sine wave pattern
         # self.pos.y = 50 * math.sin((pg.time.get_ticks() - self.spawn_time) / 1000 * 0.5 * math.pi)
         self.rect.center = self.pos
         if self.rect.left > WIDTH:
@@ -486,6 +498,8 @@ class Bomb(pg.sprite.Sprite):
         self.rect.center = self.pos
 
 class Beam(pg.sprite.Sprite):
+    # TODO: find good art for this
+    # TODO: allow/disallow move/rotate while firing?
     def __init__(self, ship, dx, dy):
         self.groups = ship.game.all_sprites, ship.game.bullets
         self._layer = BULLET_LAYER
@@ -518,6 +532,7 @@ class Bullet(pg.sprite.Sprite):
         self.game = ship.game
         # self.image = ship.game.spritesheet.get_image_by_name(img)
         self.image = pg.transform.scale(ship.game.beam_sheet.get_image_by_rect(135, 309, 54, 97), (41, 73))  # lt blue
+        # TODO: all these colors - customize?
         # self.image = ship.game.beam_sheet.get_image_by_rect(227, 210, 48, 85)  # purple
         # self.image = ship.game.beam_sheet.get_image_by_rect(294, 26, 71, 120)  # dk blue
         # self.image = ship.game.beam_sheet.get_image_by_rect(38, 168, 17, 33)  # sm red
@@ -530,11 +545,11 @@ class Bullet(pg.sprite.Sprite):
         self.pos = ship.pos - vec(dx, dy).rotate(-ship.rot)
         self.vel = ship.vel + -vec(0, BULLET_SPEED).rotate(-ship.rot - rot)
         self.rect.center = self.pos
-        # self.vel = -pg.math.Vector2(0, 12).rotate(-self.ship.rot)
         self.spawn_time = pg.time.get_ticks()
         choice(ship.game.bullet_sounds).play()
 
     def update(self):
+        # TODO: should bullets wrap?
         now = pg.time.get_ticks()
         if now - self.spawn_time > BULLET_LIFETIME:
             self.kill()
@@ -551,8 +566,6 @@ class ABullet(pg.sprite.Sprite):
         self.image = self.game.spritesheet.get_image_by_name(ALIEN_BULLET_IMAGE)
         self.image = self.game.beam_sheet.get_image_by_rect(236, 6, 49, 83)
         self.image = pg.transform.rotozoom(self.image, 0, BULLET_SCALE)
-        # self.dir = degrees(atan2(self.game.player.pos.y - self.pos.y, self.game.player.pos.x - self.pos.x)) + 90
-        # self.dir = 90
         self.dir = vec(self.game.player.pos.x - self.pos.x, self.game.player.pos.y - self.pos.y).as_polar()[1] + 90
         self.dir += angle
         self.image = pg.transform.rotate(self.image, -self.dir)

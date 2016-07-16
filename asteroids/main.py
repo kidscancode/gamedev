@@ -1,7 +1,7 @@
 # Space Rocks! (asteroids)
 # KidsCanCode 2016
 # Art by kenney.nl
-# Beams by http://opengameart.org/users/rawdanitsu
+# Beams/Lasers by http://opengameart.org/users/rawdanitsu
 # SimpleBeat by http://opengameart.org/users/3uhox
 import pygame as pg
 import sys
@@ -20,14 +20,21 @@ class Game:
         pg.mixer.init()
         pg.mixer.set_num_channels(16)
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+        # all drawing is done to game_surface
+        # then game surface blitted to screen
         self.game_surface = pg.Surface((WIDTH, HEIGHT))
         self.game_rect = self.game_surface.get_rect()
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
+        # rotation cache to store rotated images of sprites
+        # rather than repeated transforms every frame
         self.rot_cache = {}
+        self.rot_cache['player'] = {}
+        self.rot_cache['rock'] = {}
         self.load_data()
 
     def draw_text(self, text, size, color, x, y, align='m'):
+        # helper method to render/place text - use in game loop draw section
         font = pg.font.Font(path.join(img_dir, FONT_NAME), size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
@@ -40,6 +47,7 @@ class Game:
         self.game_surface.blit(text_surface, text_rect)
 
     def draw_hyper(self, x, y):
+        # draw charge indicator for hyperspace function
         box_width = 100
         box_height = 12
         if self.player.hyper_charge:
@@ -59,6 +67,8 @@ class Game:
         pg.draw.rect(self.game_surface, WHITE, outline_rect, 2)
 
     def draw_shield_level(self, x, y):
+        # draw shield indicator
+        # TODO: add "warning" flash when shield empty
         box_width = 12
         box_height = 15
         spacer = 3
@@ -81,6 +91,7 @@ class Game:
         self.game_surface.blit(img, img_rect)
 
     def draw_lives(self, img, x, y, count):
+        # draw lives indicator using given icon
         for i in range(count):
             img_rect = img.get_rect()
             img_rect.x = x + 40 * i
@@ -88,6 +99,7 @@ class Game:
             self.game_surface.blit(img, img_rect)
 
     def draw_score(self, x, y):
+        # draw score using image font
         digit_rect = self.numbers[0].get_rect()
         width = len(str(self.score)) * digit_rect.width
         score_surf = pg.Surface([width, digit_rect.height])
@@ -100,8 +112,8 @@ class Game:
         self.game_surface.blit(score_surf, score_rect)
 
     def new(self):
-        # initialize all your variables and do all the setup for a new game
-        self.rot_cache['player'] = {}
+        # initialize all variables and do all the setup for a new game
+        # various groups for collisions
         self.all_sprites = pg.sprite.LayeredUpdates()
         self.rocks = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
@@ -110,20 +122,24 @@ class Game:
         self.aliens = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.player = Player(self, PLAYER_IMG)
-        # if SHIELD_AT_SPAWN:
-        #     Shield(self, self.player)
-        for i in range(3):
+        for i in range(START_ROCKS):
             Rock(self, 3, None)
         self.score = 0
         self.level = 1
+        # Experimental lighting
+        # TODO: improve lighting functionality
         self.light = False
+        # offset for screen shake function
         self.offset = repeat((0, 0))
         self.last_alien = pg.time.get_ticks()
         pg.mixer.music.load(path.join(snd_dir, 'SimpleBeat.ogg'))
         pg.mixer.music.play(loops=-1)
 
     def load_data(self):
-        # overlay
+        # load all game assets
+        # TODO: loading bar (needed?)
+        # alpha image for lighting overlay
+        # TODO: remove & replace with better lighting
         self.player_light = pg.image.load(path.join(img_dir, 'light350.png')).convert_alpha()
         self.player_light_rect = self.player_light.get_rect()
         # spritesheets
@@ -133,7 +149,6 @@ class Game:
         self.expl_player_sheet = SpritesheetWithXML(path.join(img_dir, 'spritesheet_sonicExplosion'))
         self.ship_particle_img = pg.image.load(path.join(img_dir, PLAYER_THRUST_IMG)).convert_alpha()
         # rock images - 4 sizes
-        self.rot_cache['rock'] = {}
         for size in ROCK_IMAGES.keys():
             for img in ROCK_IMAGES[size]:
                 self.rot_cache['rock'][img] = {}
@@ -154,7 +169,7 @@ class Game:
             self.expl_frames['lg'].append(img_lg)
             img_sm = pg.transform.rotozoom(img, 0, 0.3)
             self.expl_frames['sm'].append(img_sm)
-        # numerals for 0-9
+        # image font - numerals for 0-9
         self.numbers = []
         for i in range(10):
             self.numbers.append(self.spritesheet.get_image_by_name('numeral{}.png'.format(i)))
@@ -191,7 +206,7 @@ class Game:
             self.pow_sounds[pow_type] = pg.mixer.Sound(path.join(snd_dir, POW_SOUNDS[pow_type]))
 
     def run(self):
-        # The Game loop - set self.running to False to end the game
+        # game loop - set self.playing = False to end the game
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
@@ -204,9 +219,11 @@ class Game:
         sys.exit()
 
     def update(self):
-        # the update part of the game loop
+        # update portion of the game loop
+        # TODO: clean up - move collisions to sep. functions?
         self.all_sprites.update()
         # spawn alien?
+        # TODO: improve alien spawning
         now = pg.time.get_ticks()
         if now - self.last_alien > ALIEN_SPAWN_TIME + randint(1000, 5000):
             self.last_alien = now
@@ -229,8 +246,7 @@ class Game:
                     Rock(self, hit.size - 1, hit.rect.center)
 
         # check for bullet hits
-        # 1) with rocks 2) with aliens
-        # collide bullets with aliens
+        # 1) with rocks 2) with aliens 3) with alien bullets
         hits = pg.sprite.groupcollide(self.mobs, self.bullets, False, False, pg.sprite.collide_mask)
         for hit in hits.keys():
             for bullet in hits[hit]:
@@ -261,10 +277,12 @@ class Game:
                     if isinstance(bullet, Bullet):
                         bullet.kill()
             if isinstance(hit, ABullet):
+                # TODO: decide whether player shots should hit alien shots
                 # hit.kill()
                 pass
 
         # check for collisions with player
+        # 1) Rocks 2) alien shots 3) powerups 4) aliens
         hits = pg.sprite.spritecollide(self.player, self.mobs, True, pg.sprite.collide_mask)
         for hit in hits:
             # type of object
@@ -306,15 +324,19 @@ class Game:
             elif isinstance(hit, Alien):
                 pass
 
+        # destroyed all rocks? next level
+        # TODO: level change indication
         if len(self.rocks) == 0:
             self.level += 1
             for i in range(self.level + 2):
                 Rock(self, choice([3, 2]), None)
 
+        # game over
         if self.player.lives <= 0:
             self.playing = False
 
     def shake(self, amount=20, times=2):
+        # implement screen shake
         d = -1
         for _ in range(0, times):
             for x in range(0, amount, 4):
@@ -327,11 +349,12 @@ class Game:
 
     def draw(self):
         # draw everything to the screen
+        # TODO: disable FPS counter
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
-        # self.screen.fill(BGCOLOR)
         self.game_surface.blit(self.background, self.background_rect)
         self.all_sprites.draw(self.game_surface)
         self.player.engine_emitter.draw()
+        # TODO: remove this
         if self.light:
             self.player_light_rect.center = self.player.pos
             self.game_surface.blit(self.player_light, self.player_light_rect)
@@ -347,16 +370,18 @@ class Game:
     def events(self):
         # catch all events here
         for event in pg.event.get():
-            # this one checks for the window being closed
             if event.type == pg.QUIT:
                 self.quit()
             if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
                 self.quit()
+            # TODO: remove this
             if event.type == pg.KEYDOWN and event.key == pg.K_l:
                 self.light = not self.light
 
     def show_start_screen(self):
         # show the start screen
+        # TODO: add animation
+        # TODO: combine with go_screen?
         self.game_surface.fill(BGCOLOR)
         self.draw_text(TITLE, 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("Arrows to move, Space to fire", 22, WHITE, WIDTH / 2, HEIGHT / 2)
@@ -376,6 +401,7 @@ class Game:
         self.wait_for_key(2000)
 
     def wait_for_key(self, delay):
+        # simple loop to wait for a keyup event
         start = pg.time.get_ticks()
         pg.event.get()
         waiting = True
