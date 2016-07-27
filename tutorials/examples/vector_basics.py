@@ -61,7 +61,7 @@ class Player(pg.sprite.Sprite):
     def move_to_mouse(self, dt):
         mpos = pg.mouse.get_pos()
         # self.vel = (mpos - self.pos).normalize() * 5
-        self.vel = (mpos - self.pos) * 0.1 * 10
+        self.vel = (mpos - self.pos) * 0.1 * 25
         # if (mpos - self.pos).length() > 5:
         self.pos += self.vel * dt
         self.rect.center = self.pos

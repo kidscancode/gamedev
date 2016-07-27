@@ -138,10 +138,9 @@ class Game:
     def load_data(self):
         # load all game assets
         # TODO: loading bar (needed?)
-        # alpha image for lighting overlay
-        # TODO: remove & replace with better lighting
-        self.player_light = pg.image.load(path.join(img_dir, 'light350.png')).convert_alpha()
-        self.player_light_rect = self.player_light.get_rect()
+        # TODO: improve lighting frame rate
+        self.fog = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
+        self.fog.fill((0, 0, 0, 255))
         # spritesheets
         self.spritesheet = SpritesheetWithXML(path.join(img_dir, 'sheet'))
         self.beam_sheet = SpritesheetWithXML(path.join(img_dir, 'beams'))
@@ -173,7 +172,7 @@ class Game:
         self.numbers = []
         for i in range(10):
             self.numbers.append(self.spritesheet.get_image_by_name('numeral{}.png'.format(i)))
-        self.background = pg.image.load(path.join(img_dir, 'starfield.png'))
+        self.background = pg.image.load(path.join(img_dir, 'starfield.png')).convert_alpha()
         self.background_rect = self.background.get_rect()
         # shield images
         self.shield_images = []
@@ -347,17 +346,24 @@ class Game:
         while True:
             yield (0, 0)
 
+    def render_fog(self):
+        self.fog.fill((0, 0, 0, 255))
+        steps = 250
+        center = (int(self.player.pos.x), int(self.player.pos.y))
+        for i in range(steps, 1, -5):
+            pg.draw.circle(self.fog, (0, 0, 0, i * 255 / steps), center, i)
+        self.game_surface.blit(self.fog, (0, 0))
+
     def draw(self):
         # draw everything to the screen
         # TODO: disable FPS counter
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
         self.game_surface.blit(self.background, self.background_rect)
+        #self.game_surface.fill((40, 40, 40))
         self.all_sprites.draw(self.game_surface)
         self.player.engine_emitter.draw()
-        # TODO: remove this
         if self.light:
-            self.player_light_rect.center = self.player.pos
-            self.game_surface.blit(self.player_light, self.player_light_rect)
+            self.render_fog()
         self.draw_text(str(self.score), 28, WHITE, WIDTH / 2, 15, align='m')
         self.draw_text("Level: " + str(self.level), 22, WHITE, 5, 15, align='l')
         self.draw_lives(self.player.life_image, WIDTH - 150, 15, self.player.lives)
