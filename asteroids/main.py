@@ -139,8 +139,12 @@ class Game:
         # load all game assets
         # TODO: loading bar (needed?)
         # TODO: improve lighting frame rate
-        self.fog = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
-        self.fog.fill((0, 0, 0, 255))
+        self.fog = pg.Surface((WIDTH, HEIGHT))  # , pg.SRCALPHA)
+        self.fog.fill((255, 255, 255))
+        self.player_light_img = pg.image.load(path.join(img_dir, 'circle_1000.png')).convert_alpha()
+        self.player_light_rect = self.player_light_img.get_rect()
+        self.bullet_light_img = pg.transform.scale(self.player_light_img, (300, 300))
+        self.bullet_light_rect = self.bullet_light_img.get_rect()
         # spritesheets
         self.spritesheet = SpritesheetWithXML(path.join(img_dir, 'sheet'))
         self.beam_sheet = SpritesheetWithXML(path.join(img_dir, 'beams'))
@@ -347,12 +351,25 @@ class Game:
             yield (0, 0)
 
     def render_fog(self):
-        self.fog.fill((0, 0, 0, 255))
-        steps = 250
-        center = (int(self.player.pos.x), int(self.player.pos.y))
-        for i in range(steps, 1, -5):
-            pg.draw.circle(self.fog, (0, 0, 0, i * 255 / steps), center, i)
-        self.game_surface.blit(self.fog, (0, 0))
+        self.fog.fill((180, 180, 180))
+        self.player_light_rect.center = self.player.pos
+        self.fog.blit(self.player_light_img, self.player_light_rect)
+        for sprite in self.all_sprites:
+            if isinstance(sprite, Bullet) or isinstance(sprite, ABullet):
+                self.bullet_light_rect.center = sprite.pos
+                self.fog.blit(self.bullet_light_img, self.bullet_light_rect)
+            if isinstance(sprite, Alien) or isinstance(sprite, Explosion):
+                self.player_light_rect.center = sprite.pos
+                self.fog.blit(self.player_light_img, self.player_light_rect)
+        self.game_surface.blit(self.fog, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
+
+    # def render_fog(self):
+    #     self.fog.fill((0, 0, 0, 255))
+    #     steps = 250
+    #     center = (int(self.player.pos.x), int(self.player.pos.y))
+    #     for i in range(steps, 1, -5):
+    #         pg.draw.circle(self.fog, (0, 0, 0, i * 255 / steps), center, i)
+    #     self.game_surface.blit(self.fog, (0, 0))
 
     def draw(self):
         # draw everything to the screen

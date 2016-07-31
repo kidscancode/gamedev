@@ -263,6 +263,7 @@ class Explosion(pg.sprite.Sprite):
         self._layer = EXPLOSION_LAYER
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        self.pos = center
         self.size = size
         if self.size == 'sonic':
             self.game.bomb_explosions.add(self)
