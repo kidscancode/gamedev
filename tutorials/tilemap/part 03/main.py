@@ -1,5 +1,7 @@
-# Tilemap Demo
-# KidsCanCode 2016
+# KidsCanCode - Game Development with Pygame video series
+# Tile-based game - Part 3
+# Smoother Movement
+# Video link: https://youtu.be/pA7OABYHNDY
 import pygame as pg
 import sys
 from os import path
