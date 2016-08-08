@@ -1,5 +1,7 @@
-# Tilemap Demo
-# KidsCanCode 2016
+# KidsCanCode - Game Development with Pygame video series
+# Tile-based game - Part 4
+# Scrolling Map/Camera
+# Video link: https://youtu.be/3zV2ewk-IGU
 import pygame as pg
 import sys
 from os import path
