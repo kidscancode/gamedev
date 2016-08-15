@@ -1,5 +1,7 @@
-# Tilemap Demo
-# KidsCanCode 2016
+# KidsCanCode - Game Development with Pygame video series
+# Tile-based game - Part 6
+# Rotating Player Sprite
+# Video link: https://youtu.be/5M_-cJP5rk8
 import pygame as pg
 import sys
 from os import path
