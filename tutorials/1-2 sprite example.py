@@ -36,7 +36,7 @@ class Player(pygame.sprite.Sprite):
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("My Game")
+pygame.display.set_caption("Sprite Example")
 clock = pygame.time.Clock()
 
 all_sprites = pygame.sprite.Group()
