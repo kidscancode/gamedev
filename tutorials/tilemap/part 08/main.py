@@ -1,5 +1,7 @@
-# Tilemap Demo
-# KidsCanCode 2016
+# KidsCanCode - Game Development with Pygame video series
+# Tile-based game - Part 8
+# Mob Movement
+# Video link: https://youtu.be/SAbxZDBJX4E
 import pygame as pg
 import sys
 from os import path
