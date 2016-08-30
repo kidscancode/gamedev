@@ -1,5 +1,7 @@
-# Tilemap Demo
-# KidsCanCode 2016
+# KidsCanCode - Game Development with Pygame video series
+# Tile-based game - Part 9
+# Basic Shooting
+# Video link: https://youtu.be/YfWh0WtwuWE
 import pygame as pg
 import sys
 from os import path
