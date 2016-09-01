@@ -92,7 +92,7 @@ class Mob(pg.sprite.Sprite):
     def update(self):
         self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
         self.image = pg.transform.rotate(self.game.mob_img, self.rot)
-        self.rect = self.image.get_rect()
+        # self.rect = self.image.get_rect()
         self.rect.center = self.pos
         self.acc = vec(MOB_SPEED, 0).rotate(-self.rot)
         self.acc += self.vel * -1

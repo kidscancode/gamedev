@@ -1,0 +1,62 @@
+{
+  "atom": "1.10.0",
+  "pigments": "0.34.0",
+  "platform": "darwin",
+  "config": {
+    "filetypesForColorWords": [
+      "css",
+      "less",
+      "styl",
+      "stylus",
+      "sass",
+      "scss",
+      "py"
+    ],
+    "markerType": "native-dot",
+    "traverseIntoSymlinkDirectories": false,
+    "sourceNames": [
+      "**/*.styl",
+      "**/*.stylus",
+      "**/*.less",
+      "**/*.sass",
+      "**/*.scss"
+    ],
+    "ignoredNames": [
+      "vendor/*",
+      "node_modules/*",
+      "spec/*",
+      "test/*"
+    ],
+    "ignoredBufferNames": [],
+    "extendedSearchNames": [
+      "**/*.css"
+    ],
+    "supportedFiletypes": [
+      "*"
+    ],
+    "ignoredScopes": [],
+    "autocompleteScopes": [
+      ".source.css",
+      ".source.css.less",
+      ".source.sass",
+      ".source.css.scss",
+      ".source.stylus"
+    ],
+    "extendAutocompleteToVariables": false,
+    "extendAutocompleteToColorValue": false,
+    "sassShadeAndTintImplementation": "compass",
+    "sortPaletteColors": "none",
+    "groupPaletteColors": "none",
+    "mergeColorDuplicates": false,
+    "delayBeforeScan": 500,
+    "ignoreVcsIgnoredPaths": true
+  },
+  "project": {
+    "config": {},
+    "paths": [],
+    "variables": {
+      "colors": 0,
+      "total": 0
+    }
+  }
+}
