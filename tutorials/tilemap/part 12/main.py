@@ -1,5 +1,7 @@
-# Tilemap Demo
-# KidsCanCode 2016
+# KidsCanCode - Game Development with Pygame video series
+# Tile-based game - Part 12
+# Loading Tiled Maps
+# Video link: https://youtu.be/QIXyj3WeyZM
 import pygame as pg
 import sys
 from os import path
