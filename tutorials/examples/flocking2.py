@@ -5,16 +5,18 @@ vec = pg.math.Vector2
 
 WIDTH = 1024
 HEIGHT = 800
-FPS = 30
+FPS = 60
 GRIDSIZE = 32
-NUM_MOBS = 20
-NEIGHBOR_RADIUS = 25
-ALIGN_WEIGHT = .5
-COHERE_WEIGHT = 1
-SEPARATE_WEIGHT = 2
+NUM_MOBS = 1
+MOB_SIZE = 16
+NEIGHBOR_RADIUS = 75
+ALIGN_WEIGHT = 1
+COHERE_WEIGHT = 1.2
+SEPARATE_WEIGHT = 1.6
 MAX_SPEED = 5
-MAX_FORCE = 0.3
+MAX_FORCE = 0.2
 APPROACH_RADIUS = 100
+SEEK_RADIUS = 300
 
 WANDER_RADIUS = 150
 WANDER_DISTANCE = 255
@@ -23,7 +25,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+CYAN = (0, 255, 255)
 YELLOW = (255, 255, 0)
 LIGHTGREY = (40, 40, 40)
 
@@ -65,20 +67,40 @@ def draw_grid():
     for y in range(0, HEIGHT, GRIDSIZE):
         pg.draw.line(screen, LIGHTGREY, (0, y), (WIDTH, y))
 
-def draw_vectors():
-    # future vector
-    draw_arrow(p1.pos, p1.draw_data[0], GREEN, 5)
-    # circle
-    cx = int(p1.draw_data[0].x)
-    cy = int(p1.draw_data[0].y)
-    pg.draw.circle(screen, WHITE, (cx, cy), WANDER_RADIUS, 2)
-    # target vector
-    draw_arrow((cx, cy), p1.draw_data[1], RED, 4)
+class Player(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((30, 30))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.pos = vec(WIDTH / 2, HEIGHT / 2)
+        self.rect.center = self.pos
 
+    def update(self):
+        self.vel = vec(0, 0)
+        self.move_8way()
+        self.pos += self.vel
+        self.rect.center = self.pos
+        # prevent sprite from moving off screen
+        if self.pos.x < 0:
+            self.pos.x = WIDTH
+        if self.pos.x > WIDTH:
+            self.pos.x = 0
+        if self.pos.y < 0:
+            self.pos.y = HEIGHT
+        if self.pos.y > HEIGHT:
+            self.pos.y = 0
 
-def draw_arrow(p1, p2, col, size):
-    # line portion
-    pg.draw.line(screen, col, p1, p2, size)
+    def move_8way(self):
+        keystate = pg.key.get_pressed()
+        if keystate[pg.K_UP]:
+            self.vel.y = -5
+        if keystate[pg.K_DOWN]:
+            self.vel.y = 5
+        if keystate[pg.K_LEFT]:
+            self.vel.x = -5
+        if keystate[pg.K_RIGHT]:
+            self.vel.x = 5
 
 class Predator(pg.sprite.Sprite):
     def __init__(self):
@@ -129,7 +151,7 @@ class Mob(pg.sprite.Sprite):
     def __init__(self):
         self.groups = all_sprites, mobs
         pg.sprite.Sprite.__init__(self, self.groups)
-        self.image = pg.Surface((16, 16))
+        self.image = pg.Surface((MOB_SIZE, MOB_SIZE))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
         self.pos = vec(randint(25, WIDTH - 25), randint(25, HEIGHT - 25))
@@ -138,52 +160,50 @@ class Mob(pg.sprite.Sprite):
         self.rect.center = self.pos
 
     def seek(self, target):
-        desired = (target - self.pos).normalize() * MAX_SPEED
+        steer = vec(0, 0)
+        dist = target - self.pos
+        if dist.length_squared() < SEEK_RADIUS**2:
+            desired = dist.normalize() * MAX_SPEED
+            steer = desired - self.vel
+            if steer.length_squared() > MAX_FORCE**2:
+                steer.scale_to_length(MAX_FORCE)
+        return steer
+
+    def separation(self, a_dist):
+        # move away from other mobs
+        desired = a_dist
+        if desired.length_squared() > 0:
+            desired.scale_to_length(MAX_SPEED)
         steer = (desired - self.vel)
         if steer.length_squared() > MAX_FORCE**2:
             steer.scale_to_length(MAX_FORCE)
         return steer
 
-    def separation(self, count, a_dist):
-        # move away from other mobs
-        steer = vec(0, 0)
-        desired = a_dist
-        if count > 0:
-            desired.scale_to_length(MAX_SPEED)
-            steer = (desired - self.vel)
-            if steer.length_squared() > MAX_FORCE**2:
-                steer.scale_to_length(MAX_FORCE)
-        return steer * SEPARATE_WEIGHT
-
-    def alignment(self, count, a_vel):
-        steer = vec(0, 0)
+    def alignment(self, a_vel):
         desired = a_vel
-        if count > 0:
-            desired.scale_to_length(MAX_SPEED)
-            steer = (desired - self.vel)
-            if steer.length_squared() > MAX_FORCE**2:
-                steer.scale_to_length(MAX_FORCE)
-        return steer * ALIGN_WEIGHT
+        desired.scale_to_length(MAX_SPEED)
+        steer = (desired - self.vel)
+        if steer.length_squared() > MAX_FORCE**2:
+            steer.scale_to_length(MAX_FORCE)
+        return steer
 
-    def cohesion(self, count, a_pos):
-        steer = vec(0, 0)
+    def cohesion(self, a_pos):
         desired = a_pos
-        if count > 0:
-            steer = self.seek(desired)
-        return steer * COHERE_WEIGHT
+        steer = self.seek(desired)
+        return steer
 
     def get_averages(self):
         count = 0
         a_pos = vec(0, 0)
         a_dist = vec(0, 0)
-        a_vel = vec(0, 0)
+        a_vel = vec(0, 0) 
         for mob in mobs:
             if mob != self:
                 d = self.pos.distance_to(mob.pos)
                 if d < NEIGHBOR_RADIUS:
                     a_pos += mob.pos
                     a_vel += mob.vel
-                    a_dist += (self.pos - mob.pos).normalize()
+                    a_dist += (self.pos - mob.pos).normalize() / d
                     count += 1
         if count > 0:
             a_pos /= count
@@ -194,14 +214,19 @@ class Mob(pg.sprite.Sprite):
     def update(self):
         # avoid multiple loops, get averages
         count, a_pos, a_dist, a_vel = self.get_averages()
-        # seek = self.seek(pg.mouse.get_pos())
-        # seek = vec(0, 0)
-        seek = self.seek(p1.pos)
-        sep = self.separation(count, a_dist)
-        ali = self.alignment(count, a_vel)
-        coh = self.cohesion(count, a_pos)
-
-        self.acc = seek + sep + ali + coh
+        # self.acc = self.seek(pg.mouse.get_pos())
+        # self.acc = vec(0, 0)
+        if count > 0:
+            sep = self.separation(a_dist) * SEPARATE_WEIGHT
+            ali = self.alignment(a_vel) * ALIGN_WEIGHT
+            coh = self.cohesion(a_pos) * COHERE_WEIGHT
+            self.acc += sep + ali + coh
+        if self.acc.length_squared() == 0 and self.vel.length() < MAX_SPEED:
+            desired = self.vel.normalize() * MAX_SPEED
+            self.acc = desired - self.vel
+        self.acc += self.seek(p1.pos) * 0.75
+        if self.acc.length_squared() > MAX_FORCE**2:
+            self.acc.scale_to_length(MAX_FORCE)
         self.vel += self.acc
         self.pos += self.vel
         if self.pos.x > WIDTH:
@@ -215,11 +240,21 @@ class Mob(pg.sprite.Sprite):
 
         self.rect.center = self.pos
 
+    def draw_vectors(self):
+        scale = 10
+        # vel
+        pg.draw.line(screen, GREEN, self.pos, (self.pos + self.vel * scale), 5)
+        # acc
+        pg.draw.line(screen, RED, self.pos, (self.pos + self.acc * scale * 5), 5)
+        # rad
+        pg.draw.circle(screen, CYAN, (int(self.pos.x), int(self.pos.y)), NEIGHBOR_RADIUS, 1)
 
 all_sprites = pg.sprite.Group()
 mobs = pg.sprite.Group()
 predators = pg.sprite.Group()
-p1 = Predator()
+# p1 = Predator()
+p1 = Player()
+all_sprites.add(p1)
 for i in range(NUM_MOBS):
     Mob()
 paused = False
@@ -235,16 +270,34 @@ while running:
         # check for closing window
         if event.type == pg.QUIT:
             running = False
-        if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-            running = False
-        if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-            paused = not paused
-        if event.type == pg.KEYDOWN and event.key == pg.K_m:
-            Mob()
-        if event.type == pg.KEYDOWN and event.key == pg.K_v:
-            show_vectors = not show_vectors
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                running = False
+            if event.key == pg.K_SPACE:
+                paused = not paused
+            if event.key == pg.K_m:
+                Mob()
+            if event.key == pg.K_v:
+                show_vectors = not show_vectors
+            if event.key == pg.K_q:
+                ALIGN_WEIGHT += 0.1
+            if event.key == pg.K_z:
+                ALIGN_WEIGHT -= 0.1
+            if event.key == pg.K_w:
+                SEPARATE_WEIGHT += 0.1
+            if event.key == pg.K_x:
+                SEPARATE_WEIGHT -= 0.1
+            if event.key == pg.K_e:
+                COHERE_WEIGHT += 0.1
+            if event.key == pg.K_c:
+                COHERE_WEIGHT -= 0.1
+            if event.key == pg.K_t:
+                NEIGHBOR_RADIUS += 5
+            if event.key == pg.K_b:
+                NEIGHBOR_RADIUS -= 5
 
     # Update
+    p1.update()
     if not paused:
         mobs.update()
         predators.update()
@@ -254,8 +307,13 @@ while running:
     screen.fill(BLACK)
     draw_grid()
     all_sprites.draw(screen)
+    draw_text("A: {:.1f}".format(ALIGN_WEIGHT), 18, WHITE, 5, 5)
+    draw_text("S: {:.1f}".format(SEPARATE_WEIGHT), 18, WHITE, 5, 25)
+    draw_text("C: {:.1f}".format(COHERE_WEIGHT), 18, WHITE, 5, 45)
+    draw_text("R: {}".format(NEIGHBOR_RADIUS), 18, WHITE, 5, 65)
     if show_vectors:
-        draw_vectors()
+        for sprite in mobs:
+            sprite.draw_vectors()
     pg.display.flip()
 
 pg.quit()

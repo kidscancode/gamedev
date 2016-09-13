@@ -1,5 +1,7 @@
-# Tilemap Demo
-# KidsCanCode 2016
+# KidsCanCode - Game Development with Pygame video series
+# Tile-based game - Part 13
+# Map Obstacles
+# Video link: https://youtu.be/vIT7P-RPJNo
 import pygame as pg
 import sys
 from os import path

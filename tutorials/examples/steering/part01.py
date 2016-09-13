@@ -1,6 +1,8 @@
 # Steering Behavior Examples
 # Seek & Approach
 # KidsCanCode 2016
+# Video lesson: https://youtu.be/g1jo_qsO5c4
+
 import pygame as pg
 from random import randint, uniform
 vec = pg.math.Vector2

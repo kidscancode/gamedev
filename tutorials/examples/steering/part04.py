@@ -1,5 +1,5 @@
 # Steering Behavior Examples
-# Flee
+# Wall avoid
 # KidsCanCode 2016
 import pygame as pg
 from random import randint, uniform
@@ -18,9 +18,9 @@ DARKGRAY = (40, 40, 40)
 
 # Mob properties
 MOB_SIZE = 32
-MAX_SPEED = 5
+MAX_SPEED = 4
 MAX_FORCE = 0.2
-FLEE_DISTANCE = 100
+WALL_LIMIT = 50
 
 class Mob(pg.sprite.Sprite):
     def __init__(self):
@@ -34,33 +34,45 @@ class Mob(pg.sprite.Sprite):
         self.acc = vec(0, 0)
         self.rect.center = self.pos
 
-    def flee(self, target):
+    def avoid_walls(self):
         steer = vec(0, 0)
-        self.desired = self.vel
-        dist = self.pos - target
-        if dist.length() < FLEE_DISTANCE:
-            self.desired = (self.pos - target).normalize() * MAX_SPEED
+        self.desired = vec(0, 0)
+        near_wall = False
+        if self.pos.x < WALL_LIMIT:
+            self.desired = vec(MAX_SPEED, self.vel.y)
+            near_wall = True
+        if self.pos.x > WIDTH - WALL_LIMIT:
+            self.desired = vec(-MAX_SPEED, self.vel.y)
+            near_wall = True
+        if self.pos.y < WALL_LIMIT:
+            self.desired = vec(self.vel.x, MAX_SPEED)
+            near_wall = True
+        if self.pos.y > HEIGHT - WALL_LIMIT:
+            self.desired = vec(self.vel.x, -MAX_SPEED)
+            near_wall = True
+        if near_wall:
             steer = (self.desired - self.vel)
             if steer.length() > MAX_FORCE:
                 steer.scale_to_length(MAX_FORCE)
         return steer
 
     def update(self):
-        # self.follow_mouse()
-        self.acc = self.flee(pg.mouse.get_pos())
+        self.acc = self.avoid_walls()
         # equations of motion
         self.vel += self.acc
+        if self.acc.length() == 0:
+            self.vel.scale_to_length(MAX_SPEED)
         if self.vel.length() > MAX_SPEED:
             self.vel.scale_to_length(MAX_SPEED)
         self.pos += self.vel
         if self.pos.x > WIDTH:
-            self.pos.x = 0
-        if self.pos.x < 0:
             self.pos.x = WIDTH
+        if self.pos.x < 0:
+            self.pos.x = 0
         if self.pos.y > HEIGHT:
-            self.pos.y = 0
-        if self.pos.y < 0:
             self.pos.y = HEIGHT
+        if self.pos.y < 0:
+            self.pos.y = 0
         self.rect.center = self.pos
 
     def draw_vectors(self):
@@ -69,8 +81,9 @@ class Mob(pg.sprite.Sprite):
         pg.draw.line(screen, GREEN, self.pos, (self.pos + self.vel * scale), 5)
         # desired
         pg.draw.line(screen, RED, self.pos, (self.pos + self.desired * scale), 5)
-        # flee radius
-        pg.draw.circle(screen, WHITE, pg.mouse.get_pos(), FLEE_DISTANCE, 1)
+        # limits
+        r = pg.Rect(WALL_LIMIT, WALL_LIMIT, WIDTH - WALL_LIMIT * 2, HEIGHT - WALL_LIMIT * 2)
+        pg.draw.rect(screen, WHITE, r, 1)
 
 pg.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
