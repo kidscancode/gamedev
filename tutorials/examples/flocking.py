@@ -122,6 +122,9 @@ class Mob(pg.sprite.Sprite):
                     self.v_c += other.pos
                     self.v_s += other.pos - self.pos
                     neighbors += 1
+                if self.pos.distance_squared_to(other.pos) < 900:
+                    self.v_s += (other.pos - self.pos) * 2
+
         if neighbors > 0:
             self.v_a /= neighbors
             self.v_a.normalize_ip()

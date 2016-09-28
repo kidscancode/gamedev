@@ -27,7 +27,7 @@ MOB_BEHAVIORS = {'max_force': 0.2,
                  'wander_ring_radius': 50,
                  'wander_ring_distance': 150,
                  'neighbor_radius': 50,
-                 'sep_weight': 1,
+                 'sep_weight': 1.5,
                  'ali_weight': 0.8,
                  'coh_weight': 1}
 

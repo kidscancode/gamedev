@@ -8,7 +8,7 @@ import random
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-BLACK = (0, 0, 0)
+BLACK = (0, 0, 0)       
 FUCHSIA = (255, 0, 255)
 GRAY = (128, 128, 128)
 LIME = (0, 128, 0)
@@ -45,16 +45,16 @@ running = True
 while running:
     # keep the loop running at the right speed
     clock.tick(FPS)
-    ##### Game loop part 1: Events #####
+    # Game loop part 1: Events #####
     for event in pygame.event.get():
         # this one checks for the window being closed
         if event.type == pygame.QUIT:
             pygame.quit()
         # add any other events here (keys, mouse, etc.)
 
-    ##### Game loop part 2: Updates #####
+    # Game loop part 2: Updates #####
 
-    ##### Game loop part 3: Draw #####
+    # Game loop part 3: Draw #####
     screen.fill(BGCOLOR)
     # after drawing, flip the display
     pygame.display.flip()

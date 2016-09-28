@@ -196,7 +196,7 @@ class Mob(pg.sprite.Sprite):
         count = 0
         a_pos = vec(0, 0)
         a_dist = vec(0, 0)
-        a_vel = vec(0, 0) 
+        a_vel = vec(0, 0)
         for mob in mobs:
             if mob != self:
                 d = self.pos.distance_to(mob.pos)
