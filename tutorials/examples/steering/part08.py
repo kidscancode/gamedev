@@ -41,7 +41,7 @@ YELLOW = (255, 255, 0)
 DARKGRAY = (40, 40, 40)
 LIGHTGRAY = (140, 140, 140)
 
-SEARCH_RANGE = 500
+SEARCH_RANGE = 700
 # Mob properties
 MOB_SIZE = 16
 MAX_SPEED = 4
@@ -174,6 +174,8 @@ class FlowField:
                     self.field[next] = vec(current) - vec(next)
 
     def fill2(self, start, rect):
+        self.field = self.empty_field.copy()
+        self.remove_walls()
         searches = self.cells_for_rect(rect)
         # print(list(searches))
         sub_field = {}
@@ -181,22 +183,23 @@ class FlowField:
             if c in self.field.keys():
                 sub_field[c] = self.field[c]
         frontier = Queue()
+        start = vec_t(start)
         frontier.put(start)
         came_from = {}
         self.distance = {}
         self.max_distance = 0
-        came_from[vec_t(start)] = None
-        self.distance[vec_t(start)] = 0
+        came_from[start] = None
+        self.distance[start] = 0
         while not frontier.empty():
             current = frontier.get()
             for next in self.find_neighbors(current, sub_field):
-                if vec_t(next) not in came_from:
+                if next not in came_from:
                     frontier.put(next)
-                    came_from[vec_t(next)] = current
-                    self.distance[vec_t(next)] = 1 + self.distance[vec_t(current)]
-                    if self.distance[vec_t(next)] > self.max_distance:
-                        self.max_distance = self.distance[vec_t(next)]
-                    self.field[vec_t(next)] = vec(current) - vec(next)
+                    came_from[next] = current
+                    self.distance[next] = 1 + self.distance[current]
+                    if self.distance[next] > self.max_distance:
+                        self.max_distance = self.distance[next]
+                    self.field[next] = vec(current) - vec(next)
 
     def cells_for_rect(self, rect):
         x1 = rect.x // TILESIZE
@@ -281,7 +284,8 @@ class Mob(pg.sprite.Sprite):
         return steer
 
     def update(self):
-        self.acc = self.follow_field(field)
+        if (self.pos - p.pos).length_squared() < SEARCH_RANGE**2:
+            self.acc = self.follow_field(field)
         # equations of motion
         self.vel += self.acc
         if self.acc.length() == 0:
@@ -328,8 +332,8 @@ while running:
     if now - last_update > 100:
         last_update = now
         # field.generate()
-        field.fill(vec(p.pos.x // TILESIZE, p.pos.y // TILESIZE))
-        # field.fill2(vec(p.pos.x // TILESIZE, p.pos.y // TILESIZE), p.rect.inflate(SEARCH_RANGE, SEARCH_RANGE))
+        # field.fill(vec(p.pos.x // TILESIZE, p.pos.y // TILESIZE))
+        field.fill2(vec(p.pos.x // TILESIZE, p.pos.y // TILESIZE), p.rect.inflate(SEARCH_RANGE, SEARCH_RANGE))
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
