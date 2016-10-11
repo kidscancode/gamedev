@@ -1,5 +1,7 @@
-# Tilemap Demo
-# KidsCanCode 2016
+# KidsCanCode - Game Development with Pygame video series
+# Tile-based game - Part 15
+# Simple Visual Effects (and a bug fix)
+# Video link: https://youtu.be/ZapYMuV8f1g
 import pygame as pg
 import sys
 from os import path
