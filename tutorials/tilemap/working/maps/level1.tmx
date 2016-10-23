@@ -190,6 +190,6 @@
   <object id="92" name="zombie" x="1504" y="736" width="32" height="32"/>
   <object id="93" name="zombie" x="1856" y="752" width="32" height="32"/>
   <object id="94" name="zombie" x="1872" y="576" width="32" height="32"/>
-  <object id="99" name="health" x="208" y="400" width="32" height="32"/>
+  <object id="99" name="health" x="848" y="912" width="32" height="32"/>
  </objectgroup>
 </map>
