@@ -32,7 +32,7 @@ class Player(pygame.sprite.Sprite):
             self.update_bad()
         else:
             self.update_good()
-        
+
     def update_bad(self):
         now = pygame.time.get_ticks()
         if now - self.last_update > 100:
@@ -67,6 +67,9 @@ all_sprites.add(player)
 
 # Game loop
 good_rotation = False
+draw_orig_rect = False
+draw_fixed_rect = False
+pause = True
 running = True
 while running:
     # keep loop running at the right speed
@@ -79,6 +82,12 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
+            if event.key == pygame.K_r:
+                draw_orig_rect = not draw_orig_rect
+            if event.key == pygame.K_p:
+                pause = not pause
+            if event.key == pygame.K_f:
+                draw_fixed_rect = not draw_fixed_rect
             if event.key == pygame.K_SPACE:
                 good_rotation = not good_rotation
                 player.kill()
@@ -86,15 +95,18 @@ while running:
                 all_sprites.add(player)
 
     # Update
-    all_sprites.update()
+    if not pause:
+        all_sprites.update()
 
     # Draw / render
     screen.fill(BLACK)
     all_sprites.draw(screen)
-    pygame.draw.rect(screen, WHITE, player.rect, 5)
+    if draw_orig_rect:
+        pygame.draw.rect(screen, WHITE, player.rect, 5)
     p_rect = player.image.get_rect()
     p_rect.topleft = player.rect.topleft
-    pygame.draw.rect(screen, WHITE, p_rect, 2)
+    if draw_fixed_rect:
+        pygame.draw.rect(screen, WHITE, p_rect, 2)
     # *after* drawing everything, flip the display
     pygame.display.flip()
 

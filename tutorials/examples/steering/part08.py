@@ -175,7 +175,6 @@ class FlowField:
 
     def fill2(self, start, rect):
         self.field = self.empty_field.copy()
-        self.remove_walls()
         searches = self.cells_for_rect(rect)
         # print(list(searches))
         sub_field = {}
@@ -329,11 +328,11 @@ running = True
 while running:
     clock.tick(FPS)
     now = pg.time.get_ticks()
-    if now - last_update > 100:
+    if now - last_update > 500:
         last_update = now
         # field.generate()
-        # field.fill(vec(p.pos.x // TILESIZE, p.pos.y // TILESIZE))
-        field.fill2(vec(p.pos.x // TILESIZE, p.pos.y // TILESIZE), p.rect.inflate(SEARCH_RANGE, SEARCH_RANGE))
+        field.fill(vec(p.pos.x // TILESIZE, p.pos.y // TILESIZE))
+        # field.fill2(vec(p.pos.x // TILESIZE, p.pos.y // TILESIZE), p.rect.inflate(SEARCH_RANGE, SEARCH_RANGE))
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
