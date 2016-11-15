@@ -1,7 +1,6 @@
 TODO:
 * Effects
     * Hit effect (flash)
-    * mob death effect
     * particle effects (heal sparkle, smoke)
     * screen shake
     * floating combat text (hits/crits)
@@ -20,4 +19,3 @@ TODO:
     * Mob states (chasing, roaming)
 
 pause
-sounds/music (various)
