@@ -23,8 +23,6 @@ TILESIZE = 64
 GRIDWIDTH = WIDTH / TILESIZE
 GRIDHEIGHT = HEIGHT / TILESIZE
 
-WALL_IMG = 'tileGreen_39.png'
-
 # Player settings
 PLAYER_HEALTH = 100
 PLAYER_SPEED = 280
@@ -33,14 +31,25 @@ PLAYER_IMG = 'manBlue_gun.png'
 PLAYER_HIT_RECT = pg.Rect(0, 0, 35, 35)
 BARREL_OFFSET = vec(30, 10)
 
-# Gun settings
+# Weapon settings
 BULLET_IMG = 'bullet.png'
-BULLET_SPEED = 500
-BULLET_LIFETIME = 1000
-BULLET_RATE = 150
-KICKBACK = 200
-GUN_SPREAD = 5
-BULLET_DAMAGE = 10
+WEAPONS = {}
+WEAPONS['pistol'] = {'bullet_speed': 500,
+                     'bullet_lifetime': 1000,
+                     'rate': 250,
+                     'kickback': 200,
+                     'spread': 5,
+                     'damage': 10,
+                     'bullet_size': 'lg',
+                     'bullet_count': 1}
+WEAPONS['shotgun'] = {'bullet_speed': 400,
+                      'bullet_lifetime': 500,
+                      'rate': 900,
+                      'kickback': 300,
+                      'spread': 20,
+                      'damage': 5,
+                      'bullet_size': 'sm',
+                      'bullet_count': 12}
 
 # Mob settings
 MOB_IMG = 'zombie1_hold.png'
@@ -78,6 +87,7 @@ PLAYER_HIT_SOUNDS = ['pain/8.wav', 'pain/9.wav', 'pain/10.wav', 'pain/11.wav']
 ZOMBIE_MOAN_SOUNDS = ['brains2.wav', 'brains3.wav', 'zombie-roar-1.wav', 'zombie-roar-2.wav',
                       'zombie-roar-3.wav', 'zombie-roar-5.wav', 'zombie-roar-6.wav', 'zombie-roar-7.wav']
 ZOMBIE_HIT_SOUNDS = ['splat-15.wav']
-WEAPON_SOUNDS_GUN = ['pistol.wav']
+WEAPON_SOUNDS = {'pistol': ['pistol.wav'],
+                 'shotgun': ['shotgun.wav']}
 EFFECTS_SOUNDS = {'level_start': 'level_start.wav',
                   'health_up': 'health_pack.wav'}

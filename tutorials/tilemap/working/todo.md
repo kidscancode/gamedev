@@ -17,5 +17,3 @@ TODO:
 * Mob improvements
     * mob pathfinding (detect range)
     * Mob states (chasing, roaming)
-
-pause

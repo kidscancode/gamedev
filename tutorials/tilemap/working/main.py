@@ -28,6 +28,7 @@ def draw_player_health(surf, x, y, pct):
 
 class Game:
     def __init__(self):
+        pg.mixer.pre_init(44100, -16, 4, 2048)
         pg.init()
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
@@ -71,10 +72,10 @@ class Game:
         self.map_img = self.map.make_map()
         self.map.rect = self.map_img.get_rect()
         self.player_img = pg.image.load(path.join(img_folder, PLAYER_IMG)).convert_alpha()
-        self.bullet_img = pg.image.load(path.join(img_folder, BULLET_IMG)).convert_alpha()
+        self.bullet_images = {}
+        self.bullet_images['lg'] = pg.image.load(path.join(img_folder, BULLET_IMG)).convert_alpha()
+        self.bullet_images['sm'] = pg.transform.scale(self.bullet_images['lg'], (10, 10))
         self.mob_img = pg.image.load(path.join(img_folder, MOB_IMG)).convert_alpha()
-        self.wall_img = pg.image.load(path.join(img_folder, WALL_IMG)).convert_alpha()
-        self.wall_img = pg.transform.scale(self.wall_img, (TILESIZE, TILESIZE))
         self.splat = pg.image.load(path.join(img_folder, SPLAT)).convert_alpha()
         self.splat = pg.transform.scale(self.splat, (64, 64))
         self.gun_flashes = []
@@ -89,9 +90,12 @@ class Game:
         for type in EFFECTS_SOUNDS:
             self.effects_sounds[type] = pg.mixer.Sound(path.join(snd_folder, EFFECTS_SOUNDS[type]))
         self.weapon_sounds = {}
-        self.weapon_sounds['gun'] = []
-        for snd in WEAPON_SOUNDS_GUN:
-            self.weapon_sounds['gun'].append(pg.mixer.Sound(path.join(snd_folder, snd)))
+        for weapon in WEAPON_SOUNDS:
+            self.weapon_sounds[weapon] = []
+            for snd in WEAPON_SOUNDS[weapon]:
+                s = pg.mixer.Sound(path.join(snd_folder, snd))
+                s.set_volume(0.3)
+                self.weapon_sounds[weapon].append(s)
         self.zombie_moan_sounds = []
         for snd in ZOMBIE_MOAN_SOUNDS:
             s = pg.mixer.Sound(path.join(snd_folder, snd))
@@ -168,7 +172,7 @@ class Game:
         # bullets hit mobs
         hits = pg.sprite.groupcollide(self.mobs, self.bullets, False, True)
         for hit in hits:
-            hit.health -= BULLET_DAMAGE
+            hit.health -= WEAPONS[self.player.weapon]['damage'] * len(hits[hit])
             hit.vel = vec(0, 0)
 
     def draw_grid(self):
