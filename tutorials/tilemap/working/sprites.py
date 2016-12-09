@@ -3,6 +3,7 @@ from random import uniform, choice, randint, random
 from settings import *
 from tilemap import collide_hit_rect
 import pytweening as tween
+from itertools import chain
 vec = pg.math.Vector2
 
 def collide_with_walls(sprite, group, dir):
@@ -41,7 +42,8 @@ class Player(pg.sprite.Sprite):
         self.rot = 0
         self.last_shot = 0
         self.health = PLAYER_HEALTH
-        self.weapon = 'shotgun'
+        self.weapon = 'pistol'
+        self.damaged = False
 
     def get_keys(self):
         self.rot_speed = 0
@@ -74,10 +76,19 @@ class Player(pg.sprite.Sprite):
                 snd.play()
             MuzzleFlash(self.game, pos)
 
+    def hit(self):
+        self.damaged = True
+        self.damage_alpha = chain(DAMAGE_ALPHA * 4)
+
     def update(self):
         self.get_keys()
         self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
         self.image = pg.transform.rotate(self.game.player_img, self.rot)
+        if self.damaged:
+            try:
+                self.image.fill((255, 255, 255, next(self.damage_alpha)), special_flags=pg.BLEND_RGBA_MULT)
+            except:
+                self.damaged = False
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
@@ -167,7 +178,7 @@ class Bullet(pg.sprite.Sprite):
         self.pos = vec(pos)
         self.rect.center = pos
         #spread = uniform(-GUN_SPREAD, GUN_SPREAD)
-        self.vel = dir * WEAPONS[game.player.weapon]['bullet_speed']
+        self.vel = dir * WEAPONS[game.player.weapon]['bullet_speed'] * uniform(0.9, 1.1)
         self.spawn_time = pg.time.get_ticks()
 
     def update(self):

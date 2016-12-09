@@ -65,6 +65,10 @@ all_sprites = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
+print("p: pause")
+print("r: draw original rect")
+print("f: draw fixed rect")
+print("<space>: rotate corner/center")
 # Game loop
 good_rotation = False
 draw_orig_rect = False
