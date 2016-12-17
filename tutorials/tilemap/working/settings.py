@@ -80,8 +80,8 @@ ITEMS_LAYER = 1
 ITEM_IMAGES = {'health': 'health_pack.png',
                'shotgun': 'obj_shotgun.png'}
 HEALTH_PACK_AMOUNT = 20
-BOB_RANGE = 15
-BOB_SPEED = 0.4
+BOB_RANGE = 10
+BOB_SPEED = 0.3
 
 # Sounds
 BG_MUSIC = 'espionage.ogg'

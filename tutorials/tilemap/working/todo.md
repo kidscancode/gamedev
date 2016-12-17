@@ -1,6 +1,5 @@
 TODO:
 * Effects
-    * Hit effect (flash)
     * particle effects (heal sparkle, smoke)
     * screen shake
     * floating combat text (hits/crits)
@@ -12,6 +11,7 @@ TODO:
     * Destructible obstacles (doors / windows)
     * update weapons to per-bullet damage (prevent weapon switch errors)
     * Level objective (kill all zombies)
+    * Game Over
     * more weapons
         * grenade
         * rocket
