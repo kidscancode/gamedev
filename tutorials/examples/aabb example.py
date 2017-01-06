@@ -9,9 +9,9 @@ HEIGHT = 600
 FPS = 60
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-CYAN = (0, 255, 255)
+RED = (255, 0, 0, 128)
+GREEN = (0, 255, 0, 128)
+CYAN = (0, 255, 255, 128)
 YELLOW = (255, 255, 0)
 LIGHTGRAY = (150, 150, 150)
 DARKGRAY = (40, 40, 40)
@@ -49,7 +49,8 @@ clock = pg.time.Clock()
 
 p = pg.Rect(0, 0, 150, 150)
 p.center = (WIDTH / 3, HEIGHT / 3)
-m = pg.Rect(0, 0, 100, 100)
+m_r = pg.Rect(0, 0, 100, 100)
+m = pg.Surface((100, 100)).convert_alpha()
 col = GREEN
 msg = ""
 
@@ -63,17 +64,20 @@ while running:
             if event.key == pg.K_ESCAPE:
                 running = False
 
-    m.center = (pg.mouse.get_pos())
-    in_x = m.left < p.right and m.right > p.left
-    in_y = m.top < p.bottom and m.bottom > p.top
+    m_r.center = (pg.mouse.get_pos())
+    in_x = m_r.left < p.right and m_r.right > p.left
+    in_y = m_r.top < p.bottom and m_r.bottom > p.top
     if in_x and in_y:
-        col = RED
+        # col = RED
+        m.fill(RED)
         msg = "Colliding!"
     elif in_x or in_y:
-        col = CYAN
+        # col = CYAN
+        m.fill(CYAN)
         msg = "Not colliding"
     else:
-        col = GREEN
+        # col = GREEN
+        m.fill(GREEN)
         msg = "Not colliding"
 
     screen.fill(DARKGRAY)
@@ -82,11 +86,12 @@ while running:
     pg.draw.line(screen, LIGHTGRAY, (p.right + 5, p.top), (WIDTH, p.top), 2)
     pg.draw.line(screen, LIGHTGRAY, (p.right + 5, p.bottom), (WIDTH, p.bottom), 2)
     pg.draw.rect(screen, YELLOW, p)
-    pg.draw.rect(screen, col, m)
+    # pg.draw.rect(screen, col, m)
+    screen.blit(m, m_r)
     draw_text(msg, 22, WHITE, 15, 15)
     draw_text("left", 18, WHITE, p.left - 5, HEIGHT - 5, align="se")
     draw_text("right", 18, WHITE, p.right + 5, HEIGHT - 5, align="sw")
     draw_text("top", 18, WHITE, WIDTH - 5, p.top - 5, align="se")
     draw_text("bottom", 18, WHITE, WIDTH - 5, p.bottom + 5, align="ne")
-    draw_text(str(m), 20, col, WIDTH / 2, 15, align="nw")
+    draw_text(str(m_r), 20, col, WIDTH / 2, 15, align="nw")
     pg.display.flip()

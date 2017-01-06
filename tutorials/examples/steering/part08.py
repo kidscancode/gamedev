@@ -158,9 +158,9 @@ class FlowField:
         frontier.put(start)
         came_from = {}
         self.distance = {}
-        self.max_distance = 0
+        # self.max_distance = 0
         came_from[start] = None
-        self.distance[start] = 0
+        # self.distance[start] = 0
         while not frontier.empty():
             current = frontier.get()
             for next in self.find_neighbors(current, self.field):
@@ -168,9 +168,9 @@ class FlowField:
                     # priority = self.heuristic(goal, next)
                     frontier.put(next)
                     came_from[next] = current
-                    self.distance[next] = 1 + self.distance[current]
-                    if self.distance[next] > self.max_distance:
-                        self.max_distance = self.distance[next]
+                    # self.distance[next] = 1 + self.distance[current]
+                    # if self.distance[next] > self.max_distance:
+                    #     self.max_distance = self.distance[next]
                     self.field[next] = vec(current) - vec(next)
 
     def fill2(self, start, rect):
@@ -310,7 +310,7 @@ class Mob(pg.sprite.Sprite):
         pg.draw.line(screen, RED, self.pos, (self.pos + self.acc * scale * 5), 5)
 
 pg.init()
-screen = pg.display.set_mode((WIDTH, HEIGHT))
+screen = pg.display.set_mode((WIDTH, HEIGHT), pg.DOUBLEBUF | pg.HWSURFACE)
 clock = pg.time.Clock()
 
 all_sprites = pg.sprite.Group()
