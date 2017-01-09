@@ -32,8 +32,9 @@ class SquareGrid:
         self.width = width
         self.height = height
         self.walls = []
-        self.connections = [vec(1, 0), vec(-1, 0), vec(0, 1), vec(0, -1),
-                            vec(1, 1), vec(-1, 1), vec(1, -1), vec(-1, -1)]
+        self.connections = [vec(1, 0), vec(-1, 0), vec(0, 1), vec(0, -1)]
+        # comment/uncomment this for diagonals:
+        #self.connections += [vec(1, 1), vec(-1, 1), vec(1, -1), vec(-1, -1)]
 
     def in_bounds(self, node):
         return 0 <= node.x < self.width and 0 <= node.y < self.height
@@ -43,8 +44,9 @@ class SquareGrid:
 
     def find_neighbors(self, node):
         neighbors = [node + connection for connection in self.connections]
-        # if (node.x + node.y) % 2:
-        #     neighbors.reverse()
+        # don't use this for diagonals:
+        if (node.x + node.y) % 2:
+            neighbors.reverse()
         neighbors = filter(self.in_bounds, neighbors)
         neighbors = filter(self.passable, neighbors)
         return neighbors
