@@ -20,7 +20,7 @@ MAGENTA = (255, 0, 255)
 YELLOW = (255, 255, 0)
 DARKGRAY = (40, 40, 40)
 LIGHTGRAY = (140, 140, 140)
-
+ 
 font_name = pg.font.match_font('hack')
 def draw_text(text, size, color, x, y, align="topleft"):
     font = pg.font.Font(font_name, size)
