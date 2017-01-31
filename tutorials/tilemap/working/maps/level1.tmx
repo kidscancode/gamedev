@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="50" height="30" tilewidth="64" tileheight="64" nextobjectid="178">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="50" height="30" tilewidth="64" tileheight="64" nextobjectid="183">
  <tileset firstgid="1" name="spritesheet_tiles" tilewidth="64" tileheight="64" spacing="10" tilecount="540" columns="27">
   <image source="../img/spritesheet_tiles.png" width="1988" height="1470"/>
  </tileset>
@@ -227,6 +227,11 @@
   <object id="166" name="wall" x="2832" y="656" width="16" height="32"/>
   <object id="167" name="wall" x="2768" y="592" width="32" height="32"/>
   <object id="177" name="wall" x="2384" y="592" width="32" height="32"/>
+  <object id="178" name="zombie" x="672" y="1376" width="32" height="32"/>
+  <object id="179" name="zombie" x="832" y="1392" width="32" height="32"/>
+  <object id="180" name="zombie" x="944" y="1344" width="32" height="32"/>
+  <object id="181" name="zombie" x="928" y="1472" width="32" height="32"/>
+  <object id="182" name="zombie" x="576" y="1424" width="32" height="32"/>
  </objectgroup>
  <objectgroup name="Breakables">
   <object id="114" name="breakable" gid="526" x="832" y="384" width="64" height="64">

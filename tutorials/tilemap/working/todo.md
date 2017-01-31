@@ -9,9 +9,6 @@ TODO:
     * Civilians to rescue (if bit they turn!?)
     * items:  armor (ammo?)
     * Destructible obstacles (doors / windows)
-    * update weapons to per-bullet damage (prevent weapon switch errors)
-    * Level objective (kill all zombies)
-    * Game Over
     * more weapons
         * grenade
         * rocket
