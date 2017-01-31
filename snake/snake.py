@@ -1,10 +1,11 @@
 # Snake
-# by KidsCanCode 2014
+# by KidsCanCode 2014, 2017
 # A Pygame snake clone
 # For educational purposes only
 # Modified from http://inventwithpython.com/
 import pygame
 import sys
+from os import path
 import random
 
 BLACK = (0, 0, 0)
@@ -17,17 +18,11 @@ BGCOLOR = BLACK
 
 FPS = 15
 # WIDTH & HEIGHT need to be multiples of CELLSIZE
-WIDTH = 640
-HEIGHT = 480
-CELLSIZE = 20
+WIDTH = 800
+HEIGHT = 600
+CELLSIZE = 25
 CELLWIDTH = WIDTH / CELLSIZE
 CELLHEIGHT = HEIGHT / CELLSIZE
-
-class Coord:
-    # a utility object to hold X/Y coordinates
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
 
 # initialize pygame and create the screen
 pygame.init()
@@ -36,20 +31,19 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption("Snake")
 # load some sound effects
-snake_eat_snd = pygame.mixer.Sound("snd/eat.wav")
+snd_dir = path.join(path.dirname(__file__), 'snd')
+snake_eat_snd = pygame.mixer.Sound(path.join(snd_dir, "eat.wav"))
 snake_eat_snd.set_volume(0.2)
-snake_hit_snd = pygame.mixer.Sound("snd/hit.wav")
+snake_hit_snd = pygame.mixer.Sound(path.join(snd_dir, "hit.wav"))
 snake_hit_snd.set_volume(0.2)
 
 def run_game():
     # this function runs the game
     # pick a starting spot for the snake's head (not too close to the wall)
-    startx = random.randrange(5, CELLWIDTH-5)
-    starty = random.randrange(5, CELLHEIGHT-5)
+    startx = random.randrange(5, CELLWIDTH - 5)
+    starty = random.randrange(5, CELLHEIGHT - 5)
     # this list will hold the coordinates of the snake's body
-    snake_coords = [Coord(startx, starty),
-                    Coord(startx-1, starty),
-                    Coord(startx-2, starty)]
+    snake = [(startx, starty), (startx - 1, starty), (startx - 2, starty)]
     direction = 'r'
     apple = get_random_location()
 
@@ -60,8 +54,7 @@ def run_game():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
+                    return
                 elif event.key == pygame.K_LEFT and direction != 'r':
                     direction = 'l'
                 elif event.key == pygame.K_RIGHT and direction != 'l':
@@ -72,46 +65,41 @@ def run_game():
                     direction = 'd'
 
         # check if the snake has eaten an apple
-        if snake_coords[0].x == apple.x and snake_coords[0].y == apple.y:
+        if snake[0] == apple:
             # add a new apple and don't remove hthe snake's tail
             snake_eat_snd.play()
             apple = get_random_location()
         else:
-            del snake_coords[-1]
+            del snake[-1]
 
         # move the snake by adding a new segment in the direction
+        x, y = snake[0]
         if direction == 'u':
-            new_head = Coord(snake_coords[0].x, snake_coords[0].y-1)
+            y -= 1
         elif direction == 'd':
-            new_head = Coord(snake_coords[0].x, snake_coords[0].y+1)
+            y += 1
         elif direction == 'l':
-            new_head = Coord(snake_coords[0].x-1, snake_coords[0].y)
+            x -= 1
         elif direction == 'r':
-            new_head = Coord(snake_coords[0].x+1, snake_coords[0].y)
+            x += 1
         # insert the new coord at the front of the coord list
-        snake_coords.insert(0, new_head)
+        snake.insert(0, (x, y))
 
         # check if snake hit an edge = death
-        if snake_coords[0].x == -1:
-            return
-        if snake_coords[0].x == CELLWIDTH:
-            return
-        if snake_coords[0].y == -1:
-            return
-        if snake_coords[0].y == CELLHEIGHT:
+        x, y = snake[0]
+        if x in [-1, CELLWIDTH] or y in [-1, CELLHEIGHT]:
             return
 
         # check if snake hit itself = death
-        for snake_body in snake_coords[1:]:
-            if snake_body.x == snake_coords[0].x and snake_body.y == snake_coords[0].y:
-                return
+        if snake[0] in snake[1:]:
+            return
 
         # Update screen
         screen.fill(BGCOLOR)
         draw_grid()
-        draw_snake(snake_coords)
+        draw_snake(snake)
         draw_apple(apple)
-        draw_score(len(snake_coords) - 3)
+        draw_score(len(snake) - 3)
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -123,22 +111,24 @@ def draw_grid():
 
 def get_random_location():
     # pick a random Coord on the grid
-    return Coord(random.randrange(0, CELLWIDTH-1),
-                 random.randrange(0, CELLHEIGHT-1))
+    return (random.randrange(0, CELLWIDTH - 1),
+            random.randrange(0, CELLHEIGHT - 1))
 
 def draw_apple(loc):
-    x = loc.x * CELLSIZE
-    y = loc.y * CELLSIZE
+    x, y = loc
+    x *= CELLSIZE
+    y *= CELLSIZE
     apple_rect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
     pygame.draw.rect(screen, RED, apple_rect)
 
-def draw_snake(coords):
-    for coord in coords:
-        x = coord.x * CELLSIZE
-        y = coord.y * CELLSIZE
+def draw_snake(segments):
+    for segment in segments:
+        x, y = segment
+        x *= CELLSIZE
+        y *= CELLSIZE
         segment_rect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
         pygame.draw.rect(screen, DARKGREEN, segment_rect)
-        inside_rect = pygame.Rect(x+4, y+4, CELLSIZE-8, CELLSIZE-8)
+        inside_rect = pygame.Rect(x + 4, y + 4, CELLSIZE - 8, CELLSIZE - 8)
         pygame.draw.rect(screen, GREEN, inside_rect)
 
 def draw_text(text, size, x, y):
@@ -151,8 +141,8 @@ def draw_text(text, size, x, y):
     screen.blit(text_surface, text_rect)
 
 def draw_score(score):
-    text = 'Score: %s' % score
-    draw_text(text, 18, WIDTH-70, 10)
+    # text = 'Score: %s' % score
+    draw_text(str(score), 28, WIDTH / 2, 10)
 
 def wait_for_key():
     # utility function to pause waiting for a keypress
@@ -172,9 +162,9 @@ def wait_for_key():
 def show_start_screen():
     # Display the starting screen
     screen.fill(BGCOLOR)
-    draw_text("SNAKE", 64, WIDTH/2, HEIGHT/4)
-    draw_text("Move with the arrow keys", 24, WIDTH/2, HEIGHT/2)
-    draw_text("Press a key to begin", 24, WIDTH/2, HEIGHT*3/4)
+    draw_text("SNAKE", 64, WIDTH / 2, HEIGHT / 4)
+    draw_text("Move with the arrow keys", 24, WIDTH / 2, HEIGHT / 2)
+    draw_text("Press a key to begin", 24, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.update()
     # wait for a keypress to start
     wait_for_key()
@@ -186,8 +176,8 @@ def show_start_screen():
 def show_go_screen():
     # display the Game Over screen
     screen.fill(BGCOLOR)
-    draw_text("GAME OVER", 58, WIDTH/2, HEIGHT/4)
-    draw_text("Press a key to begin", 24, WIDTH/2, HEIGHT*3/4)
+    draw_text("GAME OVER", 58, WIDTH / 2, HEIGHT / 4)
+    draw_text("Press a key to begin", 24, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.update()
     # pause for a moment and then wait for key
     pygame.time.wait(500)

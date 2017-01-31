@@ -1,5 +1,5 @@
-# from transitions import Machine
-from transitions.extensions import GraphMachine as Machine
+from transitions import Machine
+# from transitions.extensions import GraphMachine as Machine
 class Matter:
     def hiss(self):
         print("Ssssss!")
@@ -20,4 +20,4 @@ transitions = [
 machine = Machine(stuff, states=states, transitions=transitions,
                   initial='liquid', auto_transitions=False)
 
-stuff.graph.draw('graph.png', prog='dot')
+# stuff.graph.draw('graph.png', prog='dot')

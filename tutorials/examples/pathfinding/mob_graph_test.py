@@ -20,7 +20,7 @@ MAGENTA = (255, 0, 255)
 YELLOW = (255, 255, 0)
 DARKGRAY = (40, 40, 40)
 LIGHTGRAY = (140, 140, 140)
- 
+
 font_name = pg.font.match_font('hack')
 def draw_text(text, size, color, x, y, align="topleft"):
     font = pg.font.Font(font_name, size)
@@ -76,6 +76,8 @@ class SquareGrid:
         self.height = height
         self.walls = []
         self.connections = [vec(1, 0), vec(-1, 0), vec(0, 1), vec(0, -1)]
+        # comment/uncomment this for diagonals:
+        self.connections += [vec(1, 1), vec(-1, 1), vec(1, -1), vec(-1, -1)]
 
     def in_bounds(self, loc):
         x, y = loc

@@ -1,0 +1,19 @@
+<TextureAtlas imagePath="sprites.png">
+	<SubTexture name="character_black_blue.png" x="0" y="38" width="52" height="36"/>
+	<SubTexture name="character_black_green.png" x="54" y="76" width="52" height="36"/>
+	<SubTexture name="character_black_red.png" x="0" y="114" width="52" height="36"/>
+	<SubTexture name="character_black_white.png" x="0" y="152" width="52" height="36"/>
+	<SubTexture name="character_blonde_blue.png" x="54" y="190" width="52" height="36"/>
+	<SubTexture name="character_blonde_green.png" x="54" y="114" width="52" height="36"/>
+	<SubTexture name="character_blonde_red.png" x="54" y="152" width="52" height="36"/>
+	<SubTexture name="character_blonde_white.png" x="0" y="76" width="52" height="36"/>
+	<SubTexture name="character_brown_blue.png" x="0" y="0" width="52" height="36"/>
+	<SubTexture name="character_brown_green.png" x="54" y="38" width="52" height="36"/>
+	<SubTexture name="character_brown_red.png" x="54" y="0" width="52" height="36"/>
+	<SubTexture name="character_brown_white.png" x="0" y="190" width="52" height="36"/>
+	<SubTexture name="racer_black.png" x="108" y="0" width="42" height="51"/>
+	<SubTexture name="racer_blue.png" x="108" y="53" width="42" height="51"/>
+	<SubTexture name="racer_green.png" x="108" y="159" width="42" height="51"/>
+	<SubTexture name="racer_red.png" x="152" y="0" width="42" height="51"/>
+	<SubTexture name="racer_yellow.png" x="108" y="106" width="42" height="51"/>
+</TextureAtlas>

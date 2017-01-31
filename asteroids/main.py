@@ -1,8 +1,5 @@
 # Space Rocks! (asteroids)
-# KidsCanCode 2016
-# Art by kenney.nl
-# Beams/Lasers by http://opengameart.org/users/rawdanitsu
-# SimpleBeat by http://opengameart.org/users/3uhox
+# KidsCanCode 2016, 2017
 import pygame as pg
 import sys
 from os import path
@@ -33,17 +30,11 @@ class Game:
         self.rot_cache['rock'] = {}
         self.load_data()
 
-    def draw_text(self, text, size, color, x, y, align='m'):
+    def draw_text(self, text, size, color, x, y, align='midtop'):
         # helper method to render/place text - use in game loop draw section
         font = pg.font.Font(path.join(img_dir, FONT_NAME), size)
         text_surface = font.render(text, True, color)
-        text_rect = text_surface.get_rect()
-        if align == 'm':
-            text_rect.midtop = (x, y)
-        elif align == 'r':
-            text_rect.topright = (x, y)
-        elif align == 'l':
-            text_rect.topleft = (x, y)
+        text_rect = text_surface.get_rect(**{align: (x, y)})
         self.game_surface.blit(text_surface, text_rect)
 
     def draw_hyper(self, x, y):
@@ -381,8 +372,8 @@ class Game:
         self.player.engine_emitter.draw()
         if self.light:
             self.render_fog()
-        self.draw_text(str(self.score), 28, WHITE, WIDTH / 2, 15, align='m')
-        self.draw_text("Level: " + str(self.level), 22, WHITE, 5, 15, align='l')
+        self.draw_text(str(self.score), 28, WHITE, WIDTH / 2, 15, align='midtop')
+        self.draw_text("Level: " + str(self.level), 22, WHITE, 5, 15, align='topleft')
         self.draw_lives(self.player.life_image, WIDTH - 150, 15, self.player.lives)
         self.draw_shield_level(WIDTH - 150, 55)
         self.draw_hyper(WIDTH - 150, 105)

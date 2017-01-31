@@ -123,8 +123,8 @@ def a_star_search(graph, start, end):
 
     while not frontier.empty():
         current = frontier.get()
-        if current == end:
-            break
+        # if current == end:
+        #     break
         for next in graph.find_neighbors(vec(current)):
             next = vec2int(next)
             next_cost = cost[current] + graph.cost(current, next)
